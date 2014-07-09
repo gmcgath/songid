@@ -1,0 +1,27 @@
+body {background-color: #EEEEEE}
+
+h1 { font-size: 20pt; font-weight: bold; color:#220000}
+
+td.navhead { width: 140px;}
+
+.swlabel { font-weight: bold; }
+
+.swdesc { background-color: #CCEEEE; padding-left: 40px; }
+
+.banner {background-color: #AACCCC}
+
+.footer {font-size: 80%}
+
+.signature {padding-left: 3in; }
+
+.mockplayer {font-size: 24pt; color: #006622; }
+
+ul.nobullet { list-style-type: none; }
+
+.hidden {display: none; }
+
+ul.instlist {list-style-type: none; }
+
+ul.instlist li {float:left; width: 180px; }
+
+.textbox {width: 600px; }

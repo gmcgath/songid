@@ -1,0 +1,3 @@
+ErrorDocument 404 http://www.garymcgath.com/songid/404.html
+ErrorDocument 403 http://www.garymcgath.com/songid/403.html
+Options -Indexes
