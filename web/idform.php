@@ -10,6 +10,16 @@
 <noscript><strong>Sorry, JavaScript is required.</strong>
 </noscript>
 
+<?php
+	include_once ('bin/config.php');
+	include_once ('bin/supportfuncs.php');
+	/* Open the database */
+	$mysqli = opendb();
+	if ($mysqli) {
+        echo ("<p>Successful database connection</p>\n");
+	}
+?>
+
 <audio controls>
 	<source src="https://archive.org/download/background_noise/bleeps_64kb.mp3"
 		type="audio/mpeg">
