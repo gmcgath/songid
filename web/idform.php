@@ -5,6 +5,9 @@
 	<title>Identify Track</title>
 	<meta name="generator" content="BBEdit 10.5" />
 	<link href="css/styles.css" rel="stylesheet">
+	
+
+    
 </head>
 <body>
 <noscript><strong>Sorry, JavaScript is required.</strong>
@@ -13,20 +16,39 @@
 <?php
 	include_once ('bin/config.php');
 	include_once ('bin/supportfuncs.php');
+	include_once ('bin/model/clip.php');
 	/* Open the database */
 	$mysqli = opendb();
 	if ($mysqli) {
         echo ("<p>Successful database connection</p>\n");
 	}
+	
+	$id = $_GET["id"];
+	if (!ctype_digit ($id))
+		$id = "";		// defeat dirty tricks
+	$clip = Clip::findById($mysqli, $id);
+	if ($clip == NULL) {
+		echo ("<p>Clip not found.</p>\n");
+		return;
+	}
+		
 ?>
 
 <audio controls>
-	<source src="https://archive.org/download/background_noise/bleeps_64kb.mp3"
+	<source src=
+<?php
+	echo ('"' . $clip->url . '"');
+?>
+
 		type="audio/mpeg">
 <p>Sorry, your browser does not support the audio element.</p>
 </audio>
-<p class="audiocaption">"Bleeps," from the Internet Archive Community Audio collection, 64Kbps MP3</p>
-<form action="processform.html" method="post">
+<p class="audiocaption">
+<?php
+	echo $clip->description;
+?>
+</p>
+<form action="processform.php" method="post">
 <h1>What can you hear?</h1>
 <ul class="nobullet">
 <li><input type="radio" id="trackperformance" 
@@ -69,7 +91,7 @@
 </li>
 </ul>
 
-</div>
+</div>	<!-- chatter -->
 <div id="performance" class="hidden">
 <h4>Performance</h4>
 <ul class="nobullet">
@@ -86,7 +108,7 @@
 <label for="singleperformerunknown">Can't tell gender or N/A</label></li>
 </ul>
 &nbsp;<br>
-</div>
+</div>	<!-- singleperformertype -->
 </li>
 <li><input type="radio" name="performertype" id="perf_group" value="group"
 	onclick="trackTypeUpdate();">
@@ -103,7 +125,7 @@
 <label for="groupperformerunknown">Can't tell group type</label></li>
 </ul>
 &nbsp;<br>
-</div>
+</div>	<!-- groupperformertype -->
 </li>
 
 <li><input type="radio" id="performertypeunknown" name="performertype" value="unknown"
@@ -191,10 +213,19 @@
 	<input class="textbox" type="text" name="noisenote" id="noisenote"></li>
 </ul>
 
-</div>
+</div>	<!-- noise -->
+
+
+<li><input type="submit" value="Submit"></li>
+
 </ul>
-</div>
+
+
 </form>
+
+<div>
+<a href="cliplist.php">Clip list</a>
+</div>
 
 
 <!-- Put scripts at end for faster load -->
