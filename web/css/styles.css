@@ -24,4 +24,14 @@ ul.instlist {list-style-type: none; }
 
 ul.instlist li {float:left; width: 180px; }
 
+ul.menubar {list-style-type: none;}
+
+ul.menubar li {float: left; width: 200px; }
+
 .textbox {width: 600px; }
+
+.submitbutton {background-color: #BBCCFF}
+
+table.cliptable {padding-left: 30px;}
+
+table.cliptable tr {border: 1px solid blue;}

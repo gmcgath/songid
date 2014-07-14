@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Identify Track</title>
+	<title>Identify Clip</title>
 	<meta name="generator" content="BBEdit 10.5" />
 	<link href="css/styles.css" rel="stylesheet">
 	
-
-    
 </head>
 <body>
 <noscript><strong>Sorry, JavaScript is required.</strong>
@@ -19,21 +17,21 @@
 	include_once ('bin/model/clip.php');
 	/* Open the database */
 	$mysqli = opendb();
-	if ($mysqli) {
-        echo ("<p>Successful database connection</p>\n");
-	}
+
 	
 	$id = $_GET["id"];
 	if (!ctype_digit ($id))
 		$id = "";		// defeat dirty tricks
 	$clip = Clip::findById($mysqli, $id);
-	if ($clip == NULL) {
-		echo ("<p>Clip not found.</p>\n");
+	if (is_null($clip)) {
+		echo ("<p class='bg-warning'>Clip not found.</p>\n");
 		return;
 	}
 		
 ?>
-
+<?php
+	include ('menubar.php');
+?>
 <audio controls>
 	<source src=
 <?php
@@ -51,6 +49,10 @@
 <form action="processform.php" method="post">
 <h1>What can you hear?</h1>
 <ul class="nobullet">
+<input type="hidden" name="clipid" value=
+<?php
+	echo ("'" . $clip->id . "'>");
+?>
 <li><input type="radio" id="trackperformance" 
 		name="tracktype" value="performance"
 		onclick="trackTypeUpdate();">
@@ -152,6 +154,7 @@
 		</li>
 		<li>&nbsp;</li>
 	</ul>
+</li>	<!-- idperformername -->
 
 <li><input type="checkbox" id="instrumentspresent" name="instrumentspresent" value="yes"
 		onclick="trackTypeUpdate();">
@@ -167,7 +170,8 @@
 				<label for="inst_guitar">Guitar</label></li>
 			<li><input type="checkbox" id="inst_ukelele" name="inst_ukelele" value="yes">
 				<label for="inst_ukelele">Ukelele</label></li>
-		</ul></li>
+		</ul>
+	</li>
 	<li style="clear:both"></li>
 	<li>
 		<input type="checkbox" id="windspresent" name="windspresent" value="yes"
@@ -201,8 +205,9 @@
 			<li><input type="checkbox" id="inst_xylophone" name="inst_xylophone" value="yes">
 				<label for="inst_xylophone">Xylophone</label></li>
 		</ul>
-	</li>
+	</li>	<!-- percussionpresent -->
 	</ul>
+</li>	<!-- instrumentspresent -->
 </div> <!-- performance -->
 
 <div id="noise" class="hidden">
@@ -216,27 +221,19 @@
 </div>	<!-- noise -->
 
 
-<li><input type="submit" value="Submit"></li>
+<li><input type="submit" class="submitbutton" value="Submit"></li>
 
 </ul>
 
 
 </form>
 
-<div>
-<a href="cliplist.php">Clip list</a>
-</div>
 
 
 <!-- Put scripts at end for faster load -->
+
 <script type="text/JavaScript"
 src="http://code.jquery.com/jquery-1.11.1.js">
-</script>
-<script type="text/JavaScript"
-src="js/jwplayer.js">
-</script>
-<script type="text/JavaScript"
-src="js/jwplayer.html5.js">
 </script>
 <script type="text/JavaScript">
 $(document).ready(

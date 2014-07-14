@@ -1,3 +1,9 @@
+AuthType Digest
+AuthName songid
+AuthUserFile /home3/gmcgath/songid/digest.users  
+Require user songid
+
 ErrorDocument 404 http://www.garymcgath.com/songid/404.html
 ErrorDocument 403 http://www.garymcgath.com/songid/403.html
+ErrorDocument 500 http://www.garymcgath.com/songid/500.html
 Options -Indexes

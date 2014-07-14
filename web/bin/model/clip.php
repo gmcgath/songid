@@ -5,6 +5,9 @@
    Gary McGath
    July 11, 2014
 */
+
+include_once (dirname(__FILE__) . '/../supportfuncs.php');
+
 class Clip {
 	var $id;
 	var $description;
@@ -18,6 +21,7 @@ class Clip {
 	*/
 	public static function getRows ($mysqli, $idx, $n) {
 		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS LIMIT " . $idx . " , " . $n;
+		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			throw new Exception ($mysqli->connect_error);
@@ -26,7 +30,7 @@ class Clip {
 		if ($res) {
 			while (true) {
 				$row = $res->fetch_row();
-				if ($row == NULL) {
+				if (is_null($row)) {
 					break;
 				}
 				$clip = new Clip();
@@ -41,14 +45,19 @@ class Clip {
 	}
 	
 	public static function findById($mysqli, $id) {
-		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS WHERE ID = '$id'";
+		
+		error_log ("Clip.findById");
+		$id = sqlPrep($id);
+		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS WHERE ID = $id";
 		$res = $mysqli->query($selstmt);
+		error_log ("Returned from query");
 		if ($mysqli->connect_errno) {
+			error_log($mysqli->connect_error);
 			return NULL;
 		}
 		if ($res) {
 			$row = $res->fetch_row();
-			if ($row != NULL) {
+			if (!is_null($row)) {
 				$clip = new Clip();
 				$clip->id = $row[0];
 				$clip->description = $row[1];
@@ -57,6 +66,7 @@ class Clip {
 				return $clip;
 			}
 		}
+		error_log ("No clip found with ID $id");
 		return NULL;
 	}
 }

@@ -28,5 +28,42 @@ function opendb() {
 	return $mysqli;
 }
 
+/* This function can be called immediately after an INSERT to 
+   retrieve the ID of the row just created. */
+function getInsertId ($mysqli) {
+	$selstmt = "SELECT LAST_INSERT_ID()";
+	$res = $mysqli->query ($selstmt);
+	if ($res) {
+		$row = $res->fetch_row();
+		if (is_null($row)) {
+			return $row[0];
+		}
+	}
+	return NULL;
+}
+
+/* Dump a variable to the error log. */
+function dumpVar ($v) {
+	ob_start();
+	var_dump($v);
+	$contents = ob_get_contents();
+	ob_end_clean();
+	error_log($contents);
+}
+
+/* Prepare a string (that's already sanitized) for SQL by replacing null
+   with "NULL" and putting non-null arguments in single quotes. */
+function sqlPrep ($s) {
+	if (is_null($s)) {
+		return 'NULL';
+	} else if (is_bool($s)) {
+		if ($s)
+			return 'TRUE';
+		else
+			return 'FALSE';
+	} else {
+		return "'" . $s . "'";
+	}
+}
 
 ?>
