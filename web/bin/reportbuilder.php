@@ -1,8 +1,13 @@
 <?php
 /* This class provides functions for assembing a Report.
 	Input sanitization is done here.
- */
 
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
+*/
+
+include_once (dirname(__FILE__) . '/model/actor.php');
 include_once (dirname(__FILE__) . '/model/clip.php');
 include_once (dirname(__FILE__) . '/model/report.php');
 include_once (dirname(__FILE__) . '/model/song.php');
@@ -78,7 +83,34 @@ class ReportBuilder {
 			}
 			$this->report->song = $song;
 		}
-		// TODO performers, instruments, etc.
+		// Get performers
+		$performerNames = $_POST["performernames"];
+		error_log ("Getting performers");
+		dumpVar($performerNames);
+		if ($performerNames != NULL) {
+			$performers = array();
+			foreach ($performerNames as $performerName)  {
+				error_log("Adding performer " . $performerName);
+				$actor = Actor::findByName ($this->mysqli, $performerName);
+				if (!is_null($actor)) {
+					// name belongs to an Actor
+					error_log("Actor exists");
+					$performers[] = $actor;
+				}
+				else {
+					// No match for name, create an Actor
+					error_log("Creating new Actor");
+					$actor = new Actor();
+					$actor->name = $performerName;
+					// TODO for now, assume all performers are individuals (I'm not!)
+					$actor->typeId = Actor::TYPE_INDIVIDUAL;
+					$actor->insert($this->mysqli);
+					$performers[] = $actor;
+				}
+			}
+			$this->report->performers = $performers;
+		}
+		// TODO instruments, etc.
 }
 
 	/* Fill out the report if the user selected Chatter */

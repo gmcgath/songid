@@ -3,6 +3,10 @@
    Implementation of the SONGS table as a model
    Gary McGath
    July 12, 2014
+
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
 */
 
 include_once (dirname(__FILE__) . '/../supportfuncs.php');
@@ -67,16 +71,14 @@ class Song {
 		$ttl = sqlPrep($this->title);
 		$nte = sqlPrep($this->note);
 		$insstmt = "INSERT INTO SONGS (TITLE, NOTE) VALUES ($ttl, $nte)";
-		error_log($insstmt);
 		$res = $mysqli->query ($insstmt);
 		if ($res) {
 			// Retrieve the ID of the row we just inserted
 			$this->id = $mysqli->insert_id;
-			error_log ("inserted song, id = {$this->id}");
 			return $this->id;
 		}
-		
-		return false;
+		error_log ("Error inserting Song: " . $mysqli->error);
+		throw new Exception ("Could not add Song {$this->title} to database");
 	}
 	
 }

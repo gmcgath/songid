@@ -1,3 +1,12 @@
+<?php
+/* cliplist.php
+
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
+*/
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 12, 2014 at 04:38 PM
+-- Generation Time: Jul 15, 2014 at 12:59 PM
 -- Server version: 5.5.37-35.1
 -- PHP Version: 5.4.23
 
@@ -37,6 +37,20 @@ CREATE TABLE IF NOT EXISTS `ACTORS` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `ACTOR_NAMES`
+--
+
+CREATE TABLE IF NOT EXISTS `ACTOR_NAMES` (
+  `ACTOR_ID` int(11) NOT NULL COMMENT 'FK to ACTORS',
+  `NAME` varchar(128) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL,
+  UNIQUE KEY `NAME` (`NAME`),
+  KEY `ACTOR_ID` (`ACTOR_ID`),
+  KEY `NAME_2` (`NAME`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `ACTOR_TYPES`
 --
 
@@ -66,8 +80,7 @@ CREATE TABLE IF NOT EXISTS `CLIPS` (
   `URL` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   `DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=3 ;
-
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
 
 
 -- --------------------------------------------------------
@@ -78,14 +91,17 @@ CREATE TABLE IF NOT EXISTS `CLIPS` (
 
 CREATE TABLE IF NOT EXISTS `REPORTS` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `CLIP_ID` int(11) NOT NULL COMMENT 'FK to CLIPS',
   `USER_ID` int(11) NOT NULL COMMENT 'FK to USERS',
   `SOUND_TYPE` int(11) NOT NULL,
-  `SONG_ID` int(11) NOT NULL COMMENT 'FK to SONGS',
+  `SONG_ID` int(11) DEFAULT NULL COMMENT 'FK to SONGS',
   `SINGALONG` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`),
   KEY `CLIP_ID` (`CLIP_ID`,`USER_ID`,`SONG_ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
+
+
 
 -- --------------------------------------------------------
 
@@ -120,8 +136,10 @@ CREATE TABLE IF NOT EXISTS `REPORTS_PERFORMERS` (
 CREATE TABLE IF NOT EXISTS `SONGS` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(128) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL,
+  `NOTE` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'For disambiguation',
   PRIMARY KEY (`ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10 ;
+
 
 -- --------------------------------------------------------
 

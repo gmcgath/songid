@@ -4,6 +4,10 @@
    Implementation of the CLIPS table as a model
    Gary McGath
    July 11, 2014
+
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
 */
 
 include_once (dirname(__FILE__) . '/../supportfuncs.php');
@@ -24,15 +28,18 @@ class Clip {
 		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
+			error_log("Error getting Clips: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		$rows = array();
+		error_log("Adding rows to array");
 		if ($res) {
 			while (true) {
 				$row = $res->fetch_row();
 				if (is_null($row)) {
 					break;
 				}
+				dumpVar($row);
 				$clip = new Clip();
 				$clip->id = $row[0];
 				$clip->description = $row[1];
@@ -44,6 +51,7 @@ class Clip {
 		return $rows;	
 	}
 	
+	/* Return the Clip with the specified ID, or NULL. */
 	public static function findById($mysqli, $id) {
 		
 		error_log ("Clip.findById");

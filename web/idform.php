@@ -1,3 +1,12 @@
+<?php
+/*	idform.php
+	
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
+*/
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,7 +157,7 @@
 	Name(s): 
 	<ul class="nobullet">
 		<li>
-		<input class="textbox" type="text" name="performername[]">
+		<input class="textbox" type="text" name="performernames[]">
 		<button type="button" onclick="addnameinput(this);">+</button>
 		<button type="button" onclick="removenameinput(this);">-</button>
 		</li>

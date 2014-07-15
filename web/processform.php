@@ -1,7 +1,13 @@
 <?php
+/*	processform.php
+	
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
+*/
 
-/* This PHP precedes all HTML, since it may need to redirect.
-   In fact, it's probably better to have it be pure HTML and always redirect. */
+/* This PHP page is called when the identification form is submitted. 
+   It has no HTML and always redirects.  */
 
 include_once ('bin/config.php');
 include_once ('bin/supportfuncs.php');

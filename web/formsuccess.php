@@ -1,3 +1,13 @@
+<?php
+/*
+   formsuccess.php
+   
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
+*/
+?>
+
 <html>
 <head>
 	<meta charset="utf-8" />

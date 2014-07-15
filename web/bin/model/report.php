@@ -3,8 +3,13 @@
    Implementation of the REPORTS table as a model
    Gary McGath
    July 12, 2014
+
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
 */
 
+include_once (dirname(__FILE__) . '/actor.php');
 include_once (dirname(__FILE__) . '/song.php');
 include_once (dirname(__FILE__) . '/clip.php');
 
@@ -26,6 +31,8 @@ class Report {
 	var $soundType;	// Use one of the SOUND_TYPE_xxx constants
 	var $song;		// a Song pointed to by SONG_ID
 	var $singalong;	// boolean
+	var $performers;	// An array of Actors, or null
+	var $composers;		// An array of Actors, or null
 	
 	public function Report () {
 		// possibly redundant initialization for clarity
@@ -86,7 +93,6 @@ class Report {
 		$sndtyp = sqlPrep($this->soundType);
 		$insstmt = "INSERT INTO REPORTS (CLIP_ID, USER_ID, SOUND_TYPE, SONG_ID, SINGALONG) " .
 			" VALUES ($clpid, $usrid, $sndtyp, $sngid, $sngalng)";
-		error_log ($insstmt);		// DEBUG***
 		$res = $mysqli->query ($insstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
@@ -95,10 +101,29 @@ class Report {
 		if ($res) {
 			// Retrieve the ID of the row we just inserted
 			$this->id = $mysqli->insert_id;
+			$this->writePerformers ($mysqli);
 			return $this->id;
 		}
 		
 		return false;
+	}
+	
+	/* After writing the Report, write the Performers if necessary. */
+	private function writePerformers ($mysqli) {
+		if ($this->performers != NULL) {
+			foreach ($this->performers as $performer) {
+				// $performer is an Actor
+				$rptid = sqlPrep($this->id);
+				$actid = sqlPrep($performer->id);
+				$insstmt = "INSERT INTO REPORTS_PERFORMERS (REPORT_ID, ACTOR_ID) " .
+					"VALUES ($rptid, $actid)";
+				$mysqli->query($insstmt);
+				if ($mysqli->connect_errno) {
+					error_log($mysqli->connect_error);
+					throw new Exception ("Error writing performers: " . $mysqli->connect_error);
+				}
+			}
+		}
 	}
 	
 	/* Set the sound type, either using one of the string constants or integers. */
@@ -135,7 +160,7 @@ class Report {
 	   reverse chronological. Later we may want to add other orderings.
 	*/
 	public static function getReports ($mysqli, $m, $n) {
-			$selstmt = "SELECT CLIP_ID, USER_ID, SOUND_TYPE, SONG_ID, SINGALONG, DATE " .
+			$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SONG_ID, SINGALONG, DATE " .
 			"FROM REPORTS  " .
 			"ORDER BY DATE DESC";
 		$res = $mysqli->query($selstmt);
@@ -152,28 +177,52 @@ class Report {
 				if (is_null($row))
 					break;
 				$rep = new Report();
-				$clipId = $row[0];
+				$rep->id = $row[0];
+				$clipId = $row[1];
 				$rep->clip = Clip::findById($mysqli, $clipId);
 				if (is_null ($rep->clip)) {
 					error_log ("Could not find clip with ID $clipId");
 					throw new Exception ("Database problem getting clips");
 				}
 				// TODO add user later
-				$rep->soundType = $row[2];
-				$songId = $row[3];
+				$rep->soundType = $row[3];
+				$songId = $row[4];
 				if (!is_null($songId)) {
 					error_log ("Finding song by ID $songId");
 					$rep->song = Song::findById($mysqli, $songId);
 					dumpVar ($rep->song);
 				}
-				$rep->singalong = ($row[4] == 1) ? true : false;
-				$rep->date = $row[5];
+				$rep->singalong = ($row[5] == 1) ? true : false;
+				$rep->date = $row[6];
+				$rep->getPerformers($mysqli);
 				$reports[] = $rep;
 			}
 		}
 		error_log("Dumping reports");
 		dumpVar ($reports);
 		return $reports;
+	}
+	
+	/* Add any performers to the Report object */
+	private function getPerformers ($mysqli) {
+		$rptid = sqlPrep($this->id);
+		$selstmt = "SELECT ACTOR_ID FROM REPORTS_PERFORMERS WHERE REPORT_ID = $rptid";
+		error_log($selstmt);
+		$res = $mysqli->query($selstmt);
+		$this->performers = array();
+		if ($res) {
+			while (true) {
+				$row = $res->fetch_row();
+				if (is_null($row))
+					break;
+				error_log("Got a performer row");
+				$actorId = $row[0];
+				$performer = Actor::findById($mysqli, $actorId);
+				if ($performer != NULL) {
+					$this->performers[] = $performer;
+				}
+			}
+		}
 	}
 	   
 }

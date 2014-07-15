@@ -1,5 +1,10 @@
 <?php
+/* supportfuncs.php
 
+   Copyright 2014 by Gary McGath.
+   This code is made available under the MIT license.
+   See README.txt in the source distribution.
+*/
 
 /* This function removes most HTML tags from text while allowing
    some basic formatting.
