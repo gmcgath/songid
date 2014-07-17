@@ -7,7 +7,6 @@
 */
 ?>
 
-<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
@@ -48,7 +47,7 @@
 	}
 	catch (Exception $e) {
 		echo ("<p>There was a problem.</p>\n");
-		echo ("<p>" . $e->getMessage() . "</p>");
+		error_log ($e->getMessage());
 	}
 ?>
 </body>

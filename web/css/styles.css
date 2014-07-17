@@ -1,12 +1,16 @@
 body {background-color: #EEEEEE}
 
-h1 { font-size: 20pt; font-weight: bold; color:#220000}
+h1 { font-size: 20pt; font-weight: bold; color:#330000}
 
 td.navhead { width: 140px;}
 
-.swlabel { font-weight: bold; }
+.logintab {border-style: none;}
 
-.swdesc { background-color: #CCEEEE; padding-left: 40px; }
+.logintab td {padding: 10px;}
+
+.loginlabel {width: 140px; test-align: right;}
+
+.loginbox {width: 200px;}
 
 .banner {background-color: #AACCCC}
 
@@ -35,3 +39,5 @@ ul.menubar li {float: left; width: 200px; }
 table.cliptable {padding-left: 30px;}
 
 table.cliptable tr {border: 1px solid blue;}
+
+.errormsg {color: red; font-weight: bold; font-size: 120%;}

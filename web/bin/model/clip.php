@@ -25,7 +25,6 @@ class Clip {
 	*/
 	public static function getRows ($mysqli, $idx, $n) {
 		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS LIMIT " . $idx . " , " . $n;
-		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			error_log("Error getting Clips: " . $mysqli->connect_error);

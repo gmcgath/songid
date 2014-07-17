@@ -30,6 +30,17 @@
 	include_once ('bin/model/clip.php');
 	include_once ('bin/model/report.php');
 
+	$performerTypeText = array (
+		NULL,
+		"Solo, male",
+		"Solo, female",
+		"Solo, gender unspecified",
+		"Group, male",
+		"Group, female",
+		"Group, mixed",
+		"Group, gender unspecified"
+	);
+	
 	/* Open the database */
 	$mysqli = opendb();
 
@@ -42,8 +53,11 @@
 		$clipDate = $report->clip->date;
 		$clipDesc = $report->clip->description;
 		echo ("<li><b>Clip:</b> $clipDate $clipDesc\n");
-		$soundTypeStr = $report->getSoundTypeAsString();
+		$soundTypeStr = soundTypeString($report->soundType, $report->soundSubtype);
 		echo ("<li><b>Type:</b> $soundTypeStr</li>\n");
+		$performerTypeStr = $performerTypeText [$report->performerType];
+		if (!is_null($performerTypeStr))
+			echo ("<li><b>Performer(s):</b> $performerTypeStr</b></li>\n");
 		$soundType = $report->soundType;
 		if ($soundType == Report::SOUND_TYPE_PERFORMANCE) {
 			$title = "(Not given)";
@@ -66,6 +80,69 @@
 		}
 		echo ("</ul>\n");
 		echo ("<p>&nbsp;</p><hr>\n");
+	}
+	
+	/* Generate the sound type string */
+		/* Return the sound type as a string. */
+	function soundTypeString ($sndType, $sndSubtype) {
+		$val = "";
+		switch ($sndType) {
+			case Report::SOUND_TYPE_PERFORMANCE:
+				$val = "performance";
+				break;
+			case Report::SOUND_TYPE_TALK:
+				$val = "talk";
+				break;
+			case Report::SOUND_TYPE_OTHER:
+				$val = "noise or silence";
+				break;
+		}
+		$val2 = NULL;
+		switch ($sndSubtype) {
+			case Report::SOUND_SUBTYPE_PRF_SONG:
+				$val2 = "song";
+				break;
+			case Report::SOUND_SUBTYPE_PRF_MEDLEY:
+				$val2 = "medley";
+				break;
+			case Report::SOUND_SUBTYPE_PRF_INST:
+				$val2 = "instrumental";
+				break;
+			case Report::SOUND_SUBTYPE_PRF_SPOKEN:
+				$val2 = "spoken or shtick";
+				break;
+			case Report::SOUND_SUBTYPE_PRF_OTHER:
+				$val2 = "other";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_ANNC:
+				$val2 = "announcement";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_CONV:
+				$val2 = "conversation";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_AUCTION:
+				$val2 = "auction";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_SONGID:
+				$val2 = "song identification";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_OTHER:
+				$val2 = "other";
+				break;
+			case Report::SOUND_SUBTYPE_NOISE_SETUP:
+				$val2 = "setup";
+				break;
+			case Report::SOUND_SUBTYPE_NOISE_SILENCE:
+				$val2 = "silence";
+				break;
+			case Report::SOUND_SUBTYPE_NOISE_OTHER:
+				$val2 = "other";
+				break;
+		}
+		if (!is_null($val2))
+			$val = $val . ": " . $val2;
+		return $val;
+		return $val;
 	}
 	
 ?>

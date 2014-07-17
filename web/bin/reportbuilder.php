@@ -50,8 +50,8 @@ class ReportBuilder {
 			case "performance":
 				$this->doPerformance();
 				break;
-			case "chatter":
-				$this->doChatter();
+			case "talk":
+				$this->doTalk();
 				break;
 			case "noise":
 				$this->doNoise();
@@ -59,12 +59,15 @@ class ReportBuilder {
 			default:
 				throw new Exception ("Invalid form, wrong tracktype");
 		}
+		// Can I make this all more consistent?
 		$this->report->setSoundType($tracktype);
 	}
 	
 	/* Fill out the report if the user selected Performance */	
 	private function doPerformance() {
 		error_log ("doPerformance");
+		$this->report->setSoundSubtype($_POST["performancetype"]);
+		
 		$title = trim(strip_unsafe_html_tags($this->mysqli->real_escape_string($_POST["songtitle"])));
 		if (strlen($title) > 0) {
 			// Really is safe! strlen returns 0 for null object.
@@ -113,13 +116,15 @@ class ReportBuilder {
 		// TODO instruments, etc.
 }
 
-	/* Fill out the report if the user selected Chatter */
-	function doChatter() {
+	/* Fill out the report if the user selected talk */
+	function doTalk() {
+		$this->report->setSoundSubtype($_POST["performancetype"]);
 
 	}
 
 	/* Fill out the report if the user selected Other/Noise/Silence */
 	function doNoise() {
+		$this->report->setSoundSubtype($_POST["performancetype"]);
 	}
 	
 	/* Insert the object into the database. */

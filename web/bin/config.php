@@ -12,5 +12,5 @@
 	   database. Keeping them out of your web directory
 	   provides extra security.
 	*/
-	include ("/home3/gmcgath/songid/dbconfig.php");
+	include ("/home/songid/dbconfig.php");
 ?>

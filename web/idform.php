@@ -7,7 +7,6 @@
 */
 ?>
 
-<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
@@ -57,34 +56,42 @@
 </p>
 <form action="processform.php" method="post">
 <h1>What can you hear?</h1>
-<ul class="nobullet">
 <input type="hidden" name="clipid" value=
 <?php
 	echo ("'" . $clip->id . "'>");
 ?>
+<ul class="nobullet" title="Select the broad category the clip falls into">
 <li><input type="radio" id="trackperformance" 
 		name="tracktype" value="performance"
 		onclick="trackTypeUpdate();">
 	<label for="trackperformance">Performance</label></li>
-<li><input type="radio" id="trackchatter" 
-		name="tracktype" value="chatter"
+<li><input type="radio" id="tracktalk" 
+		name="tracktype" value="talk"
 		onclick="trackTypeUpdate();">
-	<label for="trackchatter">Speech</label></li>
+	<label for="tracktalk">Speech</label></li>
 <li><input type="radio" id="tracknoise" 
 		name="tracktype" value="noise" 
 		onclick="trackTypeUpdate();">
 	<label for="tracknoise">Other</label></li>
 </ul>
 
-<div id="chatter" class="hidden">
+<div id="talk" class="hidden">
 <h4>Talk</h4>
+<ul class="nobullet" title="Select the talk type">
+<li><input type="radio" name="talktype" id="talktype_annc" value="talktype_annc">
+	<label for="talktype_annc">Announcement</label></li>
+<li><input type="radio" name="talktype" id="talktype_conv" value="talktype_conv">
+	<label for="talktype_conv">Conversation</label></li>
+<li><input type="radio" name="talktype" id="talktype_auction" value="talktype_auction">
+	<label for="talktype_auction">Auction</label></li>
+<li><input type="radio" name="talktype" id="talktype_songid" value="talktype_songid">
+	<label for="talktype_songid">Song identification</label></li>
+<li><input type="radio" name="talktype" id="talktype_other" value="talktype_other">
+	<label for="talktype_other">Other</label></li>
+</ul>
+
+
 <ul class="nobullet">
-<li><input type="radio" name="chattertype" id="talk_announcement" value="announcement">
-<label for="talk_announcement">Announcements</label></li>
-<li><input type="radio" name="chattertype" id="talk_talk" value="talk">
-<label for="talk_talk">Conversation</label></li>
-<li><input type="radio" name="chattertype" id="talk_noise" value="noise">
-<label for="talk_noise">Noise</label></li>
 <li>&nbsp;</li>
 <li><input type="checkbox" id="canidtalk" name="canidtalk" value="yes"
 		onclick="trackTypeUpdate();">
@@ -102,15 +109,31 @@
 </li>
 </ul>
 
-</div>	<!-- chatter -->
+</div>	<!-- talk -->
+
+
+
 <div id="performance" class="hidden">
 <h4>Performance</h4>
+<ul class="nobullet" title="Select the performance type">
+<li><input type="radio" name="performancetype" id="perftype_song" value="perftype_song">
+	<label for="perftype_song">Song</label></li>
+<li><input type="radio" name="performancetype" id="perftype_medley" value="perftype_medley">
+	<label for="perftype_medley">Medley</label></li>
+<li><input type="radio" name="performancetype" id="perftype_instrumental" value="perftype_instrumental">
+	<label for="perftype_instrumental">Instrumental</label></li>
+<li><input type="radio" name="performancetype" id="perftype_spoken" value="perftype_spoken">
+	<label for="perftype_spoken">Spoken word or shtick</label></li>
+<li><input type="radio" name="performancetype" id="perftype_other" value="perftype_other">
+	<label for="perftype_other">Other</label></li>
+</ul>
+
 <ul class="nobullet">
 <li><input type="radio" name="performertype" id="perf_single" value="solo"
 		onclick="trackTypeUpdate();">
-	<label id="perf_single">Single performer</label>
+	<label for="perf_single">Solo performer</label>
 <div id="singleperformertype" class="hidden">
-<ul class="nobullet">
+<ul class="nobullet" title="Select the performer's gender">
 <li><input type="radio" id="singleperformermale" name="singleperformersex" value="male">
 <label for="singleperformermale">Male</label></li>
 <li><input type="radio" id="singleperformerfemale" name="singleperformersex" value="female">
@@ -125,7 +148,7 @@
 	onclick="trackTypeUpdate();">
 	<label for="perf_group">Group performance</label>
 <div id="groupperformertype" class="hidden">
-<ul class="nobullet">
+<ul class="nobullet" title="Select the group type">
 <li><input type="radio" id="groupperformermale" name="groupperformersex" value="male">
 <label for="groupperformermale">Male performers</label></li>
 <li><input type="radio" id="groupperformerfemale" name="groupperformersex" value="female">
@@ -141,7 +164,7 @@
 
 <li><input type="radio" id="performertypeunknown" name="performertype" value="unknown"
 		onclick="trackTypeUpdate();">
-	<label for="performertypeunknown">Can't tell if single or group</label></li>
+	<label for="performertypeunknown">Can't tell if solo or group</label></li>
 <li>&nbsp;</li>
 <li><input type="checkbox" id="canidsong" name="canidsong" value="yes"
 		onclick="trackTypeUpdate();">
@@ -220,11 +243,14 @@
 </div> <!-- performance -->
 
 <div id="noise" class="hidden">
-<h4>Noise, silence, etc.</h4>
-<ul class="nobullet">
-<li>
-	Note: <br>
-	<input class="textbox" type="text" name="noisenote" id="noisenote"></li>
+<h4>Other (noise, silence, etc.)</h4>
+<ul class="nobullet" title="Select the sound type">
+<li><input type="radio" name="noisetype" id="noisetype_setup" value="noisetype_setup">
+	<label for="noisetype_setup">Setup</label></li>
+<li><input type="radio" name="noisetype" id="noisetype_silence" value="noisetype_silence">
+	<label for="noisetype_silence">Silence</label></li>
+<li><input type="radio" name="noisetype" id="noisetype_other" value="noisetype_other">
+	<label for="noisetype_other">Other</label></li>
 </ul>
 
 </div>	<!-- noise -->
@@ -270,8 +296,10 @@ function trackTypeUpdate() {
 
 		if ($('#canidsong').is(':checked'))
 			$('#lisongtitle').show();
-		else
+		else {
 			$('#lisongtitle').hide();
+			$('#lisongtitle').val("");
+		}
 		
 		if ($('#instrumentspresent').is(':checked')) {
 			$('#instrumentnames').show();
@@ -297,15 +325,15 @@ function trackTypeUpdate() {
 	else 
 		$('#performance').hide();
 
-	if ($('#trackchatter').is(':checked')) {
-		$('#chatter').show();
+	if ($('#tracktalk').is(':checked')) {
+		$('#talk').show();
 		if ($('#canidtalk').is(':checked')) 
 			$('#lipeopletalking').show();
 		else
 			$('#lipeopletalking').hide();
 	}
 	else 
-		$('#chatter').hide();
+		$('#talk').hide();
 
 	if ($('#tracknoise').is(':checked')) {
 		$('#noise').show();
