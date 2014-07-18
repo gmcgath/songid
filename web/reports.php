@@ -21,8 +21,30 @@
 
 <?php
 	include ('menubar.php');
+	
+	$start = (int)$_GET["m"];
+	if (is_null($start)) {
+		$start = 0;
+		if ($start < 0)
+			$start = 0;
+	}
+	$hideprev = false;
+	if ($start == 0) 
+		$hideprev = true;
+	
+	
+	$nstr = $_GET["n"];
+	if (is_null ($nstr)) 
+		$itemsPerPage = 10;
+	else {
+		$itemsPerPage = (int) $nstr;
+		if ($itemsPerPage < 1)
+			$itemsPerPage = 1;
+	}
+	$hidenext = false;
 ?>
 <h1>Reports</h1>
+
 
 <?php	
 	include_once ('bin/config.php');
@@ -40,13 +62,52 @@
 		"Group, mixed",
 		"Group, gender unspecified"
 	);
-	
+?>
+
+
+
+<?php
 	/* Open the database */
 	$mysqli = opendb();
 
-	$reports = Report::getReports ($mysqli, 0, 50);
-	
+	// Get one extra report so we know if there are more to come
+	$reports = Report::getReports ($mysqli, $start, $itemsPerPage + 1);
+	error_log("Report count = " . count($reports));
+	if (count($reports) <= $itemsPerPage)
+		$hidenext = true;
+?>
+
+<table class="reportnav">
+<tr>
+<td id="reportprev">
+<?php
+	/* Previous n */
+	if (!$hideprev) {
+		$prevm = $start - $itemsPerPage;
+		if ($prevm < 0)
+			$prevm = 0;
+		echo ("<a href='reports.php?m=$prevm'>Previous</a>\n");
+	}
+?>
+</td>
+<td id="reportnext">
+<?php
+	/* Next n */
+	if (!$hidenext) {
+		$nextm = $start + $itemsPerPage;
+		echo ("<a href='reports.php?m=$nextm'>Next</a>\n");
+	}
+?>
+</td>
+</tr>
+</table>
+
+<?php
+	$reptidx = 0;
 	foreach ($reports as $report) {
+		if ($reptidx >= $itemsPerPage)
+			break;		// omit last report if it's the extra one
+		$reptidx++;
 		echo ("<ul class='nobullet'>\n");
 		$date = $report->date;
 		echo ("<li><b>Date of report:</b> $date</li>\n");
@@ -146,5 +207,6 @@
 	}
 	
 ?>
+
 </body>
 </html>

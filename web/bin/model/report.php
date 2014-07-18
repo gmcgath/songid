@@ -190,7 +190,9 @@ class Report {
 			$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE " .
 			"FROM REPORTS  " .
-			"ORDER BY DATE DESC";
+			"ORDER BY DATE DESC " .
+			"LIMIT $m, $n ";
+		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);

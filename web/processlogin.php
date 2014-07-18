@@ -18,13 +18,14 @@ $mysqli = opendb();
 	
 try {
 	$userName = $mysqli->real_escape_string($_POST["user"]);
-	$pw = $mysqli->real_escape_string($_POST["pw"]);
-	if (User::verifyLogin($mysqli, $userName, $pw)) {
+	if (User::verifyLogin($mysqli, $userName, $_POST["pw"])) {
 		header ("Location: cliplist.php", true, 302);
+		return;
 	}
 } catch (Exception $e) {
 	error_log($e->getMessage());
 }
+error_log ("Login error for $userName");
 header ("Location: login.php?error=1", true, 302);	// Should add an error message to login.php
 
 ?>
