@@ -14,14 +14,19 @@ include_once ('bin/supportfuncs.php');
 include_once ('bin/model/report.php');
 include_once ('bin/reportbuilder.php');
 
+include('bin/model/user.php');
+session_start();
+include('bin/sessioncheck.php');
+
 /* Open the database */
 $mysqli = opendb();
 	
 $reportBuilder = new ReportBuilder($mysqli);
 try {
 	$reportBuilder->populate($_POST);
+	$user = $_SESSION['user'];
+	$reportBuilder->setUser($user);
 
-	session_start();
 	$_SESSION['report'] = $reportBuilder;
 
 	/* TODO Put disambiguation checks here. If they're needed, redirect

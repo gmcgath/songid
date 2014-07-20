@@ -19,8 +19,8 @@
 	
 	echo ("User name: ");
 	$uname = trim(fgets(STDIN));
-	echo ("Email: ");
-	$email = trim(fgets(STDIN));
+	echo ("Real name: ");
+	$name = trim(fgets(STDIN));
 	echo ("Password: ");
 	$pw = trim(fgets(STDIN));
 	$pwHash = password_hash($pw, PASSWORD_DEFAULT);
@@ -33,7 +33,7 @@
 	}
 	$user = new User;
 	$user->loginId = $uname;
-	$user->email = $email;
+	$user->name = $name;
 	$user->passwordHash = $pwHash;
 	echo ("Hash is " . $pwHash . "\n");
 	if (password_verify($pw, $pwHash))

@@ -31,7 +31,6 @@ class Clip {
 			throw new Exception ($mysqli->connect_error);
 		}
 		$rows = array();
-		error_log("Adding rows to array");
 		if ($res) {
 			while (true) {
 				$row = $res->fetch_row();
@@ -53,13 +52,11 @@ class Clip {
 	/* Return the Clip with the specified ID, or NULL. */
 	public static function findById($mysqli, $id) {
 		
-		error_log ("Clip.findById");
 		$id = sqlPrep($id);
 		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS WHERE ID = $id";
 		$res = $mysqli->query($selstmt);
-		error_log ("Returned from query");
 		if ($mysqli->connect_errno) {
-			error_log($mysqli->connect_error);
+			error_log("Error getting clip by ID: " . $mysqli->connect_error);
 			return NULL;
 		}
 		if ($res) {

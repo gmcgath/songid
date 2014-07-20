@@ -5,6 +5,10 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
+
+include('bin/model/user.php');
+session_start();
+include('bin/sessioncheck.php');
 ?>
 
 <html lang="en">

@@ -23,11 +23,6 @@ try {
 	$realname = $mysqli->real_escape_string($_POST["realname"]);
 	$authcode = $mysqli->real_escape_string($_POST["authcode"]);
 	
-	error_log ("userName = $userName");
-	error_log ("pw = $pw");
-	error_log ("realname = $realname");
-	error_log ("authcode = $authcode");
-	
 	// Check for valid fields
 	if ($userName == NULL || $pw == NULL || $realname == NULL || $authcode == NULL) {
 		// Empty string is == to null, so we catch empty as well as missing values
@@ -54,7 +49,23 @@ try {
 		return;
 	}
 	
-	// TODO create user
+	// Check if login name is already in use
+	if (User::findByLoginId($mysqli, $userName)) {
+		header ("Location: register.php?error=2", true, 302);
+		return;
+	}
+	
+	// Create the user
+	$user = new User;
+	$user->loginId = $userName;
+	$user->name = $realName;
+	$user->passwordHash = password_hash($pw, PASSWORD_DEFAULT);
+	$user->insert($mysqli);
+	$user->assignRole($mysqli, User::ROLE_CONTRIBUTOR);
+	
+	header ("Location: registerok.php", true, 200);
+	return;
+	
 } catch (Exception $e) {
 	error_log($e->getMessage());
 }

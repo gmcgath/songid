@@ -92,7 +92,7 @@ class Report {
 	/** Return a Report matching the specified ID. If no report matches,
 	    returns null. Throws an Exception if there is an SQL error. */
 	public static function findById ($mysqli, $reportId) {
-		$selstmt = "SELECT CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
+		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE " .
 			"FROM REPORTS WHERE ID = " . $reportID;
 		$res = $mysqli->query($selstmt);
@@ -117,19 +117,20 @@ class Report {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
-		// TEMPORARY userId till we add users. Afterwards get the ID from a User object.
-		$userId = 1;
+		error_log("Insert dump:");
+		dumpVar($this->user);
 		$sngid = NULL;
 		if (!is_null($this->song)) 
 			$sngid = $this->song->id;
 		$sngid = sqlPrep ($sngid);
 		$sngalng = sqlPrep($this->singalong);
 		$clpid = sqlPrep($this->clip->id);
-		$usrid = sqlPrep($userId);
+		$usrid = sqlPrep($this->user->id);
 		$sndtyp = sqlPrep($this->soundType);
 		$sndsbtyp = sqlPrep($this->soundSubtype);
 		$insstmt = "INSERT INTO REPORTS (CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, SONG_ID, SINGALONG) " .
 			" VALUES ($clpid, $usrid, $sndtyp, $sndsbtyp, $sngid, $sngalng)";
+		error_log("Inserting Report, $insstmt");
 		$res = $mysqli->query ($insstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
@@ -192,7 +193,6 @@ class Report {
 			"FROM REPORTS  " .
 			"ORDER BY DATE DESC " .
 			"LIMIT $m, $n ";
-		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
@@ -217,16 +217,17 @@ class Report {
 	/* Construct the report from a result row. This is used from getReports and
 	   findById, which need to return the same row elements. */
 	private function buildFromRow($mysqli, $row) {
-		error_log("buildFromRow");
 		dumpVar($row);
 		$this->id = $row[0];
 		$clipId = $row[1];
 		$this->clip = Clip::findById($mysqli, $clipId);
-		if (is_null ($this->clip)) {
-			error_log ("Could not find clip with ID $clipId");
-			throw new Exception ("Database problem getting clips");
+		
+		$userId = $row[2];
+		error_log("User id = $userId");
+		if ($userId) {
+			$this->user = User::findById($mysqli, $userId);
+			dumpVar($this->user);
 		}
-		// TODO add user later
 		$this->soundType = $row[3];
 		$this->soundSubtype = $row[4];
 		$this->performerType = $row[5];

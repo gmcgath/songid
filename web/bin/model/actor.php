@@ -52,7 +52,6 @@ class Actor {
 	public static function findByName ($mysqli, $name) {
 		$nam = sqlPrep ($name);
 		$selstmt = "SELECT ACTOR_ID FROM ACTOR_NAMES WHERE NAME = $nam";
-		error_log ($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			throw new Exception ($mysqli->connect_error);
@@ -86,8 +85,6 @@ class Actor {
 		$nam = sqlPrep($this->name);
 		$tpid = sqlPrep($this->typeId);
 		$insstmt = "INSERT INTO ACTORS (NAME, TYPE_ID) VALUES ($nam, $tpid)";
-		error_log("Inserting Actor: " . $insstmt);
-		$res = $mysqli->query ($insstmt);
 		if ($res) {
 			// Retrieve the ID of the row we just inserted
 			$this->id = $mysqli->insert_id;
@@ -95,7 +92,6 @@ class Actor {
 			// Now add the name to ACTOR_NAMES
 			$actrid = sqlPrep($this->id);
 			$insstmt2 = "INSERT INTO ACTOR_NAMES (ACTOR_ID, NAME) values ($actrid, $nam)";
-			error_log ("Inserting into actor_names: " . $insstmt2);
 			$res = $mysqli->query ($insstmt2);
 			if ($res) 
 				return $this->id;

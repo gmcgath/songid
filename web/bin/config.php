@@ -13,4 +13,8 @@
 	   provides extra security.
 	*/
 	include ("/home/songid/dbconfig.php");
+	
+	/* Set your default time zone. */
+	date_default_timezone_set("America/New_York");		// PHP style
+	sqlTimeZone = "US/Eastern";							// sensible SQL style
 ?>

@@ -5,6 +5,11 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
+
+include('bin/model/user.php');
+session_start();
+include('bin/sessioncheck.php');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -111,8 +116,24 @@
 		echo ("<ul class='nobullet'>\n");
 		$date = $report->date;
 		echo ("<li><b>Date of report:</b> $date</li>\n");
-		$clipDate = $report->clip->date;
-		$clipDesc = $report->clip->description;
+		
+		$user = $report->user;
+		error_log ("User in report:");
+		dumpVar($user);
+		if ($user)
+			$userName = $user->name;
+		else
+			$userName = "Unknown";
+		echo ("<li><b>Submitted by:</b> $userName");
+		if ($report->clip) {
+			$clipDate = $report->clip->date;
+			$clipDesc = $report->clip->description;
+		}
+		else {
+			// Unknown or deleted clip
+			$clipDate = "";
+			$clipDesc = "Clip unavailable";
+		}
 		echo ("<li><b>Clip:</b> $clipDate $clipDesc\n");
 		$soundTypeStr = soundTypeString($report->soundType, $report->soundSubtype);
 		echo ("<li><b>Type:</b> $soundTypeStr</li>\n");

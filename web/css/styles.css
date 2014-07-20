@@ -32,6 +32,8 @@ ul.menubar {list-style-type: none;}
 
 ul.menubar li {float: left; width: 200px; }
 
+.menubaruser {color:blue; font-size: 80%; }
+
 .textbox {width: 600px; }
 
 .submitbutton {background-color: #BBCCFF}

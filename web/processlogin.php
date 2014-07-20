@@ -18,7 +18,13 @@ $mysqli = opendb();
 	
 try {
 	$userName = $mysqli->real_escape_string($_POST["user"]);
-	if (User::verifyLogin($mysqli, $userName, $_POST["pw"])) {
+	$user = User::verifyLogin($mysqli, $userName, $_POST["pw"]);
+	if ($user) {
+		session_start();
+		$_SESSION['user'] = $user;
+		error_log("User login ID = $user->loginId");
+		error_log("User name = $user->name");
+		$_SESSION['report'] = NULL;
 		header ("Location: cliplist.php", true, 302);
 		return;
 	}

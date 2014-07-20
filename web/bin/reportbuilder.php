@@ -36,13 +36,7 @@ class ReportBuilder {
 		$clip = null;
 		if ($clipId != null && ctype_digit($clipId)) {
 			dumpVar($this->mysqli);
-			error_log ("calling Clip.findById");
 			$clip = Clip::findById($this->mysqli, $clipId);	
-			error_log ("returned from Clip.findById");
-		}
-		if (is_null($clip)) {
-			error_log ("No clip with ID $clipId");
-			throw new Exception ("Invalid form, no clip specified");
 		}
 		$this->report->clip = $clip;
 		$tracktype = trim($this->mysqli->real_escape_string($_POST['tracktype']));
@@ -62,6 +56,14 @@ class ReportBuilder {
 		// Can I make this all more consistent?
 		$this->report->setSoundType($tracktype);
 	}
+	
+	/* Set the user in the report to the specified User */
+	public function setUser($usr) {
+		error_log("setUser");
+		$this->report->user = $usr;
+		dumpVar($this->report->user);
+	}
+	
 	
 	/* Fill out the report if the user selected Performance */	
 	private function doPerformance() {

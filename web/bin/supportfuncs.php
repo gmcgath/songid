@@ -6,6 +6,7 @@
    See README.txt in the source distribution.
 */
 
+
 /* This function removes most HTML tags from text while allowing
    some basic formatting.
    To remove all tags, call strip_tags without a second argument.
@@ -30,6 +31,10 @@ function opendb() {
         		$mysqli->connect_error . "</p>");
         return false;
 	} 
+	
+	// Set the time zone. sqlTimeZone is set in config.php.
+	$tzstmt = "SET time-zone = $sqlTimeZone";
+	$res = $mysqli->query($tzstmt);
 	return $mysqli;
 }
 

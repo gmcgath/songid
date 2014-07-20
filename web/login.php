@@ -42,6 +42,8 @@ if (!is_null($_GET["error"]))
 </table>
 </form>
 </div>
+<hr>
+<p><a href="register.php">Sign up</a></p>
 
 </body>
 </html>

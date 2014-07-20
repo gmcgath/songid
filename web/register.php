@@ -10,7 +10,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Register</title>
+	<title>Sign up</title>
 	<link href="css/styles.css" rel="stylesheet">
 	
 </head>
@@ -18,7 +18,7 @@
 <noscript><strong>Sorry, JavaScript is required.</strong>
 </noscript>
 
-<h1>Register</h1>
+<h1>Sign up</h1>
 <?php
 $err = $_GET["error"];
 if (!is_null($err)) {

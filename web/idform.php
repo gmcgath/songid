@@ -5,6 +5,10 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
+include('bin/model/user.php');
+session_start();
+include('bin/sessioncheck.php');
+
 ?>
 
 <html lang="en">
@@ -179,7 +183,7 @@
 <li class="hidden" id="liperformername">
 	Name(s): 
 	<ul class="nobullet">
-		<li>
+		<li class="performernameitem">
 		<input class="textbox" type="text" name="performernames[]">
 		<button type="button" onclick="addnameinput(this);">+</button>
 		<button type="button" onclick="removenameinput(this);">-</button>
@@ -354,7 +358,7 @@ function removenameinput (buttn) {
 	var litem = $(buttn).parent();
 	var list = litem.parent();
 	// Don't delete last item!
-	if (list.find("li").length > 1)
+	if (list.find(".performernameitem").length > 1)
 		litem.remove();
 	
 }
