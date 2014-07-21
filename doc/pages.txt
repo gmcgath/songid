@@ -1,0 +1,96 @@
+Top level (web) PHP files:
+
+cliplist.php: Presents a list of sound clips that contributors can work on.
+
+error.php: General error reporting page. Not much used.
+
+formsuccess.php: Submitting a clip identification form successfully takes you
+here.
+
+idform.php: Lets a contributor enter information on a clip.
+
+login.php: Lets the user log in.
+
+logout.php: Logs the user out, deleting all session information, and displays
+an appropriate message.
+
+menubar.php: An include file to display a menu bar.
+
+processform.php: A non-HTML file that processes the form submitted from
+idform.php. If successful, it redirects to formsuccess.php.
+
+processlogin.php: A non-HTML file that processes logins. If successful, it
+redirects to an appropriate page (currently cliplist.php). If unsuccessful,
+it redirects back to login.php with an error parameter.
+
+processreg.php: A non-HTML file that processes new registrations. If the
+registration is accepted, it redirects to registerok.php, otherwise it goes
+back to register.php with an error parameter.
+
+register.php: New users can sign in here. They must have an authorization code,
+which is stored in the database.
+
+registerok.php: Thanks the new user for successfully registering. 
+
+reports.php: Displays reports that have been submitted.
+
+
+
+
+The "web/bin" directory cannot be accessed from the browser and contains PHP
+files that are called from other PHP files or are run as command-line
+utilities. 
+
+config.php: Holds essential configuration information. Should be included
+in just about every top-level PHP file. It references another file, which
+preferably should be outside the web directory, for database access.
+You'll need to create that file and edit config.php to point at it.
+
+makeauthcode.php: A command-line utility to create an authorization code.
+Authorization codes are given to people who are permitted to register.
+
+password.php: By Anthony Ferrara, used under the MIT license. This 
+provides the PHP 5.5 password hash functions to earlier versions of
+PHP. If you have PHP 5.5 or higher, you should be able to delete this
+and remove references to it. (Note to self: Is there a way to
+conditionally include it?)
+
+registeruser.php: This command line utility was the way to add new users
+from the command line before register.php was added. If you don't like
+the authorization code scheme, you can use this instead and not define
+any authorization codes.
+
+reportbuilder.php: Holds the logic for building a report from the form
+submitted by idform.php.
+
+sessioncheck.php: Include this in every page that requires a login. 
+
+supportfuncs.php: Various utility functions.
+
+
+
+
+The "web/bin/model" directory contains code to access the database.
+All SQL should be confined to files in this directory. File names correspond
+to database tables.
+
+actor.php: Supports the ACTORS table. An Actor is an entity that plays a
+role in a sound clip, such as composer or performer.
+
+authcode.php: Supports the AUTHCODES table, which manages the authorization
+code(s).
+
+clip.php: Supports the CLIPS table, which holds information on sound clips.
+
+report.php: Supports the REPORTS table, which holds contributor-generated
+reports.
+
+song.php: Supports the SONGS table. A song is an abstract unit of sound, not
+always a song, and not a particular recording of it. "The Star-Spangled
+Banner," for example, is the same song regardless of who sang or
+recorded it.
+
+user.php: Supports the USERS table. Users are people who can log in and
+do things. Users have roles that define what they can do. A Contributor
+can listen to clips and create reports; an Editor can manage clips and
+reports; an Administrator can manage user accounts.
