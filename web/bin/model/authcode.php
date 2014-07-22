@@ -1,6 +1,6 @@
 <?php
 
-/* user.php
+/* authcode.php
    Implementation of the AUTHCODES table as a model
    Gary McGath
    July 19, 2014

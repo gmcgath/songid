@@ -6,7 +6,7 @@
    See README.txt in the source distribution.
 */
 
-include('bin/model/user.php');
+include_once('bin/model/user.php');
 session_start();
 include_once ('bin/config.php');
 include('bin/sessioncheck.php');

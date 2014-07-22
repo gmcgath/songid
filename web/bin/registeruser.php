@@ -8,10 +8,10 @@
    This is a standalone command-line application as a temporary measure.
 */
 
-	require ('config.php');
-	require ('password.php');		// Compatibility file needed till we get PHP 5.5
-	require ('supportfuncs.php');
-	require ('model/user.php');
+	require_once ('config.php');
+	require_once ('password.php');		// Compatibility file needed till we get PHP 5.5
+	require_once ('supportfuncs.php');
+	require_once ('model/user.php');
 	
 	/* Open the database */
 	$mysqli = opendb();

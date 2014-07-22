@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 16, 2014 at 06:43 PM
+-- Generation Time: Jul 22, 2014 at 05:24 AM
 -- Server version: 5.5.37-35.1
 -- PHP Version: 5.4.23
 
@@ -28,12 +28,12 @@ SET time_zone = "+00:00";
 
 CREATE TABLE IF NOT EXISTS `ACTORS` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `NAME` varchar(128) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL COMMENT 'Primary name',
+  `NAME` varchar(128) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Primary name',
   `TYPE_ID` int(11) NOT NULL DEFAULT '1' COMMENT 'FK TO ACTOR_TYPES',
   PRIMARY KEY (`ID`),
   UNIQUE KEY `NAME_2` (`NAME`),
   KEY `NAME` (`NAME`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=11 ;
 
 
 -- --------------------------------------------------------
@@ -74,6 +74,19 @@ INSERT INTO `ACTOR_TYPES` (`ID`, `DESCRIPTION`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `AUTHCODES`
+--
+
+CREATE TABLE IF NOT EXISTS `AUTHCODES` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `CODE_HASH` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
+
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `CLIPS`
 --
 
@@ -104,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `REPORTS` (
   `SINGALONG` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`),
   KEY `CLIP_ID` (`CLIP_ID`,`USER_ID`,`SONG_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=17 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=26 ;
 
 
 -- --------------------------------------------------------
@@ -143,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `SONGS` (
   `TITLE` varchar(128) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL,
   `NOTE` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'For disambiguation',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=16 ;
 
 
 -- --------------------------------------------------------
@@ -168,10 +181,14 @@ CREATE TABLE IF NOT EXISTS `USERS` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `LOGIN_ID` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
   `PASSWORD_HASH` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `EMAIL` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `NAME` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `DATE_REGISTERED` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID`),
-  KEY `LOGIN_ID` (`LOGIN_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  KEY `LOGIN_ID` (`LOGIN_ID`),
+  KEY `NAME` (`NAME`),
+  KEY `LOGIN_ID_2` (`LOGIN_ID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=11 ;
+
 
 -- --------------------------------------------------------
 
@@ -184,6 +201,7 @@ CREATE TABLE IF NOT EXISTS `USERS_ROLES` (
   `ROLE` int(11) NOT NULL,
   KEY `USER_ID` (`USER_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

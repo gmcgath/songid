@@ -14,7 +14,7 @@ include_once ('bin/supportfuncs.php');
 include_once ('bin/model/report.php');
 include_once ('bin/reportbuilder.php');
 
-include('bin/model/user.php');
+include_once('bin/model/user.php');
 session_start();
 include('bin/sessioncheck.php');
 

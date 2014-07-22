@@ -85,6 +85,8 @@ class Actor {
 		$nam = sqlPrep($this->name);
 		$tpid = sqlPrep($this->typeId);
 		$insstmt = "INSERT INTO ACTORS (NAME, TYPE_ID) VALUES ($nam, $tpid)";
+		error_log($insstmt);
+		$res = $mysqli->query($insstmt);
 		if ($res) {
 			// Retrieve the ID of the row we just inserted
 			$this->id = $mysqli->insert_id;
@@ -95,7 +97,8 @@ class Actor {
 			$res = $mysqli->query ($insstmt2);
 			if ($res) 
 				return $this->id;
-		}
+		} else
+			error_log("Bad response from insert");
 		error_log ("Error inserting Actor: " . $mysqli->error);
 		throw new Exception ("Could not add Actor {$this->name} to database");
 	}
