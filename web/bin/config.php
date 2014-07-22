@@ -7,7 +7,7 @@
 */
 	/* Set the directory to the location of your
 	   database config file. It needs to define the
-	   variables $usr, $pw, $db, and $host to 
+	   variables $db_user, $db_pw, $db_name, and $db_host to 
 	   the appropriate parameters for your MySQL
 	   database. Keeping them out of your web directory
 	   provides extra security.

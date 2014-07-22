@@ -8,7 +8,7 @@ td.navhead { width: 140px;}
 
 .logintab td {padding: 10px;}
 
-.loginlabel {width: 140px; test-align: right;}
+.formlabel {width: 140px; test-align: right;}
 
 .loginbox {width: 200px;}
 
@@ -41,6 +41,8 @@ ul.menubar li {float: left; width: 200px; }
 table.cliptable {padding-left: 30px;}
 
 table.cliptable tr {border: 1px solid blue;}
+
+table.editcliptable {padding-left: 30px;}
 
 td.reportnav { width: 100px; }
 

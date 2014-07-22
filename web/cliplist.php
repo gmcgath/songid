@@ -8,6 +8,7 @@
 
 include('bin/model/user.php');
 session_start();
+include_once ('bin/config.php');
 include('bin/sessioncheck.php');
 ?>
 
@@ -29,9 +30,11 @@ include('bin/sessioncheck.php');
 <h1>Available sound clips</h1>	
 
 <?php
-	include_once ('bin/config.php');
 	include_once ('bin/supportfuncs.php');
 	include_once ('bin/model/clip.php');
+	
+	$user = $_SESSION['user'];
+	
 	/* Open the database */
 	$mysqli = opendb();
 	try {
@@ -45,11 +48,19 @@ include('bin/sessioncheck.php');
 			echo ("'>");
 			echo ($clip->description);			
 			echo ("</a></td>");
+			if ($user->hasRole($mysqli, User::ROLE_EDITOR)) {
+				echo ("<td><a href='editclip.php?id=");
+				echo ($clip->id);
+				echo ("'>");
+				echo ("Edit");
+				echo ("</a></td>");
+			}
 			echo ("</tr>\n");
 		}
 		echo ("</table>\n");
 	}
 	catch (Exception $e) {
+		error_log($e->getMessage());
 		echo ("<p>There was a problem.</p>\n");
 		error_log ($e->getMessage());
 	}

@@ -10,6 +10,7 @@
    See README.txt in the source distribution.
 */
 
+include_once (dirname(__FILE__) . '/../config.php');
 include_once (dirname(__FILE__) . '/../supportfuncs.php');
 include_once (dirname(__FILE__) . '/../password.php');	// Required prior to PHP 5.5
 
@@ -117,6 +118,7 @@ class User {
 	public function hasRole ($mysqli, $role) {
 		$cntstmt = "SELECT COUNT(*) FROM USERS_ROLES WHERE USER_ID = {$this->id} " .
 					"AND ROLE = $role";
+		error_log ("hasRole: $cntstmt");
 		$res = $mysqli->query($cntstmt);
 		if ($mysqli->connect_errno) {
 			error_log("Error getting User role: " . $mysqli->connect_error);
@@ -126,7 +128,7 @@ class User {
 			$row = $res->fetch_row();
 			if (!is_null($row)) {
 				$count = (int) $row[0];
-				if (count > 0)
+				if ($count > 0)
 					return true;
 			}
 		}
@@ -143,6 +145,7 @@ class User {
 		$pwh = sqlPrep($this->passwordHash);
 		$nm = sqlPrep($this->name);
 		$insstmt = "INSERT INTO USERS (LOGIN_ID, PASSWORD_HASH, NAME) VALUES ($lgn, $pwh, $nm)";
+		error_log($insstmt);
 		$res = $mysqli->query ($insstmt);
 		if ($res) {
 			// Retrieve the ID of the row we just inserted

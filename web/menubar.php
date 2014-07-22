@@ -4,7 +4,6 @@
 <?php
 $usr = $_SESSION['user'];
 if ($usr) {
-	dumpVar($usr);
 	echo ($usr->name);
 }
 else {

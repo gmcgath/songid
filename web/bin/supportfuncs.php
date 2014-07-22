@@ -6,6 +6,7 @@
    See README.txt in the source distribution.
 */
 
+include_once (dirname(__FILE__) . '/model/user.php');
 
 /* This function removes most HTML tags from text while allowing
    some basic formatting.
@@ -21,10 +22,10 @@ function strip_unsafe_html_tags( $text )
    successful, Outputs a message and returns false if it fails. */
 function opendb() {
 
-	global $host, $usr, $pw, $db;
+	global $db_host, $db_user, $db_pw, $db_name;
 	
 	/* Open the database */
-	$mysqli = new mysqli($host, $usr, $pw, $db);
+	$mysqli = new mysqli($db_host, $db_user, $db_pw, $db_name);
 	if ($mysqli->connect_errno) {
         echo ("<p>Failed to connect to database: (" . 
         		$mysqli->connect_errno . ") " .
@@ -75,5 +76,7 @@ function sqlPrep ($s) {
 		return "'" . $s . "'";
 	}
 }
+
+
 
 ?>

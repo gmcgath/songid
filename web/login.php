@@ -28,11 +28,11 @@ if (!is_null($_GET["error"]))
 <form action="processlogin.php" method="post">
 <table class="logintab">
 <tr>
-<td class="loginlabel">User:</td>
-<td><input type="text" name="user" class="loginbox" required>
+<td class="formlabel">User:</td>
+<td><input type="text" name="user" class="loginbox" required autofocus>
 </tr>
 <tr>
-<td class="loginlabel">Password:</td>
+<td class="formlabel">Password:</td>
 <td><input type="password" name="pw" class="loginbox" required>
 </tr>
 <tr>

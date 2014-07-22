@@ -52,19 +52,19 @@ if (!is_null($err)) {
 <form action="processreg.php" method="post">
 <table class="logintab">
 <tr>
-<td class="loginlabel">User name:</td>
-<td><input type="text" name="user" class="loginbox" required>
+<td class="formlabel">User name:</td>
+<td><input type="text" name="user" class="loginbox" required autofocus>
 </tr>
 <tr>
-<td class="loginlabel">Your actual name:</td>
+<td class="formlabel">Your actual name:</td>
 <td><input type="text" name="realname" class="loginbox" required>
 </tr>
 <tr>
-<td class="loginlabel">Password (8-24 characters):</td>
+<td class="formlabel">Password (8-24 characters):</td>
 <td><input type="password" name="pw" class="loginbox" required>
 </tr>
 <tr>
-<td class="loginlabel">Authorization code:</td>
+<td class="formlabel">Authorization code:</td>
 <td><input type="password" name="authcode" class="loginbox" required>
 </tr>
 <tr>

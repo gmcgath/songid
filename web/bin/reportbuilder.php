@@ -35,9 +35,11 @@ class ReportBuilder {
 		$clipId = $_POST["clipid"];
 		$clip = null;
 		if ($clipId != null && ctype_digit($clipId)) {
-			dumpVar($this->mysqli);
 			$clip = Clip::findById($this->mysqli, $clipId);	
 		}
+		if ($clip == NULL)
+			return;
+			
 		$this->report->clip = $clip;
 		$tracktype = trim($this->mysqli->real_escape_string($_POST['tracktype']));
 		switch ($tracktype) {
@@ -95,7 +97,7 @@ class ReportBuilder {
 		if ($performerNames != NULL) {
 			$performers = array();
 			foreach ($performerNames as $performerName)  {
-				error_log("Adding performer " . $performerName);
+				$performerName = $mysqli->real_escape_string($performerName);
 				$actor = Actor::findByName ($this->mysqli, $performerName);
 				if (!is_null($actor)) {
 					// name belongs to an Actor

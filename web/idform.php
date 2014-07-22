@@ -40,8 +40,6 @@ include('bin/sessioncheck.php');
 		return;
 	}
 		
-?>
-<?php
 	include ('menubar.php');
 ?>
 <audio controls>

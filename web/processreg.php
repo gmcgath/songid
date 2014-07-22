@@ -18,13 +18,13 @@ include_once ('bin/model/user.php');
 $mysqli = opendb();
 	
 try {
-	$userName = $_POST["user"];
+	$loginId = $_POST["user"];
 	$pw = $_POST["pw"];
-	$realname = $mysqli->real_escape_string($_POST["realname"]);
+	$realName = $mysqli->real_escape_string($_POST["realname"]);
 	$authcode = $mysqli->real_escape_string($_POST["authcode"]);
 	
 	// Check for valid fields
-	if ($userName == NULL || $pw == NULL || $realname == NULL || $authcode == NULL) {
+	if ($loginId == NULL || $pw == NULL || $realname == NULL || $authcode == NULL) {
 		// Empty string is == to null, so we catch empty as well as missing values
 		header ("Location: register.php?error=3", true, 302);
 		return;
@@ -34,7 +34,7 @@ try {
 		return;
 	}
 	$regex = "%^[a-zA-Z0-9_]+$%";	// letters, digits, underscore
-	if (!preg_match($regex, $userName)) {
+	if (!preg_match($regex, $loginId)) {
 		header ("Location: register.php?error=4", true, 302);
 		return;
 	}
@@ -50,14 +50,14 @@ try {
 	}
 	
 	// Check if login name is already in use
-	if (User::findByLoginId($mysqli, $userName)) {
+	if (User::findByLoginId($mysqli, $loginId)) {
 		header ("Location: register.php?error=2", true, 302);
 		return;
 	}
 	
 	// Create the user
 	$user = new User;
-	$user->loginId = $userName;
+	$user->loginId = $loginId;
 	$user->name = $realName;
 	$user->passwordHash = password_hash($pw, PASSWORD_DEFAULT);
 	$user->insert($mysqli);
@@ -69,7 +69,7 @@ try {
 } catch (Exception $e) {
 	error_log($e->getMessage());
 }
-error_log ("Registration error for $userName");
+error_log ("Registration error for $loginId");
 header ("Location: register.php?error=-1", true, 302);	
 
 ?>
