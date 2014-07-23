@@ -7,10 +7,62 @@
 */
 header("Content-type: text/html; charset=utf-8");
 
+include_once ('bin/config.php');
+include_once ('bin/supportfuncs.php');
+include_once ('bin/model/clip.php');
 include_once('bin/model/user.php');
+include_once('bin/model/instrument.php');
+include_once('bin/orchestra.php');
+
 session_start();
 include('bin/sessioncheck.php');
 
+/* This function fills in the instrument portion of the form */
+function doInstruments () {
+	global $mysqli;
+	echo ('<ul id="instrumentnames" class="hidden nobullet">' . "\n");
+	// Get all the instruments from the database
+	$orch = new Orchestra ($mysqli);
+	$orch->assemble();
+	
+	foreach ($orch->sections as $section ) {
+		// Start section
+		error_log ("Starting a section");
+		echo ("<li>\n");
+			$sectionName = $section->category->name;
+			// id and name attrs are section name, minus white space,
+			// plus "present"
+			$sectionLabel = preg_replace('/\s+/', '', $sectionName) . "present";
+			$sectionListLabel = preg_replace('/\s+/', '', $sectionName) . "list";
+			echo ("<input type='hidden' name='sectionids[]' value='$sectionLabel'>");
+			echo ("<input type='checkbox' id='$sectionLabel' name='$sectionLabel' " .
+				"class='sectioncheckbox' " .
+				"value='yes' onclick='trackTypeUpdate();'>\n");
+			echo ("<label for='$sectionLabel'>$sectionName</label>\n");
+			
+			// List of instruments
+			echo ("<ul id='$sectionListLabel' class='hidden instlist'>\n");
+			foreach ($section->instruments as $instrument) {
+				// to submit instrument names in the form, we have a hidden
+				// field, with the repeatable name of "instrumentids[]" and
+				// the value "inst" concatenated with the instrument id.
+				// The form processor will collect all the possible instrument
+				// names, and then look for the subset which are names passed by
+				// checkboxes.
+				$instname = "inst" . $instrument->id;
+				echo ("<li>\n");
+				echo ("<input type='hidden' name='instrumentids[]' value='$instname'>\n");
+				echo ("<input type='checkbox' id='$instname' name='$instname' value='yes'>\n");
+				echo ("<label for='$instname'>{$instrument->name}</label>\n");
+				echo ("</li>\n");
+			}
+			echo ("</ul>");		// end list of instruments
+		echo ("</li>\n");		// End of section
+		echo ('<li style="clear:both"> </li>' . "\n");		// Force next item to new line
+	}
+	
+	echo ("</ul>\n");
+}
 ?>
 
 <html lang="en">
@@ -24,9 +76,6 @@ include('bin/sessioncheck.php');
 </noscript>
 
 <?php
-	include_once ('bin/config.php');
-	include_once ('bin/supportfuncs.php');
-	include_once ('bin/model/clip.php');
 	/* Open the database */
 	$mysqli = opendb();
 
@@ -193,54 +242,11 @@ include('bin/sessioncheck.php');
 <li><input type="checkbox" id="instrumentspresent" name="instrumentspresent" value="yes"
 		onclick="trackTypeUpdate();">
 	<label for="instrumentspresent">One or more instruments are present</label></li>
+<?php
+	// Fill in the instrument part of the form
+	doInstruments();
+?>
 
-	<ul id="instrumentnames" class="hidden nobullet">
-	<li>
-		<input type="checkbox" id="stringspresent" name="stringspresent" value="yes"
-			onclick="trackTypeUpdate();">
-		<label for="stringspresent">Strings</label>
-		<ul id="stringlist" class="hidden instlist">
-			<li><input type="checkbox" id="inst_guitar" name="inst_guitar" value="yes">
-				<label for="inst_guitar">Guitar</label></li>
-			<li><input type="checkbox" id="inst_ukelele" name="inst_ukelele" value="yes">
-				<label for="inst_ukelele">Ukelele</label></li>
-		</ul>
-	</li>
-	<li style="clear:both"></li>
-	<li>
-		<input type="checkbox" id="windspresent" name="windspresent" value="yes"
-			onclick="trackTypeUpdate();">
-		<label for="windspresent">Winds</label>
-		<ul id="windlist" class="hidden instlist">
-			<li><input type="checkbox" id="inst_flute" name="inst_flute" value="yes">
-				<label for="inst_flute">Flute</label></li>
-			<li><input type="checkbox" id="inst_kazoo" name="inst_kazoo" value="yes">
-				<label for="inst_kazoo">Kazoo</label></li>
-			<li><input type="checkbox" id="inst_panpipe" name="inst_panpipe" value="yes">
-				<label for="inst_panpipe">Panpipe</label></li>
-			<li><input type="checkbox" id="inst_recorder" name="inst_recorder" value="yes">
-				<label for="inst_recorder">Recorder</label></li>
-		</ul>
-	</li>
-	<li style="clear:both"> </li>
-	<li >
-		<input type="checkbox" id="percussionpresent" name="percussionpresent" value="yes"
-			onclick="trackTypeUpdate();">
-		<label for="percussionpresent">Percussion</label>
-		<ul id="percussionlist" class="hidden instlist">
-			<li><input type="checkbox" id="inst_cowbell" name="inst_cowbell" value="yes">
-				<label for="inst_cowbell">Cowbell</label></li>
-			<li><input type="checkbox" id="inst_cymbals" name="inst_cymbals" value="yes">
-				<label for="inst_kazoo">Cymbals</label></li>
-			<li><input type="checkbox" id="inst_gong" name="inst_gong" value="yes">
-				<label for="inst_gong">Gong</label></li>
-			<li><input type="checkbox" id="inst_piano" name="inst_piano" value="yes">
-				<label for="inst_piano">Piano</label></li>
-			<li><input type="checkbox" id="inst_xylophone" name="inst_xylophone" value="yes">
-				<label for="inst_xylophone">Xylophone</label></li>
-		</ul>
-	</li>	<!-- percussionpresent -->
-	</ul>
 </li>	<!-- instrumentspresent -->
 </div> <!-- performance -->
 
@@ -305,21 +311,12 @@ function trackTypeUpdate() {
 		
 		if ($('#instrumentspresent').is(':checked')) {
 			$('#instrumentnames').show();
-			
-			if ($('#stringspresent').is(':checked')) 
-				$('#stringlist').show();
-			else
-				$('#stringlist').hide();
-
-			if ($('#windspresent').is(':checked')) 
-				$('#windlist').show();
-			else
-				$('#windlist').hide();
-
-			if ($('#percussionpresent').is(':checked')) 
-				$('#percussionlist').show();
-			else
-				$('#percussionlist').hide();
+			$('.sectioncheckbox').each (function () {
+				if ($(this).is(':checked'))
+					$(this).parent().find('.instlist').show();
+				else
+					$(this).parent().find('.instlist').hide();
+			});
 		}
 		else
 			$('#instrumentnames').hide();

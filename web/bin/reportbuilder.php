@@ -11,6 +11,8 @@ include_once (dirname(__FILE__) . '/model/actor.php');
 include_once (dirname(__FILE__) . '/model/clip.php');
 include_once (dirname(__FILE__) . '/model/report.php');
 include_once (dirname(__FILE__) . '/model/song.php');
+include_once (dirname(__FILE__) . '/model/instrument.php');
+include_once (dirname(__FILE__) . '/model/instrumentcategory.php');
 include_once (dirname(__FILE__) . '/supportfuncs.php');
 
 class ReportBuilder {
@@ -24,7 +26,6 @@ class ReportBuilder {
 		if (is_null($sqli))
 			throw new Exception ("reportbuilder.php: null mysqli object");
 		$this->mysqli = $sqli;
-		dumpVar($this->mysqli);
 		$this->report = new Report();
 		$this->isSongAmbiguous = false;
 	}
@@ -62,7 +63,6 @@ class ReportBuilder {
 	public function setUser($usr) {
 		error_log("setUser");
 		$this->report->user = $usr;
-		dumpVar($this->report->user);
 	}
 	
 	
@@ -186,8 +186,27 @@ class ReportBuilder {
 	}
 	
 	private function calcInstruments () {
-		if ($_POST["instruments_present"]) {
-		
+		error_log("calcInstruments");
+		if ($_POST["instrumentspresent"]) {
+			$instruments = array();
+			// First we get the list of possible instrument IDs
+			$instids = $_POST["instrumentids"];
+			// Then we look for the ones that are present
+			foreach ($instids as $instid) {
+				error_log("Looking at instrument $instid");
+				$checkedinst = $_POST[$instid];
+				if ($checkedinst != NULL) {
+					error_log ("$checkedinst is not null");
+					// The ID is passed as instxx. Strip it down to the actual ID.
+					$instid = substr($instid, 4);
+					$inst = Instrument::findById($this->mysqli, $instid);
+					if ($inst != NULL) {
+						error_log("Adding instrument $inst->name");
+						$instruments[] = $inst;
+					}
+				}
+			}
+			$this->report->instruments = $instruments;
 		}
 	}
 }

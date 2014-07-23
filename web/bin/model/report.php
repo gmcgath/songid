@@ -12,6 +12,7 @@
 include_once (dirname(__FILE__) . '/actor.php');
 include_once (dirname(__FILE__) . '/song.php');
 include_once (dirname(__FILE__) . '/clip.php');
+include_once (dirname(__FILE__) . '/instrument.php');
 
 class Report {
 
@@ -57,6 +58,7 @@ class Report {
 	var $singalong;	// boolean
 	var $performers;	// An array of Actors, or null
 	var $composers;		// An array of Actors, or null
+	var $instruments;	// An array of Instruments, or null
 	
 	// Map from sound type strings to numeric constants 
 	var $soundTypeMap = array (
@@ -140,6 +142,7 @@ class Report {
 			// Retrieve the ID of the row we just inserted
 			$this->id = $mysqli->insert_id;
 			$this->writePerformers ($mysqli);
+			$this->writeInstruments ($mysqli);
 			return $this->id;
 		}
 		
@@ -170,6 +173,23 @@ class Report {
 				if ($mysqli->connect_errno) {
 					error_log($mysqli->connect_error);
 					throw new Exception ("Error writing performers: " . $mysqli->connect_error);
+				}
+			}
+		}
+	}
+
+	/* After writing the Report, write the Instruments if necessary. */
+	private function writeInstruments ($mysqli) {
+		if ($this->instruments != NULL) {
+			foreach ($this->instruments as $instrument) {
+				$rptid = sqlPrep($this->id);
+				$instid = sqlPrep($instrument->id);
+				$insstmt = "INSERT INTO REPORTS_INSTRUMENTS (REPORT_ID, INSTRUMENT_ID) " .
+					"VALUES ($rptid, $instid)";
+				$mysqli->query($insstmt);
+				if ($mysqli->connect_errno) {
+					error_log($mysqli->connect_error);
+					throw new Exception ("Error writing instruments: " . $mysqli->connect_error);
 				}
 			}
 		}
@@ -214,7 +234,6 @@ class Report {
 			while (true) {
 				$row = $res->fetch_row();
 				error_log("Got a report row");
-				dumpVar($row);
 				if (is_null($row))
 					break;
 				$rep = new Report();
@@ -228,7 +247,6 @@ class Report {
 	/* Construct the report from a result row. This is used from getReports and
 	   findById, which need to return the same row elements. */
 	private function buildFromRow($mysqli, $row) {
-		dumpVar($row);
 		$this->id = $row[0];
 		$clipId = $row[1];
 		$this->clip = Clip::findById($mysqli, $clipId);
@@ -237,7 +255,6 @@ class Report {
 		error_log("User id = $userId");
 		if ($userId) {
 			$this->user = User::findById($mysqli, $userId);
-			dumpVar($this->user);
 		}
 		$this->soundType = $row[3];
 		$this->soundSubtype = $row[4];
@@ -249,14 +266,14 @@ class Report {
 		}
 		$this->singalong = ($row[7] == 1) ? true : false;
 		$this->date = $row[8];
-		$this->getPerformers($mysqli);
+		$this->addPerformers($mysqli);
+		$this->addInstruments($mysqli);
 	}
 	
 	/* Add any performers to the Report object */
-	private function getPerformers ($mysqli) {
+	private function addPerformers ($mysqli) {
 		$rptid = sqlPrep($this->id);
 		$selstmt = "SELECT ACTOR_ID FROM REPORTS_PERFORMERS WHERE REPORT_ID = $rptid";
-		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		$this->performers = array();
 		if ($res) {
@@ -264,12 +281,34 @@ class Report {
 				$row = $res->fetch_row();
 				if (is_null($row))
 					break;
-				error_log("Got a performer row");
 				$actorId = $row[0];
 				$performer = Actor::findById($mysqli, $actorId);
 				if ($performer != NULL) {
 					$this->performers[] = $performer;
 				}
+			}
+		}
+	}
+	
+	/* Add any instruments to the Report object */
+	private function addInstruments ($mysqli) {
+		$rptid = sqlPrep($this->id);
+		$selstmt = "SELECT INSTRUMENT_ID FROM REPORTS_INSTRUMENTS WHERE REPORT_ID = $rptid";
+		error_log($selstmt);
+		$res = $mysqli->query($selstmt);
+		$this->instruments = array();
+		if ($res) {
+			while (true) {
+				$row = $res->fetch_row();
+				if (is_null($row))
+					break;
+				error_log("Got an instrument row");
+				$instId = $row[0];
+				$instrument = Instrument::findById($mysqli, $instId);
+				if ($instrument != NULL) {
+					$this->instruments[] = $instrument;
+				}
+				// TODO sort by some scheme or other?
 			}
 		}
 	}

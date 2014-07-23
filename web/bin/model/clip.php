@@ -37,7 +37,6 @@ class Clip {
 				if (is_null($row)) {
 					break;
 				}
-				dumpVar($row);
 				$clip = new Clip();
 				$clip->id = $row[0];
 				$clip->description = $row[1];

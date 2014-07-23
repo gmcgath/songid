@@ -159,6 +159,16 @@ include('bin/sessioncheck.php');
 				}
 				echo ("</ul></li>\n");
 			}
+			
+			$instruments = $report->instruments;
+			if ($instruments != NULL) {
+				echo ("<li><b>Instruments:</b>");
+				echo ("<ul class='nobullet'>\n");
+				foreach ($instruments as $instrument) {
+					echo ("<li>{$instrument->name}</li>\n");
+				}
+				echo ("</ul></li>\n");
+			}
 		}
 		echo ("</ul>\n");
 		$user = $_SESSION['user'];

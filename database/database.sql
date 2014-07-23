@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 22, 2014 at 05:24 AM
+-- Generation Time: Jul 23, 2014 at 04:48 PM
 -- Server version: 5.5.37-35.1
 -- PHP Version: 5.4.23
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `ACTORS` (
   PRIMARY KEY (`ID`),
   UNIQUE KEY `NAME_2` (`NAME`),
   KEY `NAME` (`NAME`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=14 ;
 
 
 -- --------------------------------------------------------
@@ -93,11 +93,69 @@ CREATE TABLE IF NOT EXISTS `AUTHCODES` (
 CREATE TABLE IF NOT EXISTS `CLIPS` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `DESCRIPTION` varchar(256) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL,
-  `URL` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  `URL` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=7 ;
 
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `INSTRUMENTS`
+--
+
+CREATE TABLE IF NOT EXISTS `INSTRUMENTS` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `CATEGORY_ID` int(11) NOT NULL COMMENT 'FK to INSTRUMENT_CATEGORIES',
+  PRIMARY KEY (`ID`),
+  KEY `NAME` (`NAME`,`CATEGORY_ID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=14 ;
+
+--
+-- Dumping data for table `INSTRUMENTS`
+--
+
+INSERT INTO `INSTRUMENTS` (`ID`, `NAME`, `CATEGORY_ID`) VALUES
+(8, 'Bodhran', 3),
+(7, 'Drums', 3),
+(11, 'Electronic keyboard', 4),
+(4, 'Flute', 2),
+(1, 'Guitar', 1),
+(2, 'Harp', 1),
+(12, 'Organ', 4),
+(10, 'Piano', 4),
+(5, 'Recorder', 2),
+(9, 'Shaker', 3),
+(13, 'Theremin', 5),
+(3, 'Violin', 1),
+(6, 'Whistle', 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `INSTRUMENT_CATEGORIES`
+--
+
+CREATE TABLE IF NOT EXISTS `INSTRUMENT_CATEGORIES` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `DISPLAY_SEQUENCE` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`),
+  KEY `DISPLAY_SEQUENCE` (`DISPLAY_SEQUENCE`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=6 ;
+
+--
+-- Dumping data for table `INSTRUMENT_CATEGORIES`
+--
+
+INSERT INTO `INSTRUMENT_CATEGORIES` (`ID`, `NAME`, `DISPLAY_SEQUENCE`) VALUES
+(1, 'Strings', 1),
+(2, 'Winds', 2),
+(3, 'Percussion', 3),
+(4, 'Keyboard', 4),
+(5, 'Other', 5);
 
 -- --------------------------------------------------------
 
@@ -117,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `REPORTS` (
   `SINGALONG` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`),
   KEY `CLIP_ID` (`CLIP_ID`,`USER_ID`,`SONG_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=26 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=43 ;
 
 
 -- --------------------------------------------------------
@@ -131,6 +189,19 @@ CREATE TABLE IF NOT EXISTS `REPORTS_COMPOSERS` (
   `ACTOR_ID` int(11) NOT NULL COMMENT 'FK to ACTORS',
   KEY `REPORT_ID` (`REPORT_ID`,`ACTOR_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `REPORTS_INSTRUMENTS`
+--
+
+CREATE TABLE IF NOT EXISTS `REPORTS_INSTRUMENTS` (
+  `REPORT_ID` int(11) NOT NULL COMMENT 'FK to REPORTS',
+  `INSTRUMENT_ID` int(11) NOT NULL COMMENT 'FK to INSTRUMENTS',
+  KEY `REPORT_ID` (`REPORT_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 
 -- --------------------------------------------------------
 
@@ -156,7 +227,7 @@ CREATE TABLE IF NOT EXISTS `SONGS` (
   `TITLE` varchar(128) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL,
   `NOTE` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'For disambiguation',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=16 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=22 ;
 
 
 -- --------------------------------------------------------
