@@ -1,6 +1,14 @@
 Top level (web) PHP files:
 
+addclip.php: Lets an editor enter a new clip.
+
+addclipok.php: Confirms addition of a new clip.
+
 cliplist.php: Presents a list of sound clips that contributors can work on.
+
+editclip.php: Lets an editor change the description or URL of a clip.
+
+editclipok.php: Confirms modification of a clip's metadata.
 
 error.php: General error reporting page. Not much used.
 
@@ -15,6 +23,15 @@ logout.php: Logs the user out, deleting all session information, and displays
 an appropriate message.
 
 menubar.php: An include file to display a menu bar.
+
+norole.php: A user is taken to this page when trying to access a page which
+requires a role the user doesn't have.
+
+processaddclip.php: A non-HTML file that processes the form submitted from
+addclip.php. If successful, it redirects to addclipok.php.
+
+processeditclip.php: A non-HTML file that processes the form submitted from
+editclip.php. If successful, it redirects to editclipok.php.
 
 processform.php: A non-HTML file that processes the form submitted from
 idform.php. If successful, it redirects to formsuccess.php.

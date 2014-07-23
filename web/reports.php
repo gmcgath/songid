@@ -5,10 +5,12 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
+header("Content-type: text/html; charset=utf-8");
 
 include_once('bin/model/user.php');
 session_start();
 include('bin/sessioncheck.php');
+
 
 ?>
 <!DOCTYPE html>
@@ -117,14 +119,12 @@ include('bin/sessioncheck.php');
 		$date = $report->date;
 		echo ("<li><b>Date of report:</b> $date</li>\n");
 		
-		$user = $report->user;
-		error_log ("User in report:");
-		dumpVar($user);
-		if ($user)
-			$userName = $user->name;
+		$ruser = $report->user;
+		if ($ruser)
+			$ruserName = $ruser->name;
 		else
-			$userName = "Unknown";
-		echo ("<li><b>Submitted by:</b> $userName");
+			$ruserName = "Unknown";
+		echo ("<li><b>Submitted by:</b> $ruserName");
 		if ($report->clip) {
 			$clipDate = $report->clip->date;
 			$clipDesc = $report->clip->description;
@@ -161,6 +161,12 @@ include('bin/sessioncheck.php');
 			}
 		}
 		echo ("</ul>\n");
+		$user = $_SESSION['user'];
+		if ($user->hasRole($mysqli, User::ROLE_EDITOR)) {
+			echo ("<button type='button' onclick='location.href=\"processdelreport.php?id={$report->id}\"'>");
+			echo ("Delete report</button>");
+			echo ("</td>");
+		}
 		echo ("<p>&nbsp;</p><hr>\n");
 	}
 	

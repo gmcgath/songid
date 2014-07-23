@@ -40,7 +40,7 @@ class ReportBuilder {
 			return;
 			
 		$this->report->clip = $clip;
-		$tracktype = trim($this->mysqli->real_escape_string($_POST['tracktype']));
+		$tracktype = trim(strip_tags($this->mysqli->real_escape_string($_POST['tracktype'])));
 		switch ($tracktype) {
 			case "performance":
 				$this->doPerformance();
@@ -69,11 +69,12 @@ class ReportBuilder {
 	/* Fill out the report if the user selected Performance */	
 	private function doPerformance() {
 		error_log ("doPerformance");
+		// setSoundSubtype eliminates need to sanitize
 		$this->report->setSoundSubtype($_POST["performancetype"]);
 		
-		$title = trim(strip_unsafe_html_tags($this->mysqli->real_escape_string($_POST["songtitle"])));
+		$title = trim(strip_tags($this->mysqli->real_escape_string($_POST["songtitle"])));
 		if (strlen($title) > 0) {
-			// Really is safe! strlen returns 0 for null object.
+			// strlen returns 0 for null object.
 			$songs = Song::findByTitle ($this->mysqli, $title);
 			// How do we deal with 2 songs by the same title?
 			// TODO If we detect an ambiguity, set isSongAmbiguous to true
@@ -89,34 +90,9 @@ class ReportBuilder {
 			}
 			$this->report->song = $song;
 		}
-		// Get performers
-		$performerNames = $_POST["performernames"];
-		error_log ("Getting performers");
-		dumpVar($performerNames);
-		if ($performerNames != NULL) {
-			$performers = array();
-			foreach ($performerNames as $performerName)  {
-				$performerName = $this->mysqli->real_escape_string($performerName);
-				$actor = Actor::findByName ($this->mysqli, $performerName);
-				if (!is_null($actor)) {
-					// name belongs to an Actor
-					error_log("Actor exists");
-					$performers[] = $actor;
-				}
-				else {
-					// No match for name, create an Actor
-					error_log("Creating new Actor");
-					$actor = new Actor();
-					$actor->name = $performerName;
-					// TODO for now, assume all performers are individuals (I'm not!)
-					$actor->typeId = Actor::TYPE_INDIVIDUAL;
-					$actor->insert($this->mysqli);
-					$performers[] = $actor;
-				}
-			}
-			$this->report->performers = $performers;
-		}
-		// TODO instruments, etc.
+		$this->calcPerformerType();
+		$this->calcPerformers();
+		$this->calcInstruments();
 }
 
 	/* Fill out the report if the user selected talk */
@@ -134,6 +110,84 @@ class ReportBuilder {
 	public function insert () {
 		if (!$this->report->insert ($this->mysqli)) {
 			throw new Exception ("Failed to insert report into database");
+		}
+	}
+	
+	/* Figure out the performer type. */
+	private function calcPerformerType () {
+		$performerType = $_POST["performertype"];
+		$perfType = Report::PERFORMER_TYPE_UNSPEC;		// value to put in database
+		switch ($performerType) {
+			case "solo":
+				switch ($_POST["singleperformersex"]) {
+					case "male":
+						$perfType = Report::PERFORMER_TYPE_SINGLE_MALE;
+						break;
+					case "female":
+						$perfType = Report::PERFORMER_TYPE_SINGLE_FEMALE;
+						break;
+					case "unknown":
+					default:
+						$perfType = Report::PERFORMER_TYPE_SINGLE_UNSPEC;
+						break;
+				}
+				
+				break;
+			case "group":
+				switch ($_POST["groupperformersex"]) {
+					case "male":
+						$perfType = Report::PERFORMER_TYPE_GROUP_MALE;
+						break;
+					case "female":
+						$perfType = Report::PERFORMER_TYPE_GROUP_FEMALE;
+						break;
+					case "mixed":
+						$perfType = Report::PERFORMER_TYPE_GROUP_MIXED;
+						break;
+					case "unknown":
+					default:
+						$perfType = Report::PERFORMER_TYPE_GROUP_UNSPEC;
+						break;
+				}
+			default:
+				break;			// already set to default
+			
+		}
+		$this->report->performerType = $perfType;
+	}
+	
+	private function calcPerformers () {
+		if ($_POST["canidperformer"]) {
+			$performerNames = $_POST["performernames"];
+			if ($performerNames != NULL) {
+				$performers = array();
+				foreach ($performerNames as $performerName)  {
+					$performerName = trim(strip_tags($this->mysqli->real_escape_string($performerName)));
+					$actor = Actor::findByName ($this->mysqli, $performerName);
+					if (!is_null($actor)) {
+						// name belongs to an Actor
+						error_log("Actor exists");
+						$performers[] = $actor;
+					}
+					else {
+						// No match for name, create an Actor
+						error_log("Creating new Actor");
+						$actor = new Actor();
+						$actor->name = $performerName;
+						// TODO for now, assume all performers are individuals (I'm not!)
+						$actor->typeId = Actor::TYPE_INDIVIDUAL;
+						$actor->insert($this->mysqli);
+						$performers[] = $actor;
+					}
+				}
+				$this->report->performers = $performers;
+			}
+		}
+	}
+	
+	private function calcInstruments () {
+		if ($_POST["instruments_present"]) {
+		
 		}
 	}
 }

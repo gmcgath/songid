@@ -73,6 +73,40 @@ class Clip {
 		error_log ("No clip found with ID $id");
 		return NULL;
 	}
+	
+	/* Write the updated values of the clip out. */
+	public function update($mysqli) {
+		$desc = sqlPrep($this->description);
+		$ur = sqlPrep($this->url);
+		$id = sqlPrep($this->id);
+		$updstmt = "UPDATE CLIPS SET " .
+			"DESCRIPTION = $desc, ".
+			"URL = $ur " .
+			"WHERE ID = $id";
+		error_log($updstmt);
+		$res = $mysqli->query($updstmt);
+		if ($mysqli->connect_errno) {
+			error_log("Error getting clip by ID: " . $mysqli->connect_error);
+		}
+	}
+
+	/* Inserts a Clip into the database. Throws an Exception on failure.
+	   Returns the ID if successful. 
+	   The Date field will not be filled in. You have to re-get the Clip to do that.
+	*/
+	public function insert ($mysqli) {
+		$dsc = sqlPrep($this->description);
+		$url = sqlPrep($this->url);
+		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
+		$res = $mysqli->query ($insstmt);
+		if ($res) {
+			// Retrieve the ID of the row we just inserted
+			$this->id = $mysqli->insert_id;
+			return $this->id;
+		}
+		error_log ("Error inserting Clip: " . $mysqli->error);
+		throw new Exception ("Could not add Clip {$this->description} to database");
+	}
 }
 
 ?>

@@ -36,6 +36,7 @@ class Report {
 	const SOUND_SUBTYPE_NOISE_OTHER = 23;
 	
 	// values for performerType in database
+	const PERFORMER_TYPE_UNSPEC = 0;
 	const PERFORMER_TYPE_SINGLE_MALE = 1;
 	const PERFORMER_TYPE_SINGLE_FEMALE = 2;
 	const PERFORMER_TYPE_SINGLE_UNSPEC = 3;
@@ -94,7 +95,8 @@ class Report {
 	public static function findById ($mysqli, $reportId) {
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE " .
-			"FROM REPORTS WHERE ID = " . $reportID;
+			"FROM REPORTS WHERE ID = " . $reportId;
+		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
@@ -117,8 +119,6 @@ class Report {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
-		error_log("Insert dump:");
-		dumpVar($this->user);
 		$sngid = NULL;
 		if (!is_null($this->song)) 
 			$sngid = $this->song->id;
@@ -128,9 +128,9 @@ class Report {
 		$usrid = sqlPrep($this->user->id);
 		$sndtyp = sqlPrep($this->soundType);
 		$sndsbtyp = sqlPrep($this->soundSubtype);
-		$insstmt = "INSERT INTO REPORTS (CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, SONG_ID, SINGALONG) " .
-			" VALUES ($clpid, $usrid, $sndtyp, $sndsbtyp, $sngid, $sngalng)";
-		error_log("Inserting Report, $insstmt");
+		$prftyp = sqlPrep($this->performerType);
+		$insstmt = "INSERT INTO REPORTS (CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG) " .
+			" VALUES ($clpid, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng)";
 		$res = $mysqli->query ($insstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
@@ -144,6 +144,17 @@ class Report {
 		}
 		
 		return false;
+	}
+	
+	/* Deletes the current Report from the database. */
+	public function delete ($mysqli) {
+		$id = sqlPrep($this->id);
+		$delstmt = "DELETE FROM REPORTS WHERE ID = $id";
+		$res = $mysqli->query ($delstmt);
+		if ($mysqli->connect_errno) {
+			error_log($mysqli->connect_error);
+			throw new Exception ($mysqli->connect_error);
+		}
 	}
 	
 	/* After writing the Report, write the Performers if necessary. */
@@ -172,7 +183,7 @@ class Report {
 			$this->soundType = $this->soundTypeMap[$typ];
 	}
 	
-		/* Set the sound subtype, either using one of the string constants or integers. */
+	/* Set the sound subtype, either using one of the string constants or integers. */
 	public function setSoundSubtype ($typ) {
 		if (ctype_digit ($typ))
 			$this->soundSubtype = $typ;

@@ -5,6 +5,8 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
+header("Content-type: text/html; charset=utf-8");
+
 include_once('bin/model/user.php');
 session_start();
 include('bin/sessioncheck.php');
@@ -13,9 +15,7 @@ include('bin/sessioncheck.php');
 
 <html lang="en">
 <head>
-	<meta charset="utf-8" />
 	<title>Identify Clip</title>
-	<meta name="generator" content="BBEdit 10.5" />
 	<link href="css/styles.css" rel="stylesheet">
 	
 </head>
@@ -56,7 +56,7 @@ include('bin/sessioncheck.php');
 	echo $clip->description;
 ?>
 </p>
-<form action="processform.php" method="post">
+<form action="processform.php" method="post" accept-charset="UTF-8">
 <h1>What can you hear?</h1>
 <input type="hidden" name="clipid" value=
 <?php

@@ -6,6 +6,7 @@
    See README.txt in the source distribution.
 */
 
+header("Content-type: text/html; charset=utf-8");
 include_once('bin/model/user.php');
 session_start();
 include_once ('bin/config.php');
@@ -14,9 +15,7 @@ include('bin/sessioncheck.php');
 
 <html lang="en">
 <head>
-	<meta charset="utf-8" />
-	<title>Select Track</title>
-	<meta name="generator" content="BBEdit 10.5" />
+	<title>List of Clips</title>
 	<link href="css/styles.css" rel="stylesheet">
 </head>
 
@@ -25,11 +24,6 @@ include('bin/sessioncheck.php');
 </noscript>
 <?php
 	include ('menubar.php');
-?>
-
-<h1>Available sound clips</h1>	
-
-<?php
 	include_once ('bin/supportfuncs.php');
 	include_once ('bin/model/clip.php');
 	
@@ -37,6 +31,16 @@ include('bin/sessioncheck.php');
 	
 	/* Open the database */
 	$mysqli = opendb();
+?>
+
+<h1>Available sound clips</h1>	
+
+<?php
+	if ($user->hasRole($mysqli, User::ROLE_EDITOR)) {
+		echo ("<button type='button' onclick='location.href=\"addclip.php\"'>Add new clip</button>\n");
+		echo ("<p>&nbsp;</p>\n");
+	}
+	
 	try {
 		$clips = Clip::getRows ($mysqli, 0, 100);
 		echo ("<table class='cliptable'>\n");

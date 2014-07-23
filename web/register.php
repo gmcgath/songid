@@ -5,11 +5,12 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
+header("Content-type: text/html; charset=utf-8");
+
 ?>
 
 <html lang="en">
 <head>
-	<meta charset="utf-8" />
 	<title>Sign up</title>
 	<link href="css/styles.css" rel="stylesheet">
 	
@@ -49,7 +50,7 @@ if (!is_null($err)) {
 ?>
 <p>The user name and password may contain only letters, digits, and underscores.</p>
 <div>
-<form action="processreg.php" method="post">
+<form action="processreg.php" method="post" accept-charset="UTF-8">
 <table class="logintab">
 <tr>
 <td class="formlabel">User name:</td>

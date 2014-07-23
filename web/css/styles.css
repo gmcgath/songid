@@ -28,7 +28,9 @@ ul.instlist {list-style-type: none; }
 
 ul.instlist li {float:left; width: 180px; }
 
-ul.menubar {list-style-type: none;}
+div.menubar { background-color: #99EEEE; height: 120px;}
+
+ul.menubar {list-style-type: none; }
 
 ul.menubar li {float: left; width: 200px; }
 

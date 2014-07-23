@@ -5,11 +5,11 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
+header("Content-type: text/html; charset=utf-8");
 ?>
 
 <html lang="en">
 <head>
-	<meta charset="utf-8" />
 	<title>Log in</title>
 	<link href="css/styles.css" rel="stylesheet">
 	
@@ -25,7 +25,7 @@ if (!is_null($_GET["error"]))
 	echo ("<p class='errormsg'>Login error.</p>\n");
 ?>
 <div>
-<form action="processlogin.php" method="post">
+<form action="processlogin.php" method="post" accept-charset="UTF-8">
 <table class="logintab">
 <tr>
 <td class="formlabel">User:</td>

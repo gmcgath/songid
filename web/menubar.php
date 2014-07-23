@@ -1,4 +1,4 @@
-<div>
+<div class="menubar">
 <p>&nbsp;</p>
 <p class="menubaruser">
 <?php

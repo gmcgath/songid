@@ -17,7 +17,7 @@ include_once ('bin/model/user.php');
 $mysqli = opendb();
 	
 try {
-	$userName = $mysqli->real_escape_string($_POST["user"]);
+	$userName = trim(strip_tags($mysqli->real_escape_string($_POST["user"])));
 	$user = User::verifyLogin($mysqli, $userName, $_POST["pw"]);
 	if ($user) {
 		session_start();

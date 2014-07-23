@@ -20,8 +20,8 @@ $mysqli = opendb();
 try {
 	$loginId = $_POST["user"];
 	$pw = $_POST["pw"];
-	$realName = $mysqli->real_escape_string($_POST["realname"]);
-	$authcode = $mysqli->real_escape_string($_POST["authcode"]);
+	$realName = trim(strip_tags($mysqli->real_escape_string($_POST["realname"])));
+	$authcode = trim(strip_tags($mysqli->real_escape_string($_POST["authcode"])));
 	
 	// Check for valid fields
 	if ($loginId == NULL || $pw == NULL || $realname == NULL || $authcode == NULL) {

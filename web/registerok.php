@@ -8,6 +8,8 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
+header("Content-type: text/html; charset=utf-8");
+
 ?>
 
 <html>

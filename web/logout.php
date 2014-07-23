@@ -6,6 +6,8 @@
    See README.txt in the source distribution.
 */
 
+header("Content-type: text/html; charset=utf-8");
+
 include_once('bin/model/user.php');
 session_start();
 session_destroy();
