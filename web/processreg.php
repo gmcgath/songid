@@ -24,7 +24,7 @@ try {
 	$authcode = trim(strip_tags($mysqli->real_escape_string($_POST["authcode"])));
 	
 	// Check for valid fields
-	if ($loginId == NULL || $pw == NULL || $realname == NULL || $authcode == NULL) {
+	if ($loginId == NULL || $pw == NULL || $realName == NULL || $authcode == NULL) {
 		// Empty string is == to null, so we catch empty as well as missing values
 		header ("Location: register.php?error=3", true, 302);
 		return;
