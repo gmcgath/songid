@@ -14,6 +14,8 @@ include_once('bin/model/clip.php');
 include_once('bin/supportfuncs.php');
 session_start();
 include_once('bin/sessioncheck.php');
+if (!sessioncheck())
+	return;
 
 $mysqli = opendb();
 $user = $_SESSION['user'];

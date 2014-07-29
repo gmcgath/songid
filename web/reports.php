@@ -5,11 +5,14 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
-header("Content-type: text/html; charset=utf-8");
 
 include_once('bin/model/user.php');
 session_start();
 include('bin/sessioncheck.php');
+if (!sessioncheck())
+	return;
+
+header("Content-type: text/html; charset=utf-8");
 
 
 ?>
@@ -79,7 +82,6 @@ include('bin/sessioncheck.php');
 
 	// Get one extra report so we know if there are more to come
 	$reports = Report::getReports ($mysqli, $start, $itemsPerPage + 1);
-	error_log("Report count = " . count($reports));
 	if (count($reports) <= $itemsPerPage)
 		$hidenext = true;
 ?>
@@ -139,36 +141,19 @@ include('bin/sessioncheck.php');
 		echo ("<li><b>Type:</b> $soundTypeStr</li>\n");
 		$performerTypeStr = $performerTypeText [$report->performerType];
 		if (!is_null($performerTypeStr))
-			echo ("<li><b>Performer(s):</b> $performerTypeStr</b></li>\n");
+			echo ("<li><b>Performer type:</b> $performerTypeStr</b></li>\n");
 		$soundType = $report->soundType;
-		if ($soundType == Report::SOUND_TYPE_PERFORMANCE) {
-			$title = "(Not given)";
-			if (!is_null($report->song)) 
-				$title = $report->song->title;
-			echo ("<li><b>Title:</b> $title</li>\n");
-			$sngalng = $report->singalong ? "Yes" : "No";
-			echo ("<li><b>Singalong:</b> $sngalng</li>\n");
-			
-			$performers = $report->performers;
-			if ($performers != NULL) {
-				// that's the "really has something" test
-				echo ("<li><b>Performers:</b>");
-				echo ("<ul class='nobullet'>\n");
-				foreach ($performers as $performer) {
-					echo ("<li>{$performer->name}</li>\n");
-				}
-				echo ("</ul></li>\n");
-			}
-			
-			$instruments = $report->instruments;
-			if ($instruments != NULL) {
-				echo ("<li><b>Instruments:</b>");
-				echo ("<ul class='nobullet'>\n");
-				foreach ($instruments as $instrument) {
-					echo ("<li>{$instrument->name}</li>\n");
-				}
-				echo ("</ul></li>\n");
-			}
+		error_log ("Sound type is $soundType");
+		switch ($soundType) {
+			case Report::SOUND_TYPE_PERFORMANCE:
+				doPerformance($report);
+				break;
+			case Report::SOUND_TYPE_TALK:
+				doTalk($report);
+				break;
+			case Report::SOUND_TYPE_OTHER:
+				doNoise($report);
+				break;
 		}
 		echo ("</ul>\n");
 		$user = $_SESSION['user'];
@@ -180,8 +165,7 @@ include('bin/sessioncheck.php');
 		echo ("<p>&nbsp;</p><hr>\n");
 	}
 	
-	/* Generate the sound type string */
-		/* Return the sound type as a string. */
+	/* Return the sound type as a string. */
 	function soundTypeString ($sndType, $sndSubtype) {
 		$val = "";
 		switch ($sndType) {
@@ -241,6 +225,54 @@ include('bin/sessioncheck.php');
 			$val = $val . ": " . $val2;
 		return $val;
 		return $val;
+	}
+	
+	function doPerformance ($report) {
+		error_log("doPerformance");
+		$title = "(Not given)";
+		if (!is_null($report->song)) 
+			$title = $report->song->title;
+		echo ("<li><b>Title:</b> $title</li>\n");
+		$sngalng = $report->singalong ? "Yes" : "No";
+		echo ("<li><b>Singalong:</b> $sngalng</li>\n");
+		
+		$performers = $report->performers;
+		if ($performers != NULL) {
+			// that's the "really has something" test
+			echo ("<li><b>Performers:</b>");
+			echo ("<ul class='nobullet'>\n");
+			foreach ($performers as $performer) {
+				echo ("<li>{$performer->name}</li>\n");
+			}
+			echo ("</ul></li>\n");
+		}
+			
+		$instruments = $report->instruments;
+		if ($instruments != NULL) {
+			echo ("<li><b>Instruments:</b>");
+			echo ("<ul class='nobullet'>\n");
+			foreach ($instruments as $instrument) {
+				echo ("<li>{$instrument->name}</li>\n");
+			}
+			echo ("</ul></li>\n");
+		}
+	}
+	
+	function doTalk ($report) {
+		error_log("doTalk");
+		$performers = $report->performers;
+		if ($performers != NULL) {
+			echo ("<li><b>People talking:</b>");
+			echo ("<ul class='nobullet'>\n");
+			foreach ($performers as $performer) {
+				echo ("<li>{$performer->name}</li>\n");
+			}
+			echo ("</ul></li>\n");
+		}
+	}
+	
+	function doNoise ($report) {
+	
 	}
 	
 ?>

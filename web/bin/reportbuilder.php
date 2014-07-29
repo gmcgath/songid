@@ -72,23 +72,25 @@ class ReportBuilder {
 		// setSoundSubtype eliminates need to sanitize
 		$this->report->setSoundSubtype($_POST["performancetype"]);
 		
-		$title = trim(strip_tags($this->mysqli->real_escape_string($_POST["songtitle"])));
-		if (strlen($title) > 0) {
-			// strlen returns 0 for null object.
-			$songs = Song::findByTitle ($this->mysqli, $title);
-			// How do we deal with 2 songs by the same title?
-			// TODO If we detect an ambiguity, set isSongAmbiguous to true
-			// and keep going as far as we can.
-			// As a TEMPORARY measure, pick the first song.
-			$song = null;
-			if (sizeof($songs) > 0)
-				$song = $songs[0];
-			if (is_null($song)) {
-				$song = new Song ();
-				$song->title = $title;
-				$song->insert($this->mysqli);
+		if ($_POST("canidsong")) {
+			$title = trim(strip_tags($this->mysqli->real_escape_string($_POST["songtitle"])));
+			if (strlen($title) > 0) {
+				// strlen returns 0 for null object.
+				$songs = Song::findByTitle ($this->mysqli, $title);
+				// How do we deal with 2 songs by the same title?
+				// TODO If we detect an ambiguity, set isSongAmbiguous to true
+				// and keep going as far as we can.
+				// As a TEMPORARY measure, pick the first song.
+				$song = null;
+				if (sizeof($songs) > 0)
+					$song = $songs[0];
+				if (is_null($song)) {
+					$song = new Song ();
+					$song->title = $title;
+					$song->insert($this->mysqli);
+				}
+				$this->report->song = $song;
 			}
-			$this->report->song = $song;
 		}
 		$this->calcPerformerType();
 		$this->calcPerformers();
@@ -97,13 +99,15 @@ class ReportBuilder {
 
 	/* Fill out the report if the user selected talk */
 	function doTalk() {
-		$this->report->setSoundSubtype($_POST["performancetype"]);
-
+		$this->report->setSoundSubtype($_POST["talktype"]);
+		$this->report->performerType = 0;
+		$this->calcTalkers();
 	}
 
 	/* Fill out the report if the user selected Other/Noise/Silence */
 	function doNoise() {
-		$this->report->setSoundSubtype($_POST["performancetype"]);
+		$this->report->setSoundSubtype($_POST["noisetype"]);
+		$this->report->performerType = 0;
 	}
 	
 	/* Insert the object into the database. */
@@ -156,6 +160,7 @@ class ReportBuilder {
 		$this->report->performerType = $perfType;
 	}
 	
+	/* Put the performers into the report */
 	private function calcPerformers () {
 		if ($_POST["canidperformer"]) {
 			$performerNames = $_POST["performernames"];
@@ -207,6 +212,38 @@ class ReportBuilder {
 				}
 			}
 			$this->report->instruments = $instruments;
+		}
+	}
+	
+	/* Put the talkers into the report. Very similar to calcPerformer, but used if
+	   the track is identified as talk. */
+		private function calcTalkers () {
+		if ($_POST["canidtalk"]) {
+			$talkerNames = $_POST["peopletalking"];
+			if ($talkerNames != NULL) {
+				$talkers = array();
+				foreach ($talkerNames as $talkerName)  {
+					$talkerName = trim(strip_tags($this->mysqli->real_escape_string($talkerName)));
+					if ($talkerName == NULL)
+						continue;
+					$actor = Actor::findByName ($this->mysqli, $talkerName);
+					if (!is_null($actor)) {
+						// name belongs to an Actor
+						$talkers[] = $actor;
+					}
+					else {
+						// No match for name, create an Actor
+						$actor = new Actor();
+						$actor->name = $talkerName;
+						// All talkers are individuals. Assuming no group chanting.
+						$actor->typeId = Actor::TYPE_INDIVIDUAL;
+						$actor->insert($this->mysqli);
+						$talkers[] = $actor;
+					}
+				}
+				// Use the performers variable in report for both performers and speakers
+				$this->report->performers = $talkers;
+			}
 		}
 	}
 }

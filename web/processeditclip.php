@@ -17,6 +17,8 @@ include_once ('bin/reportbuilder.php');
 include_once('bin/model/user.php');
 session_start();
 include('bin/sessioncheck.php');
+if (!sessioncheck())
+	return;
 
 /* Open the database */
 $mysqli = opendb();

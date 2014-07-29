@@ -11,6 +11,9 @@ include_once('bin/model/user.php');
 session_start();
 include_once ('bin/config.php');
 include('bin/sessioncheck.php');
+if (!sessioncheck())
+	return;
+
 ?>
 
 <html lang="en">

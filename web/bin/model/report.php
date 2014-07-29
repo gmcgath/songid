@@ -121,6 +121,7 @@ class Report {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
+		error_log("Starting Report->insert");
 		$sngid = NULL;
 		if (!is_null($this->song)) 
 			$sngid = $this->song->id;
@@ -133,12 +134,14 @@ class Report {
 		$prftyp = sqlPrep($this->performerType);
 		$insstmt = "INSERT INTO REPORTS (CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG) " .
 			" VALUES ($clpid, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng)";
+		error_log($insstmt);
 		$res = $mysqli->query ($insstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {
+			error_log("Inserted row");
 			// Retrieve the ID of the row we just inserted
 			$this->id = $mysqli->insert_id;
 			$this->writePerformers ($mysqli);
@@ -162,8 +165,10 @@ class Report {
 	
 	/* After writing the Report, write the Performers if necessary. */
 	private function writePerformers ($mysqli) {
+		error_log("writePerformers");
 		if ($this->performers != NULL) {
 			foreach ($this->performers as $performer) {
+				error_log("Got a performer {$performer->id}");
 				// $performer is an Actor
 				$rptid = sqlPrep($this->id);
 				$actid = sqlPrep($performer->id);

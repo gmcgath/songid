@@ -50,7 +50,7 @@ if (!is_null($err)) {
 ?>
 <p>The user name and password may contain only letters, digits, and underscores.</p>
 <div>
-<form action="processreg.php" method="post" accept-charset="UTF-8">
+<form id="processreg" action="processreg.php" method="post" accept-charset="UTF-8">
 <table class="logintab">
 <tr>
 <td class="formlabel">User name:</td>
@@ -62,7 +62,11 @@ if (!is_null($err)) {
 </tr>
 <tr>
 <td class="formlabel">Password (8-24 characters):</td>
-<td><input type="password" name="pw" class="loginbox" required>
+<td><input type="password" id="pw" name="pw" class="loginbox" required>
+</tr>
+<tr>
+<td class="formlabel">Repeat password:</td>
+<td><input type="password" id="pw2" name="pw2" class="loginbox" required>
 </tr>
 <tr>
 <td class="formlabel">Authorization code:</td>
@@ -76,5 +80,22 @@ if (!is_null($err)) {
 </form>
 </div>
 
+<script type="text/JavaScript"
+src="http://code.jquery.com/jquery-1.11.1.js">
+</script>
+
+<script type="text/JavaScript">
+$('#processreg').submit ( function () {
+	console.log ("pw1 = " + $('#pw').val());
+	console.log ("pw2 = " + $('#pw2').val());
+	if (($('#pw').val() != $('#pw2').val())) {
+		alert("The password fields don't match.");
+		return false;
+	}
+	return true;
+
+});
+
+</script>
 </body>
 </html>

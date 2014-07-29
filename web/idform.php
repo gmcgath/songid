@@ -5,7 +5,6 @@
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
-header("Content-type: text/html; charset=utf-8");
 
 include_once ('bin/config.php');
 include_once ('bin/supportfuncs.php');
@@ -14,8 +13,13 @@ include_once('bin/model/user.php');
 include_once('bin/model/instrument.php');
 include_once('bin/orchestra.php');
 
+header("Content-type: text/html; charset=utf-8");
+
 session_start();
 include('bin/sessioncheck.php');
+if (!sessioncheck())
+	return;
+
 
 /* This function fills in the instrument portion of the form */
 function doInstruments () {
@@ -150,7 +154,7 @@ function doInstruments () {
 <li class="hidden" id="lipeopletalking">
 	Name(s): 
 	<ul class="nobullet">
-		<li>
+		<li class="performernameitem">
 		<input class="textbox" type="text" name="peopletalking[]" >
 		<button type="button" onclick="addnameinput(this);">+</button>
 		<button type="button" onclick="removenameinput(this);">-</button>
@@ -264,9 +268,9 @@ function doInstruments () {
 </div>	<!-- noise -->
 
 
-<li><input type="submit" class="submitbutton" value="Submit"></li>
+<input type="submit" class="submitbutton" value="Submit">
 
-</ul>
+
 
 
 </form>
@@ -330,12 +334,14 @@ function trackTypeUpdate() {
 			$('#lipeopletalking').show();
 		else
 			$('#lipeopletalking').hide();
-	}
+	} 
 	else 
 		$('#talk').hide();
 
 	if ($('#tracknoise').is(':checked')) {
 		$('#noise').show();
+	} else {
+		$('#noise').hide();
 	}
 }
 
