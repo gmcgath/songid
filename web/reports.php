@@ -137,23 +137,31 @@ header("Content-type: text/html; charset=utf-8");
 			$clipDesc = "Clip unavailable";
 		}
 		echo ("<li><b>Clip:</b> $clipDate $clipDesc\n");
-		$soundTypeStr = soundTypeString($report->soundType, $report->soundSubtype);
-		echo ("<li><b>Type:</b> $soundTypeStr</li>\n");
-		$performerTypeStr = $performerTypeText [$report->performerType];
-		if (!is_null($performerTypeStr))
-			echo ("<li><b>Performer type:</b> $performerTypeStr</b></li>\n");
-		$soundType = $report->soundType;
-		error_log ("Sound type is $soundType");
-		switch ($soundType) {
-			case Report::SOUND_TYPE_PERFORMANCE:
-				doPerformance($report);
-				break;
-			case Report::SOUND_TYPE_TALK:
-				doTalk($report);
-				break;
-			case Report::SOUND_TYPE_OTHER:
-				doNoise($report);
-				break;
+		
+		// The above should be the same in every report in the chain.
+		// We loop through chained reports for the rest.
+		$rpt = $report;
+		while ($rpt != NULL) {
+			$soundTypeStr = soundTypeString($report->soundType, $report->soundSubtype);
+			echo ("<li><b>Type:</b> $soundTypeStr</li>\n");
+			$performerTypeStr = $performerTypeText [$report->performerType];
+			if (!is_null($performerTypeStr))
+				echo ("<li><b>Performer type:</b> $performerTypeStr</b></li>\n");
+			$soundType = $report->soundType;
+			switch ($soundType) {
+				case Report::SOUND_TYPE_PERFORMANCE:
+					doPerformance($rpt);
+					break;
+				case Report::SOUND_TYPE_TALK:
+					doTalk($rpt);
+					break;
+				case Report::SOUND_TYPE_OTHER:
+					doNoise($rpt);
+					break;
+			}
+			$rpt = $rpt->nextReport;
+			if ($rpt) 
+				echo ("<li>...</li>\n");
 		}
 		echo ("</ul>\n");
 		$user = $_SESSION['user'];
@@ -176,7 +184,7 @@ header("Content-type: text/html; charset=utf-8");
 				$val = "talk";
 				break;
 			case Report::SOUND_TYPE_OTHER:
-				$val = "noise or silence";
+				$val = "other";
 				break;
 		}
 		$val2 = NULL;
@@ -223,7 +231,6 @@ header("Content-type: text/html; charset=utf-8");
 		}
 		if (!is_null($val2))
 			$val = $val . ": " . $val2;
-		return $val;
 		return $val;
 	}
 	

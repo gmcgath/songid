@@ -26,9 +26,7 @@ $mysqli = opendb();
 	
 $reportBuilder = new ReportBuilder($mysqli);
 try {
-	$reportBuilder->populate($_POST);
-	$user = $_SESSION['user'];
-	$reportBuilder->setUser($user);
+	$reportBuilder->populate($_POST, $_SESSION['user']);
 
 	$_SESSION['report'] = $reportBuilder;
 
@@ -36,7 +34,11 @@ try {
 	   appropriately and exit. */
 
 	$reportBuilder->insert();
-	header ("Location: formsuccess.php", true, 302);
+	$dochain = $_POST["dochain"];
+	if ($dochain)
+		header ("Location:idform.php?id={$_POST['clipid']}&previd={$reportBuilder->report->id}", true, 302);
+	else
+		header ("Location: formsuccess.php", true, 302);
 } catch (Exception $e) {
 	header ("Location: error.php", true, 302);
 	return;

@@ -95,7 +95,7 @@ function doInstruments () {
 		
 	include ('menubar.php');
 ?>
-<audio controls>
+<audio id="audio" controls>
 	<source src=
 <?php
 	echo ('"' . $clip->url . '"');
@@ -104,6 +104,7 @@ function doInstruments () {
 		type="audio/mpeg">
 <p>Sorry, your browser does not support the audio element.</p>
 </audio>
+<p id="audioerror" class="hidden errormsg">The clip could not be loaded.</p>
 <p class="audiocaption">
 <?php
 	echo $clip->description;
@@ -113,7 +114,13 @@ function doInstruments () {
 <h1>What can you hear?</h1>
 <input type="hidden" name="clipid" value=
 <?php
-	echo ("'" . $clip->id . "'>");
+	echo ("'" . $clip->id . "'>\n");
+?>
+<input type="hidden" id="dochain" name="dochain">
+<?php
+$previd = $_GET["previd"];
+if ($previd) 
+	echo ("<input type='hidden' name='previd' value='$previd'>\n");
 ?>
 <ul class="nobullet" title="Select the broad category the clip falls into">
 <li><input type="radio" id="trackperformance" 
@@ -268,7 +275,8 @@ function doInstruments () {
 </div>	<!-- noise -->
 
 
-<input type="submit" class="submitbutton" value="Submit">
+<input type="submit" class="submitbutton" value="Submit" onlcick="chainOff();">
+<input type="submit" class="submitbutton" value="Submit and add another description" onclick="chainOn();">
 
 
 
@@ -287,6 +295,11 @@ $(document).ready(
 	function () {
 		trackTypeUpdate();
 	});
+
+/* Display notification if the audio fails to load */
+$("#audio").on("error", function () {
+	$("#audioerror").show();
+});
 
 function trackTypeUpdate() {
 	if ($('#trackperformance').is(':checked')) {
@@ -364,6 +377,18 @@ function removenameinput (buttn) {
 	
 }
 
+/* Set the value of the dochain field when the submit and continue button
+   is clicked */
+function chainOn () {
+//	$("input[id=dochain]").val("yes");
+	$('#dochain').attr("value", "yes");
+}
+
+/* Clear the value of the dochain field when the plain submit button
+   is clicked */
+function chainOff () {
+	$('#dochain').attr("value", "");
+}
 </script>
 
 

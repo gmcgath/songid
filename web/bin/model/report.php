@@ -59,6 +59,9 @@ class Report {
 	var $performers;	// An array of Actors, or null
 	var $composers;		// An array of Actors, or null
 	var $instruments;	// An array of Instruments, or null
+	var $seqNum;		// Sequence number in chain, starting with 0
+	var $nextReport;	// Next report in chain, or null
+	var $masterId;		// ID of the master report, null if this is the master
 	
 	// Map from sound type strings to numeric constants 
 	var $soundTypeMap = array (
@@ -71,12 +74,14 @@ class Report {
 	var $soundSubtypeMap = array (
 		"perftype_song"=>Report::SOUND_SUBTYPE_PRF_SONG,
 		"perftype_medley"=>Report::SOUND_SUBTYPE_PRF_MEDLEY,
-		"perftype_inst"=>Report::SOUND_SUBTYPE_PRF_INST,
+		"perftype_instrumental"=>Report::SOUND_SUBTYPE_PRF_INST,
 		"perftype_spoken"=>Report::SOUND_SUBTYPE_PRF_SPOKEN,
+		"perftype_other"=>Report::SOUND_SUBTYPE_PRF_OTHER,
 		"talktype_annc"=>Report::SOUND_SUBTYPE_TALK_ANNC,
 		"talktype_conv"=>Report::SOUND_SUBTYPE_TALK_CONV,
 		"talktype_auction"=>Report::SOUND_SUBTYPE_TALK_AUCTION,
 		"talktype_songid"=>Report::SOUND_SUBTYPE_TALK_SONGID,
+		"talktype_other"=>Report::SOUND_SUBTYPE_TALK_OTHER,
 		"noisetype_setup"=>Report::SOUND_SUBTYPE_NOISE_SETUP,
 		"noisetype_silence"=>Report::SOUND_SUBTYPE_NOISE_SILENCE,
 		"noisetype_other"=>Report::SOUND_SUBTYPE_NOISE_OTHER
@@ -90,15 +95,15 @@ class Report {
 		$this->clip = NULL;
 		$this->soundType = 1;
 		$this->soundSubtype = 0;
+		$this->seqNum = 0;
 	}
 	
 	/** Return a Report matching the specified ID. If no report matches,
 	    returns null. Throws an Exception if there is an SQL error. */
 	public static function findById ($mysqli, $reportId) {
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE " .
+			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM " .
 			"FROM REPORTS WHERE ID = " . $reportId;
-		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
@@ -115,33 +120,42 @@ class Report {
 		}
 		return NULL;
 	}
+	
+	/* Make this a chained Report by setting the masterId and seqNum fields. */
+	public function addToChain($prevReport) {
+		if ($prevReport->masterId != null)
+			$this->masterId = null;
+		else
+			$this->masterId = $prevReport->id;
+		$this->seqNum = $prevReport->seqNum + 1;
+	}
 
 
 	/* Inserts a Report into the database. Throws an Exception on failure.
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
-		error_log("Starting Report->insert");
 		$sngid = NULL;
 		if (!is_null($this->song)) 
 			$sngid = $this->song->id;
 		$sngid = sqlPrep ($sngid);
 		$sngalng = sqlPrep($this->singalong);
 		$clpid = sqlPrep($this->clip->id);
+		$mstrid = sqlPrep($this->masterId);
+		$seqn = sqlPrep($this->seqNum);
 		$usrid = sqlPrep($this->user->id);
 		$sndtyp = sqlPrep($this->soundType);
 		$sndsbtyp = sqlPrep($this->soundSubtype);
 		$prftyp = sqlPrep($this->performerType);
-		$insstmt = "INSERT INTO REPORTS (CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG) " .
-			" VALUES ($clpid, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng)";
-		error_log($insstmt);
+		$insstmt = "INSERT INTO REPORTS (CLIP_ID, MASTER_ID, SEQ_NUM, USER_ID, SOUND_TYPE, " .
+			" SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG) " .
+			" VALUES ($clpid, $mstrid, $seqn, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng)";
 		$res = $mysqli->query ($insstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {
-			error_log("Inserted row");
 			// Retrieve the ID of the row we just inserted
 			$this->id = $mysqli->insert_id;
 			$this->writePerformers ($mysqli);
@@ -210,10 +224,11 @@ class Report {
 	
 	/* Set the sound subtype, either using one of the string constants or integers. */
 	public function setSoundSubtype ($typ) {
+		error_log("setSoundSubtype: $typ");
 		if (ctype_digit ($typ))
 			$this->soundSubtype = $typ;
-		else if (!is_null($this->soundTypeMap[$typ]))
-			$this->soundType = $this->soundTypeMap[$typ];
+		else if (!is_null($this->soundSubtypeMap[$typ]))
+			$this->soundSubtype = $this->soundSubtypeMap[$typ];
 	}
 	
 	
@@ -222,11 +237,16 @@ class Report {
 	/* Return an array of reports, starting with report m and
 	   returning up to n reports. The ordering of the reports is
 	   reverse chronological. Later we may want to add other orderings.
+	   
+	   Only the head report of each chain (the one with a null MASTER_ID)
+	   is put into the array. Chained reports are linked by the nextReport
+	   field.
 	*/
 	public static function getReports ($mysqli, $m, $n) {
 			$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE " .
+			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM " .
 			"FROM REPORTS  " .
+			"WHERE MASTER_ID IS NULL " .
 			"ORDER BY DATE DESC " .
 			"LIMIT $m, $n ";
 		$res = $mysqli->query($selstmt);
@@ -244,6 +264,7 @@ class Report {
 				$rep = new Report();
 				$rep->buildFromRow($mysqli, $row);
 				$reports[] = $rep;
+				$rep->buildChain($mysqli);
 				}
 		}
 		return $reports;
@@ -271,6 +292,8 @@ class Report {
 		}
 		$this->singalong = ($row[7] == 1) ? true : false;
 		$this->date = $row[8];
+		$this->masterId = $row[9];
+		$this->seqNum = $row[10];
 		$this->addPerformers($mysqli);
 		$this->addInstruments($mysqli);
 	}
@@ -307,15 +330,40 @@ class Report {
 				$row = $res->fetch_row();
 				if (is_null($row))
 					break;
-				error_log("Got an instrument row");
 				$instId = $row[0];
 				$instrument = Instrument::findById($mysqli, $instId);
 				if ($instrument != NULL) {
 					$this->instruments[] = $instrument;
 				}
-				// TODO sort by some scheme or other?
 			}
 		}
+	}
+	
+	/* Build the chain of reports that follows a master report. */
+	private function buildChain ($mysqli) {
+		$rpt = $this;
+		$rptid = sqlPrep($this->id);
+		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
+			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM " .
+			"FROM REPORTS WHERE MASTER_ID = " . $rptid;
+		$res = $mysqli->query($selstmt);
+		if ($mysqli->connect_errno) {
+			error_log($mysqli->connect_error);
+			throw new Exception ($mysqli->connect_error);
+		}
+		if ($res) {
+			while (true) {
+				$row = $res->fetch_row();
+				if (is_null($row)) {
+					break;
+				}
+				$report = new Report ();
+				$report->buildFromRow($mysqli, $row);
+				$rpt->nextReport = $report;
+				$rpt = $report;
+			}
+		}
+		return NULL;
 	}
 	   
 }
