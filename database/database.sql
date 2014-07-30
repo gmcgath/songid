@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 23, 2014 at 04:48 PM
+-- Generation Time: Jul 30, 2014 at 07:43 AM
 -- Server version: 5.5.37-35.1
 -- PHP Version: 5.4.23
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `ACTORS` (
   PRIMARY KEY (`ID`),
   UNIQUE KEY `NAME_2` (`NAME`),
   KEY `NAME` (`NAME`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=14 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=19 ;
 
 
 -- --------------------------------------------------------
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `CLIPS` (
   `URL` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=8 ;
 
 
 -- --------------------------------------------------------
@@ -111,26 +111,85 @@ CREATE TABLE IF NOT EXISTS `INSTRUMENTS` (
   `CATEGORY_ID` int(11) NOT NULL COMMENT 'FK to INSTRUMENT_CATEGORIES',
   PRIMARY KEY (`ID`),
   KEY `NAME` (`NAME`,`CATEGORY_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=14 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=73 ;
 
 --
 -- Dumping data for table `INSTRUMENTS`
 --
 
 INSERT INTO `INSTRUMENTS` (`ID`, `NAME`, `CATEGORY_ID`) VALUES
-(8, 'Bodhran', 3),
-(7, 'Drums', 3),
+(14, 'Autoharp', 1),
+(15, 'Banjo', 1),
+(16, 'Banjola', 1),
+(66, 'Baritone', 2),
+(17, 'Bass (acoustic)', 1),
+(18, 'Bass (electric)', 1),
+(19, 'Bass (upright)', 1),
+(20, 'Bass (washtub)', 1),
+(62, 'Bassoon', 2),
+(21, 'Bazouki', 1),
+(36, 'Bones', 3),
+(55, 'Clarinet', 2),
+(56, 'Clarinet (alto)', 2),
+(57, 'Clarinet (bass)', 2),
+(65, 'Cornet', 2),
+(37, 'Cow bell', 3),
+(38, 'Cymbals', 3),
+(69, 'Didgeridoo', 2),
+(22, 'Dobro', 1),
+(39, 'Drums (bongos)', 3),
+(40, 'Drums (djembe)', 3),
+(8, 'Drums (frame or bodhran)', 3),
+(7, 'Drums (kit)', 3),
+(41, 'Drums (snare)', 3),
+(42, 'Drums (steel)', 3),
+(43, 'Drums (tom tom)', 3),
+(23, 'Dulcimer (hammer)', 1),
+(24, 'Dulcimer (mountain)', 1),
 (11, 'Electronic keyboard', 4),
+(61, 'English horn', 2),
+(25, 'Fiddle (acoustic)', 1),
+(70, 'Fife', 2),
+(44, 'Finger cymbals', 3),
 (4, 'Flute', 2),
-(1, 'Guitar', 1),
-(2, 'Harp', 1),
+(58, 'Flute (alto)', 2),
+(59, 'Flute (bass)', 2),
+(63, 'French horn', 2),
+(45, 'Gong', 3),
+(1, 'Guitar (acoustic)', 1),
+(26, 'Guitar (electric)', 1),
+(29, 'Guitar (harp guitar)', 1),
+(27, 'Guitar (lap steel)', 1),
+(28, 'Guitar (resonator)', 1),
+(30, 'Harp (floor)', 1),
+(2, 'Harp (lap)', 1),
+(71, 'Harpsichord', 4),
+(46, 'Jew''s harp', 3),
+(31, 'Mandolin', 1),
+(72, 'Melodica', 4),
+(60, 'Oboe', 2),
 (12, 'Organ', 4),
 (10, 'Piano', 4),
+(54, 'Piccolo', 2),
+(47, 'Rainstick', 3),
 (5, 'Recorder', 2),
-(9, 'Shaker', 3),
+(9, 'Shaker egg/Maracas', 3),
+(48, 'Spoons', 3),
+(49, 'Tambourine', 3),
 (13, 'Theremin', 5),
+(6, 'Tin whistle', 2),
+(50, 'Triangle', 3),
+(68, 'Trombone', 2),
+(64, 'Trumpet', 2),
+(67, 'Tuba', 2),
+(32, 'Ukelele (alto)', 1),
+(33, 'Ukelele (bass)', 1),
+(34, 'Ukelele (soprano)', 1),
+(35, 'Ukelele (tenor)', 1),
+(51, 'Vibraphone', 3),
 (3, 'Violin', 1),
-(6, 'Whistle', 2);
+(52, 'Wooden block', 3),
+(53, 'Xylophone', 3);
 
 -- --------------------------------------------------------
 
@@ -166,6 +225,8 @@ INSERT INTO `INSTRUMENT_CATEGORIES` (`ID`, `NAME`, `DISPLAY_SEQUENCE`) VALUES
 CREATE TABLE IF NOT EXISTS `REPORTS` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `MASTER_ID` int(11) DEFAULT NULL COMMENT 'ID of master report',
+  `SEQ_NUM` smallint(6) NOT NULL DEFAULT '0',
   `CLIP_ID` int(11) NOT NULL COMMENT 'FK to CLIPS',
   `USER_ID` int(11) NOT NULL COMMENT 'FK to USERS',
   `SOUND_TYPE` int(11) NOT NULL,
@@ -174,8 +235,9 @@ CREATE TABLE IF NOT EXISTS `REPORTS` (
   `SONG_ID` int(11) DEFAULT NULL COMMENT 'FK to SONGS',
   `SINGALONG` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`),
-  KEY `CLIP_ID` (`CLIP_ID`,`USER_ID`,`SONG_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=43 ;
+  KEY `CLIP_ID` (`CLIP_ID`,`USER_ID`,`SONG_ID`),
+  KEY `MASTER_ID` (`MASTER_ID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=70 ;
 
 
 -- --------------------------------------------------------
@@ -227,7 +289,7 @@ CREATE TABLE IF NOT EXISTS `SONGS` (
   `TITLE` varchar(128) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL,
   `NOTE` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'For disambiguation',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=22 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=26 ;
 
 
 -- --------------------------------------------------------
@@ -258,7 +320,7 @@ CREATE TABLE IF NOT EXISTS `USERS` (
   KEY `LOGIN_ID` (`LOGIN_ID`),
   KEY `NAME` (`NAME`),
   KEY `LOGIN_ID_2` (`LOGIN_ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=15 ;
 
 
 -- --------------------------------------------------------

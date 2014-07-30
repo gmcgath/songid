@@ -96,7 +96,7 @@ function doInstruments () {
 	include ('menubar.php');
 ?>
 <audio id="audio" controls>
-	<source src=
+	<source id="audiosrc" src=
 <?php
 	echo ('"' . $clip->url . '"');
 ?>
@@ -294,12 +294,14 @@ src="http://code.jquery.com/jquery-1.11.1.js">
 $(document).ready(
 	function () {
 		trackTypeUpdate();
+		/* Display notification if the audio fails to load.
+		   Attach this to both audio and source for best compatibility. */
+		$("#audio, #audiosrc").on("error", function () {
+			$("#audioerror").css("display", "block");
+		});
 	});
 
-/* Display notification if the audio fails to load */
-$("#audio").on("error", function () {
-	$("#audioerror").show();
-});
+
 
 function trackTypeUpdate() {
 	if ($('#trackperformance').is(':checked')) {
