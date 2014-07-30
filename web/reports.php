@@ -142,6 +142,9 @@ header("Content-type: text/html; charset=utf-8");
 		// We loop through chained reports for the rest.
 		$rpt = $report;
 		while ($rpt != NULL) {
+			if ($report->flagged != 0) {
+				echo ("<li><span class='flagged'>Clip flagged as inappropriate. Please investigate.</span></li>\n");
+			}
 			$soundTypeStr = soundTypeString($report->soundType, $report->soundSubtype);
 			echo ("<li><b>Type:</b> $soundTypeStr</li>\n");
 			$performerTypeStr = $performerTypeText [$report->performerType];

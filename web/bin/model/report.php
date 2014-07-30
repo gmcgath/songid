@@ -62,6 +62,7 @@ class Report {
 	var $seqNum;		// Sequence number in chain, starting with 0
 	var $nextReport;	// Next report in chain, or null
 	var $masterId;		// ID of the master report, null if this is the master
+	var $flagged;		// If nonzero, clip is flagged as inappropriate
 	
 	// Map from sound type strings to numeric constants 
 	var $soundTypeMap = array (
@@ -96,13 +97,14 @@ class Report {
 		$this->soundType = 1;
 		$this->soundSubtype = 0;
 		$this->seqNum = 0;
+		$this->flagged = 0;
 	}
 	
 	/** Return a Report matching the specified ID. If no report matches,
 	    returns null. Throws an Exception if there is an SQL error. */
 	public static function findById ($mysqli, $reportId) {
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM " .
+			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS WHERE ID = " . $reportId;
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
@@ -147,9 +149,10 @@ class Report {
 		$sndtyp = sqlPrep($this->soundType);
 		$sndsbtyp = sqlPrep($this->soundSubtype);
 		$prftyp = sqlPrep($this->performerType);
+		$flgd = sqlPrep($this->flagged);
 		$insstmt = "INSERT INTO REPORTS (CLIP_ID, MASTER_ID, SEQ_NUM, USER_ID, SOUND_TYPE, " .
-			" SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG) " .
-			" VALUES ($clpid, $mstrid, $seqn, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng)";
+			" SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG, FLAGGED) " .
+			" VALUES ($clpid, $mstrid, $seqn, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng, $flgd)";
 		$res = $mysqli->query ($insstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
@@ -244,7 +247,7 @@ class Report {
 	*/
 	public static function getReports ($mysqli, $m, $n) {
 			$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM " .
+			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS  " .
 			"WHERE MASTER_ID IS NULL " .
 			"ORDER BY DATE DESC " .
@@ -294,6 +297,7 @@ class Report {
 		$this->date = $row[8];
 		$this->masterId = $row[9];
 		$this->seqNum = $row[10];
+		$this->flagged = $row[11];
 		$this->addPerformers($mysqli);
 		$this->addInstruments($mysqli);
 	}
@@ -344,7 +348,7 @@ class Report {
 		$rpt = $this;
 		$rptid = sqlPrep($this->id);
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM " .
+			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS WHERE MASTER_ID = " . $rptid;
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {

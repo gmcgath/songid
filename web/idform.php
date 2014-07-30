@@ -6,12 +6,13 @@
    See README.txt in the source distribution.
 */
 
-include_once ('bin/config.php');
-include_once ('bin/supportfuncs.php');
-include_once ('bin/model/clip.php');
-include_once('bin/model/user.php');
-include_once('bin/model/instrument.php');
-include_once('bin/orchestra.php');
+require_once('bin/config.php');
+require_once('bin/supportfuncs.php');
+require_once('bin/model/clip.php');
+require_once('bin/model/user.php');
+require_once('bin/model/instrument.php');
+require_once('bin/orchestra.php');
+require_once('bin/globalconstants.php');
 
 header("Content-type: text/html; charset=utf-8");
 
@@ -110,6 +111,26 @@ function doInstruments () {
 	echo $clip->description;
 ?>
 </p>
+<?php
+
+$errparm = $_GET["err"];
+if ($errparm != NULL) {
+	switch ($errparm) {
+	case IDFORM_NO_CLIPTYPE:
+		$errmsg = "Please specify a clip type.";
+		break;	
+	case DB_INSERT_FAILURE:
+		$errmsg = "Error writing to the database.";
+		break;
+	default:
+		$errmsg = "Internal error.";
+		break;
+	}
+	if ($errmsg)
+		echo ("<p class='errormsg'>$errmsg</p>\n");
+}
+
+?>
 <form action="processform.php" method="post" accept-charset="UTF-8">
 <h1>What can you hear?</h1>
 <input type="hidden" name="clipid" value=
@@ -135,6 +156,11 @@ if ($previd)
 		name="tracktype" value="noise" 
 		onclick="trackTypeUpdate();">
 	<label for="tracknoise">Other</label></li>
+<li>&nbsp;</li>
+<li title="Flag clips that may have serious litigation risk or private comments that should not have been recorded">
+	<input type="checkbox" name="flagged" id="flagged"
+	<label for="flagged">Flag this as something that should be removed</label>
+</li>
 </ul>
 
 <div id="talk" class="hidden">
@@ -273,6 +299,7 @@ if ($previd)
 </ul>
 
 </div>	<!-- noise -->
+
 
 
 <input type="submit" class="submitbutton" value="Submit" onlcick="chainOff();">

@@ -7,13 +7,14 @@
    See README.txt in the source distribution.
 */
 
-include_once (dirname(__FILE__) . '/model/actor.php');
-include_once (dirname(__FILE__) . '/model/clip.php');
-include_once (dirname(__FILE__) . '/model/report.php');
-include_once (dirname(__FILE__) . '/model/song.php');
-include_once (dirname(__FILE__) . '/model/instrument.php');
-include_once (dirname(__FILE__) . '/model/instrumentcategory.php');
-include_once (dirname(__FILE__) . '/supportfuncs.php');
+require_once (dirname(__FILE__) . '/globalconstants.php');
+require_once (dirname(__FILE__) . '/model/actor.php');
+require_once (dirname(__FILE__) . '/model/clip.php');
+require_once (dirname(__FILE__) . '/model/report.php');
+require_once (dirname(__FILE__) . '/model/song.php');
+require_once (dirname(__FILE__) . '/model/instrument.php');
+require_once (dirname(__FILE__) . '/model/instrumentcategory.php');
+require_once (dirname(__FILE__) . '/supportfuncs.php');
 
 class ReportBuilder {
 	var $report;
@@ -40,6 +41,7 @@ class ReportBuilder {
 		if ($clip == NULL)
 			return;
 		$this->report->clip = $clip;
+		$this->report->flagged = $_POST["flagged"] ? 1 : 0;
 		
 		// If previd was passed, put this into the chain.
 		$this->chainReport ($_POST["previd"]);
@@ -56,7 +58,7 @@ class ReportBuilder {
 				$this->doNoise();
 				break;
 			default:
-				throw new Exception ("Invalid form, wrong tracktype");
+				throw new Exception (IDFORM_NO_CLIPTYPE);
 		}
 		// Can I make this all more consistent?
 		$this->report->setSoundType($tracktype);
@@ -115,7 +117,7 @@ class ReportBuilder {
 	/* Insert the object into the database. */
 	public function insert () {
 		if (!$this->report->insert ($this->mysqli)) {
-			throw new Exception ("Failed to insert report into database");
+			throw new Exception (DB_INSERT_FAILURE);
 		}
 	}
 	

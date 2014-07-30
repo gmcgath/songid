@@ -49,3 +49,5 @@ table.editcliptable {padding-left: 30px;}
 td.reportnav { width: 100px; }
 
 .errormsg {color: red; font-weight: bold; font-size: 120%;}
+
+.flagged {color: red; font-weight: bold; font-style: italic; }

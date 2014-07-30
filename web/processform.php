@@ -9,10 +9,10 @@
 /* This PHP page is called when the identification form is submitted. 
    It has no HTML and always redirects.  */
 
-include_once ('bin/config.php');
-include_once ('bin/supportfuncs.php');
-include_once ('bin/model/report.php');
-include_once ('bin/reportbuilder.php');
+require_once ('bin/config.php');
+require_once ('bin/supportfuncs.php');
+require_once ('bin/model/report.php');
+require_once ('bin/reportbuilder.php');
 
 include_once('bin/model/user.php');
 session_start();
@@ -40,7 +40,9 @@ try {
 	else
 		header ("Location: formsuccess.php", true, 302);
 } catch (Exception $e) {
-	header ("Location: error.php", true, 302);
+	// Only our own exceptions, with numeric codes, will turn into useful messages.
+	$newloc = "idform.php?id=" . $_POST["clipid"] . "&err=" . $e->getMessage();
+	header ("Location: $newloc", true, 302);
 	return;
 }
 
