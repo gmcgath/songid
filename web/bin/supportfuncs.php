@@ -6,6 +6,7 @@
    See README.txt in the source distribution.
 */
 
+require_once (dirname(__FILE__) . '/config.php');
 require_once (dirname(__FILE__) . '/model/user.php');
 
 /* This function removes most HTML tags from text while allowing
@@ -33,8 +34,8 @@ function opendb() {
         return false;
 	} 
 	
-	// Set the time zone. sqlTimeZone is set in config.php.
-	$tzstmt = "SET time-zone = $sqlTimeZone";
+	// Set the time zone. sqlTimeZone is set in config.php. WHY DOESN'T THIS WORK?
+	$tzstmt = "SET time_zone = '$sqlTimeZone'";
 	$res = $mysqli->query($tzstmt);
 	return $mysqli;
 }

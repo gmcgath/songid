@@ -32,6 +32,7 @@ header("Content-type: text/html; charset=utf-8");
 <?php
 	include ('menubar.php');
 	
+	// param m is start index, default 0
 	$start = (int)$_GET["m"];
 	if (is_null($start)) {
 		$start = 0;
@@ -42,7 +43,7 @@ header("Content-type: text/html; charset=utf-8");
 	if ($start == 0) 
 		$hideprev = true;
 	
-	
+	// param n is end index, default 10
 	$nstr = $_GET["n"];
 	if (is_null ($nstr)) 
 		$itemsPerPage = 10;
@@ -52,6 +53,12 @@ header("Content-type: text/html; charset=utf-8");
 			$itemsPerPage = 1;
 	}
 	$hidenext = false;
+	
+	// param clip says to just show for one clip, default all clips
+	$clipid = $_GET["clip"];
+	if (!ctype_digit($clipid))
+		$clipid = NULL;
+		
 ?>
 <h1>Reports</h1>
 
@@ -81,7 +88,10 @@ header("Content-type: text/html; charset=utf-8");
 	$mysqli = opendb();
 
 	// Get one extra report so we know if there are more to come
-	$reports = Report::getReports ($mysqli, $start, $itemsPerPage + 1);
+	if ($clipid)
+		$reports = Report::getReportsForClip ($mysqli, $clipid, $start, $itemsPerPage + 1);
+	else
+		$reports = Report::getReports ($mysqli, $start, $itemsPerPage + 1);
 	if (count($reports) <= $itemsPerPage)
 		$hidenext = true;
 ?>
@@ -112,6 +122,9 @@ header("Content-type: text/html; charset=utf-8");
 </table>
 
 <?php
+	if (count($reports) == 0) {
+		echo ("<p class='notice'>No reports match your criteria</p>\n");
+	}
 	$reptidx = 0;
 	foreach ($reports as $report) {
 		if ($reptidx >= $itemsPerPage)
@@ -145,12 +158,12 @@ header("Content-type: text/html; charset=utf-8");
 			if ($report->flagged != 0) {
 				echo ("<li><span class='flagged'>Clip flagged as inappropriate. Please investigate.</span></li>\n");
 			}
-			$soundTypeStr = soundTypeString($report->soundType, $report->soundSubtype);
+			$soundTypeStr = soundTypeString($rpt->soundType, $rpt->soundSubtype);
 			echo ("<li><b>Type:</b> $soundTypeStr</li>\n");
-			$performerTypeStr = $performerTypeText [$report->performerType];
+			$performerTypeStr = $performerTypeText [$rpt->performerType];
 			if (!is_null($performerTypeStr))
 				echo ("<li><b>Performer type:</b> $performerTypeStr</b></li>\n");
-			$soundType = $report->soundType;
+			$soundType = $rpt->soundType;
 			switch ($soundType) {
 				case Report::SOUND_TYPE_PERFORMANCE:
 					doPerformance($rpt);

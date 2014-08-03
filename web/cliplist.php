@@ -39,22 +39,45 @@ if (!sessioncheck())
 <h1>Available sound clips</h1>	
 
 <?php
+	$onlyUnreported = false;
+	if ($_GET["unrep"])
+		$onlyUnreported = true;
+	
 	if ($user->hasRole($mysqli, User::ROLE_EDITOR)) {
 		echo ("<button type='button' onclick='location.href=\"addclip.php\"'>Add new clip</button>\n");
 		echo ("<p>&nbsp;</p>\n");
 	}
 	
+	echo ("<div>\n");
+	if ($onlyUnreported) {
+		echo ("<button type='button' onclick='location.href=\"cliplist.php\"'>Show all clips</button>\n");
+	}
+	else {
+		echo ("<button type='button' onclick='location.href=\"cliplist.php?unrep=1\"'>Show clips without reports</button>\n");
+	}
+	echo ("</div>\n");
+	
 	try {
-		$clips = Clip::getRows ($mysqli, 0, 100);
+		$clips = Clip::getRows ($mysqli, 0, 100, $onlyUnreported);
+		// TODO paginate
 		echo ("<table class='cliptable'>\n");
 		
 		foreach ($clips as $clip) {
-			echo ("<tr>");
+			$desc = $clip->description;
+			if (strlen($desc) > 60 )
+				$desc = substr($desc, 0, 59) . "...";
+			echo ("<tr><td style='width:500px;'>");
+			echo ($desc);		
+			echo ("</td>");
+
 			echo ("<td><a href='idform.php?id=");
 			echo ($clip->id);
 			echo ("'>");
-			echo ($clip->description);			
-			echo ("</a></td>");
+			echo ("Create report</a></td>\n");
+			
+			echo ("<td><a href='reports.php?clip={$clip->id}'>");
+			echo ("View reports</a></td>\n");
+			
 			if ($user->hasRole($mysqli, User::ROLE_EDITOR)) {
 				echo ("<td><a href='editclip.php?id=");
 				echo ($clip->id);

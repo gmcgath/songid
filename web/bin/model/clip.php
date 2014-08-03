@@ -19,12 +19,19 @@ class Clip {
 	var $date; 
 
 	/* Return n rows starting with idx.
+	   If $onlyUnrep is true, show only clips with zero reports
 	   Returns an array of clip objects. If idx is out of bounds,
 	   returns an empty array. If there's a database problem,
 	   throws an Exception with the SQL error message.
 	*/
-	public static function getRows ($mysqli, $idx, $n) {
-		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS LIMIT " . $idx . " , " . $n;
+	public static function getRows ($mysqli, $idx, $n, $onlyUnrep) {
+		if ($onlyUnrep) 
+			$selstmt = "SELECT DISTINCT c.ID, c.DESCRIPTION, c.URL, c.DATE FROM CLIPS c LEFT JOIN REPORTS r " .
+				"ON c.ID = r.CLIP_ID " .
+				"WHERE r.ID IS NULL " .
+				"LIMIT " . $idx . " , " . $n;
+		else
+			$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS LIMIT " . $idx . " , " . $n;
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			error_log("Error getting Clips: " . $mysqli->connect_error);
@@ -82,7 +89,6 @@ class Clip {
 			"DESCRIPTION = $desc, ".
 			"URL = $ur " .
 			"WHERE ID = $id";
-		error_log($updstmt);
 		$res = $mysqli->query($updstmt);
 		if ($mysqli->connect_errno) {
 			error_log("Error getting clip by ID: " . $mysqli->connect_error);

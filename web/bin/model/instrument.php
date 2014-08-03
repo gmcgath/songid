@@ -20,7 +20,6 @@ class Instrument {
 	    returns null. Throws an Exception if there is an SQL error. */
 	public static function findById ($mysqli, $instId) {
 		$selstmt = "SELECT NAME, CATEGORY_ID FROM INSTRUMENTS WHERE ID = '" . $instId . "'";
-		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			throw new Exception ($mysqli->connect_error);
@@ -45,7 +44,6 @@ class Instrument {
 	public static function getInstrumentsByCategory ($mysqli, $catId) {
 		$selstmt = "SELECT ID, NAME FROM INSTRUMENTS WHERE CATEGORY_ID = $catId " .
 			"ORDER BY NAME";
-		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			throw new Exception ($mysqli->connect_error);

@@ -20,7 +20,6 @@ class InstrumentCategory {
 	    returns null. Throws an Exception if there is an SQL error. */
 	public static function findById ($mysqli, $catId) {
 		$selstmt = "SELECT NAME, DISPLAY_SEQUENCE FROM INSTRUMENT_CATEGORIES WHERE ID = '" . $catId . "'";
-		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			throw new Exception ($mysqli->connect_error);
@@ -44,7 +43,6 @@ class InstrumentCategory {
 	public static function getAllCategories ($mysqli) {
 		$selstmt = "SELECT ID, NAME, DISPLAY_SEQUENCE FROM INSTRUMENT_CATEGORIES " .
 			"ORDER BY DISPLAY_SEQUENCE";
-		error_log($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			throw new Exception ($mysqli->connect_error);
@@ -56,11 +54,9 @@ class InstrumentCategory {
 				if (is_null($row)) {
 					break;
 				}
-				error_log("Adding a category");
 				$cat = new InstrumentCategory();
 				$cat->id = $row[0];
 				$cat->name = $row[1];
-				error_log("Category name = " .$cat->name);
 				$cat->displaySequence = $row[2];
 				$cats[] = $cat;
 			}

@@ -85,7 +85,6 @@ class Actor {
 		$nam = sqlPrep($this->name);
 		$tpid = sqlPrep($this->typeId);
 		$insstmt = "INSERT INTO ACTORS (NAME, TYPE_ID) VALUES ($nam, $tpid)";
-		error_log($insstmt);
 		$res = $mysqli->query($insstmt);
 		if ($res) {
 			// Retrieve the ID of the row we just inserted

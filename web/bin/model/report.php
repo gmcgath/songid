@@ -246,12 +246,29 @@ class Report {
 	   field.
 	*/
 	public static function getReports ($mysqli, $m, $n) {
-			$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
+		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS  " .
 			"WHERE MASTER_ID IS NULL " .
 			"ORDER BY DATE DESC " .
 			"LIMIT $m, $n ";
+		return Report::getReports1 ($mysqli, $selstmt, $m, $n);
+	}
+	
+	/* Like getReports, but for just one clip */
+	public static function getReportsForClip($mysqli, $clipid, $m, $n) {
+		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
+			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
+			"FROM REPORTS  " .
+			"WHERE MASTER_ID IS NULL AND CLIP_ID = '$clipid' " .
+			"ORDER BY DATE DESC " .
+			"LIMIT $m, $n ";
+		return Report::getReports1 ($mysqli, $selstmt, $m, $n);
+	}
+
+
+	private static function getReports1($mysqli, $selstmt, $m, $n) {
+		error_log ($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);
