@@ -6,7 +6,7 @@
    See README.txt in the source distribution.
 */
 
-include_once (dirname(__FILE__) . '/model/user.php');
+require_once (dirname(__FILE__) . '/model/user.php');
 
 /* This function removes most HTML tags from text while allowing
    some basic formatting.

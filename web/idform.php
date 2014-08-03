@@ -285,6 +285,9 @@ if ($previd)
 ?>
 
 </li>	<!-- instrumentspresent -->
+<li><input type="checkbox" id="singalong" name="singalong" value="yes">
+	<label for="singalong">There is significant audience participation (singing along)</label>
+</li>
 </div> <!-- performance -->
 
 <div id="noise" class="hidden">

@@ -12,9 +12,9 @@
    See README.txt in the source distribution.
 */
 
-include_once (dirname(__FILE__) . '/supportfuncs.php');
-include_once (dirname(__FILE__) . '/model/instrument.php');
-include_once (dirname(__FILE__) . '/model/instrumentcategory.php');
+require_once (dirname(__FILE__) . '/supportfuncs.php');
+require_once (dirname(__FILE__) . '/model/instrument.php');
+require_once (dirname(__FILE__) . '/model/instrumentcategory.php');
 
 class Section {
 	var $category;		// an InstrumentCategory

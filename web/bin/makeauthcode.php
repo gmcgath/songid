@@ -9,10 +9,10 @@
    as a temporary measure.
 */
 
-	require ('config.php');
-	require ('password.php');		// Compatibility file needed till we get PHP 5.5
-	require ('supportfuncs.php');
-	require ('model/authcode.php');
+	require_once ('config.php');
+	require_once ('password.php');		// Compatibility file needed till we get PHP 5.5
+	require_once ('supportfuncs.php');
+	require_once ('model/authcode.php');
 	
 	/* Open the database */
 	$mysqli = opendb();

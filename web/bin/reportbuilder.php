@@ -99,6 +99,9 @@ class ReportBuilder {
 		$this->calcPerformerType();
 		$this->calcPerformers();
 		$this->calcInstruments();
+		if ($_POST["singalong"]) {
+			$this->report->singalong = true;
+		}
 }
 
 	/* Fill out the report if the user selected talk */
