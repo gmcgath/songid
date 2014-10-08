@@ -203,48 +203,7 @@ header("Content-type: text/html; charset=utf-8");
 				$val = "other";
 				break;
 		}
-		$val2 = NULL;
-		switch ($sndSubtype) {
-			case Report::SOUND_SUBTYPE_PRF_SONG:
-				$val2 = "song";
-				break;
-			case Report::SOUND_SUBTYPE_PRF_MEDLEY:
-				$val2 = "medley";
-				break;
-			case Report::SOUND_SUBTYPE_PRF_INST:
-				$val2 = "instrumental";
-				break;
-			case Report::SOUND_SUBTYPE_PRF_SPOKEN:
-				$val2 = "spoken or shtick";
-				break;
-			case Report::SOUND_SUBTYPE_PRF_OTHER:
-				$val2 = "other";
-				break;
-			case Report::SOUND_SUBTYPE_TALK_ANNC:
-				$val2 = "announcement";
-				break;
-			case Report::SOUND_SUBTYPE_TALK_CONV:
-				$val2 = "conversation";
-				break;
-			case Report::SOUND_SUBTYPE_TALK_AUCTION:
-				$val2 = "auction";
-				break;
-			case Report::SOUND_SUBTYPE_TALK_SONGID:
-				$val2 = "song identification";
-				break;
-			case Report::SOUND_SUBTYPE_TALK_OTHER:
-				$val2 = "other";
-				break;
-			case Report::SOUND_SUBTYPE_NOISE_SETUP:
-				$val2 = "setup";
-				break;
-			case Report::SOUND_SUBTYPE_NOISE_SILENCE:
-				$val2 = "silence";
-				break;
-			case Report::SOUND_SUBTYPE_NOISE_OTHER:
-				$val2 = "other";
-				break;
-		}
+		$val2 = Report::soundSubtypeToString($sndSubtype);
 		if (!is_null($val2))
 			$val = $val . ": " . $val2;
 		return $val;

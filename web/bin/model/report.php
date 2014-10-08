@@ -180,6 +180,85 @@ class Report {
 		}
 	}
 	
+	/* Convert a soundSubtype constant to a user-friendly string. */
+	public static function soundSubtypeToString ($sndSubtype) {
+		$val = NULL;
+		switch ($sndSubtype) {
+			case Report::SOUND_SUBTYPE_PRF_SONG:
+				$val = "song";
+				break;
+			case Report::SOUND_SUBTYPE_PRF_MEDLEY:
+				$val = "medley";
+				break;
+			case Report::SOUND_SUBTYPE_PRF_INST:
+				$val = "instrumental";
+				break;
+			case Report::SOUND_SUBTYPE_PRF_SPOKEN:
+				$val = "spoken or shtick";
+				break;
+			case Report::SOUND_SUBTYPE_PRF_OTHER:
+				$val = "other";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_ANNC:
+				$val = "announcement";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_CONV:
+				$val = "conversation";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_AUCTION:
+				$val = "auction";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_SONGID:
+				$val = "song identification";
+				break;
+			case Report::SOUND_SUBTYPE_TALK_OTHER:
+				$val = "other";
+				break;
+			case Report::SOUND_SUBTYPE_NOISE_SETUP:
+				$val = "setup";
+				break;
+			case Report::SOUND_SUBTYPE_NOISE_SILENCE:
+				$val = "silence";
+				break;
+			case Report::SOUND_SUBTYPE_NOISE_OTHER:
+				$val = "other";
+				break;
+		}
+		return $val;
+	}
+	
+	/* Convert a performerType constant into a user-friendly string. */
+	public static function performerTypeToString ($perfType) {
+		$val = NULL;
+		switch ($perfType) {
+			case PERFORMER_TYPE_UNSPEC:
+				$val = "unspecified";
+				break;
+			case PERFORMER_TYPE_SINGLE_MALE:
+				$val = "male solo";
+				break;
+			case PERFORMER_TYPE_SINGLE_FEMALE:
+				$val = "female solo";
+				break;
+			case PERFORMER_TYPE_SINGLE_UNSPEC:
+				$val = "unspecified solo";
+				break;
+			case PERFORMER_TYPE_GROUP_MALE:
+				$val = "male group";
+				break;
+			case PERFORMER_TYPE_GROUP_FEMALE:
+				$val = "female group";
+				break;
+			case PERFORMER_TYPE_GROUP_MIXED:
+				$val = "mixed group";
+				break;
+			case PERFORMER_TYPE_GROUP_UNSPEC:
+				$val = "unspecified group";
+				break;
+		}
+		return $val;
+	}
+
 	/* After writing the Report, write the Performers if necessary. */
 	private function writePerformers ($mysqli) {
 		error_log("writePerformers");
@@ -199,7 +278,7 @@ class Report {
 			}
 		}
 	}
-
+	
 	/* After writing the Report, write the Instruments if necessary. */
 	private function writeInstruments ($mysqli) {
 		if ($this->instruments != NULL) {
