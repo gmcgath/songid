@@ -25,6 +25,9 @@ require_once (dirname(__FILE__) . '/model/instrument.php');
 require_once (dirname(__FILE__) . '/model/instrumentcategory.php');
 require_once (dirname(__FILE__) . '/supportfuncs.php');
 
+
+class Export {
+
 const EXPORT_CLIP_DESC = 1;
 const EXPORT_CLIP_URL = 2;
 const EXPORT_CLIP_DATE = 3;
@@ -39,32 +42,59 @@ const EXPORT_PERFORMERS = 11;
 const EXPORT_COMPOSERS = 12;
 const EXPORT_INSTRUMENTS = 13;
 
-class Export {
-
+	var $fieldNames = array ();
 	var $reports;
 	var $index;
 	var $sequence;
+	var $fileref;
+
+
 	
 	/* Constructor. Creates an Export object.
 	   Arguments:
 	      $reportArray   An array of the Reports to export.
 	      $sequenceArray An array of export constants defining the output.
     */
-	public function Export ($reportArray, $sequenceArray) {
+	public function Export ($reportArray, $sequenceArray, $file) {
 		$this->reports = $reportArray;
 		$this->sequence = $sequenceArray;
-		$index = 0;
+		$this->fileref = $file;
+		$this->index = 0;
+
+	$this->fieldNames[Export::EXPORT_CLIP_DESC] = "Description";
+	$this->fieldNames[Export::EXPORT_CLIP_URL] = "URL";
+	$this->fieldNames[Export::EXPORT_CLIP_DATE] = "Clip date";
+	$this->fieldNames[Export::EXPORT_USER_NAME] = "User reporting";
+	$this->fieldNames[Export::EXPORT_SOUND_TYPE] = "Type";
+	$this->fieldNames[Export::EXPORT_PERFORMER_TYPE] = "Performer type";
+	$this->fieldNames[Export::EXPORT_SONG_NAME] = "Song title";
+	$this->fieldNames[Export::EXPORT_SONG_NOTE] = "Song note";
+	$this->fieldNames[Export::EXPORT_SINGALONG] = "Singalong";
+	$this->fieldNames[Export::EXPORT_PERFORMERS] = "Performers";
+	$this->fieldNames[Export::EXPORT_COMPOSERS] = "Composers";
+	$this->fieldNames[Export::EXPORT_INSTRUMENTS] = "Instruments";
+
 	}
 	
-	/* Export one report as a line of CSV and advance the index to 
+	/* Write out the CSV header based on sequence. */
+	public function writeHeader () {
+		$hdr = array();
+		foreach ($this->sequence as $seqitem) {
+			$hdr[] = $this->fieldNames[$seqitem];
+		}
+		fputcsv($this->fileref, $hdr);
+	}
+	
+	
+	/* Export one report as a line of CSV to fileref and advance the index to 
 	   the next Report. If there are no reports left,
 	   return null.
 	*/
-	public function nextLine () {
-		if ($index > count($reports))
+	public function writeNextLine () {
+		if ($this->index > count($this->reports))
 			return null;
 		$report = $this->reports[$this->index++];
-		$line = "";
+		$line = array();
 		for ($i = 0; $i < count($this->sequence); $i++) {
 			$field = null;
 			switch ($this->sequence[$i]) {
@@ -107,9 +137,9 @@ class Export {
 				default:
 					return null;	// Or throw an exception?
 			}
-			$isLast = ($i + 1 == count($this->sequence));
-			$line = $line . self::csvify($field, isLast);
+			$line[] = $field;
 		}
+		fputcsv ($this->fileref, $line);
 		return $line;
 	}
 	
@@ -154,14 +184,14 @@ class Export {
 	   of the sound type */
 	private static function getSoundType($report) {
 		$typetext = Report::soundSubtypeToString($report->soundSubtype);
-		if (isNull($typetext))
+		if (is_null($typetext))
 			$typetext = "";
 		return $typetext;
 	}
 	
 	private static function getPerformerType($report) {
 		$typetext = Report::performerTypeToString($report->performerType);
-		if (isNull($typetext))
+		if (is_null($typetext))
 			$typetext = "";
 		return $typetext;
 	}

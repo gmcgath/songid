@@ -24,6 +24,7 @@ function strip_unsafe_html_tags( $text )
 function opendb() {
 
 	global $db_host, $db_user, $db_pw, $db_name;
+	global $sqlTimeZone;
 	
 	/* Open the database */
 	$mysqli = new mysqli($db_host, $db_user, $db_pw, $db_name);

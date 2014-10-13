@@ -69,21 +69,7 @@ header("Content-type: text/html; charset=utf-8");
 	include_once ('bin/model/clip.php');
 	include_once ('bin/model/report.php');
 
-	$performerTypeText = array (
-		NULL,
-		"Solo, male",
-		"Solo, female",
-		"Solo, gender unspecified",
-		"Group, male",
-		"Group, female",
-		"Group, mixed",
-		"Group, gender unspecified"
-	);
-?>
 
-
-
-<?php
 	/* Open the database */
 	$mysqli = opendb();
 
@@ -120,6 +106,11 @@ header("Content-type: text/html; charset=utf-8");
 </td>
 </tr>
 </table>
+
+<form action="exportcsv.php" method="post" accept-charset="UTF-8">
+<input type='submit' class="submitbutton" value="Export CSV">
+</form>
+
 
 <?php
 	if (count($reports) == 0) {
@@ -160,7 +151,7 @@ header("Content-type: text/html; charset=utf-8");
 			}
 			$soundTypeStr = soundTypeString($rpt->soundType, $rpt->soundSubtype);
 			echo ("<li><b>Type:</b> $soundTypeStr</li>\n");
-			$performerTypeStr = $performerTypeText [$rpt->performerType];
+			$performerTypeStr = Report::performerTypeToString($rpt->performerType);
 			if (!is_null($performerTypeStr))
 				echo ("<li><b>Performer type:</b> $performerTypeStr</b></li>\n");
 			$soundType = $rpt->soundType;

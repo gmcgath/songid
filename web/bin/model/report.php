@@ -165,6 +165,7 @@ class Report {
 			$this->writeInstruments ($mysqli);
 			return $this->id;
 		}
+		error_log ("Error inserting report: " . $mysqli->error);
 		
 		return false;
 	}
@@ -235,25 +236,25 @@ class Report {
 				$val = "unspecified";
 				break;
 			case PERFORMER_TYPE_SINGLE_MALE:
-				$val = "male solo";
+				$val = "Solo male";
 				break;
 			case PERFORMER_TYPE_SINGLE_FEMALE:
-				$val = "female solo";
+				$val = "Solo female";
 				break;
 			case PERFORMER_TYPE_SINGLE_UNSPEC:
-				$val = "unspecified solo";
+				$val = "Solo gender unspecified";
 				break;
 			case PERFORMER_TYPE_GROUP_MALE:
-				$val = "male group";
+				$val = "Group male";
 				break;
 			case PERFORMER_TYPE_GROUP_FEMALE:
-				$val = "female group";
+				$val = "Group female";
 				break;
 			case PERFORMER_TYPE_GROUP_MIXED:
-				$val = "mixed group";
+				$val = "Group mixed";
 				break;
 			case PERFORMER_TYPE_GROUP_UNSPEC:
-				$val = "unspecified group";
+				$val = "Group gender unspecified";
 				break;
 		}
 		return $val;
@@ -323,14 +324,17 @@ class Report {
 	   Only the head report of each chain (the one with a null MASTER_ID)
 	   is put into the array. Chained reports are linked by the nextReport
 	   field.
+	   
+	   -1 for either range value gets you all the reports.
 	*/
 	public static function getReports ($mysqli, $m, $n) {
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS  " .
 			"WHERE MASTER_ID IS NULL " .
-			"ORDER BY DATE DESC " .
-			"LIMIT $m, $n ";
+			"ORDER BY DATE DESC";
+		if ($m >= 0 && $n >= 0)
+			$selstmt .= " LIMIT $m, $n ";
 		return Report::getReports1 ($mysqli, $selstmt, $m, $n);
 	}
 	
@@ -347,7 +351,6 @@ class Report {
 
 
 	private static function getReports1($mysqli, $selstmt, $m, $n) {
-		error_log ($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			error_log($mysqli->connect_error);

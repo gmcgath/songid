@@ -18,12 +18,11 @@
 	$mysqli = opendb();
 
 	echo ("Auth code: ");
-	$authcode = trim(fgets(STDIN));
-	$acHash = password_hash($authcode, PASSWORD_DEFAULT);
+	$authc = trim(fgets(STDIN));
+	$acHash = password_hash($authc, PASSWORD_DEFAULT);
 
 	$authcode = new Authcode;
 	$authcode->hash = $acHash;
-	echo ("Hash is " . $pwHash . "\n");
 	try {
 		$authcode->insert($mysqli);
 		echo ("Successfully created authcode.");
