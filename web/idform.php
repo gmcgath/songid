@@ -32,7 +32,6 @@ function doInstruments () {
 	
 	foreach ($orch->sections as $section ) {
 		// Start section
-		error_log ("Starting a section");
 		echo ("<li>\n");
 			$sectionName = $section->category->name;
 			// id and name attrs are section name, minus white space,

@@ -19,7 +19,7 @@ if (!sessioncheck())
 
 $mysqli = opendb();
 $user = $_SESSION['user'];
-if (!($user->hasRole($mysqli, User::ROLE_EDITOR))) {
+if (!($user->hasRole(User::ROLE_EDITOR))) {
 	header ("Location: norole.php", true, 302);
 	return;
 }

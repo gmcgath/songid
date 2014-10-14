@@ -46,6 +46,10 @@ table.cliptable tr {border: 1px solid blue;}
 
 table.editcliptable {padding-left: 30px;}
 
+table.editusertable {border-collapse: collapse;}
+
+.editusertable, .editusertable tr, .editusertable td {border: 1px solid blue;}
+
 td.reportnav { width: 100px; }
 
 .errormsg {color: red; font-weight: bold; font-size: 120%;}

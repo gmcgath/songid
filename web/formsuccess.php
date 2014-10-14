@@ -19,6 +19,7 @@ header("Content-type: text/html; charset=utf-8");
 </head>
 <body>
 <?php
+$mysqli = opendb();
 include ('menubar.php');
 ?>
 <p>Thank you!</p>

@@ -9,17 +9,22 @@
 /* This PHP page is called when the clip editing form is submitted. 
    It has no HTML and always redirects.  */
 
-include_once ('bin/config.php');
-include_once ('bin/supportfuncs.php');
-include_once ('bin/model/report.php');
-include_once ('bin/reportbuilder.php');
+require_once ('bin/config.php');
+require_once ('bin/supportfuncs.php');
+require_once ('bin/model/report.php');
+require_once ('bin/model/clip.php');
+require_once ('bin/reportbuilder.php');
 
-include_once('bin/model/user.php');
+require_once('bin/model/user.php');
 session_start();
 include('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+	header ("Location: 405.html", true, 405);
+	return;
+}
 
 /* Open the database */
 $mysqli = opendb();
@@ -27,7 +32,13 @@ $mysqli = opendb();
 $clip = new Clip;
 $clip->description = strip_tags($mysqli->real_escape_string($_POST["clipdesc"]));
 $clip->url = strip_tags($mysqli->real_escape_string($_POST["clipurl"]));
-$clipId = $clip->insert($mysqli);
-error_log("Clip added");
-header ("Location: addclipok.php?id=$clipId", true, 302);
+if (!is_null($clip->url)) {
+	$clipId = $clip->insert($mysqli);
+	error_log("Clip added");
+	header ("Location: addclipok.php?id=$clipId", true, 302);
+}
+else {
+	error_log("URL missing, clip not added");
+	header ("Location: error.php", true, 302);
+}
 ?>

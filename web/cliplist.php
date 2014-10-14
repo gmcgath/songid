@@ -26,7 +26,6 @@ if (!sessioncheck())
 <noscript><strong>Sorry, JavaScript is required.</strong>
 </noscript>
 <?php
-	include ('menubar.php');
 	include_once ('bin/supportfuncs.php');
 	include_once ('bin/model/clip.php');
 	
@@ -34,6 +33,7 @@ if (!sessioncheck())
 	
 	/* Open the database */
 	$mysqli = opendb();
+	include ('menubar.php');
 ?>
 
 <h1>Available sound clips</h1>	
@@ -43,7 +43,7 @@ if (!sessioncheck())
 	if ($_GET["unrep"])
 		$onlyUnreported = true;
 	
-	if ($user->hasRole($mysqli, User::ROLE_EDITOR)) {
+	if ($user->hasRole(User::ROLE_EDITOR)) {
 		echo ("<button type='button' onclick='location.href=\"addclip.php\"'>Add new clip</button>\n");
 		echo ("<p>&nbsp;</p>\n");
 	}
@@ -78,7 +78,7 @@ if (!sessioncheck())
 			echo ("<td><a href='reports.php?clip={$clip->id}'>");
 			echo ("View reports</a></td>\n");
 			
-			if ($user->hasRole($mysqli, User::ROLE_EDITOR)) {
+			if ($user->hasRole(User::ROLE_EDITOR)) {
 				echo ("<td><a href='editclip.php?id=");
 				echo ($clip->id);
 				echo ("'>");

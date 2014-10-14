@@ -30,8 +30,15 @@ header("Content-type: text/html; charset=utf-8");
 </noscript>
 
 <?php
-	include ('menubar.php');
-	
+	include_once ('bin/config.php');
+	include_once ('bin/supportfuncs.php');
+	include_once ('bin/model/clip.php');
+	include_once ('bin/model/report.php');
+
+	/* Open the database */
+	$mysqli = opendb();
+
+	/* Determine the range of reports to present */	
 	// param m is start index, default 0
 	$start = (int)$_GET["m"];
 	if (is_null($start)) {
@@ -60,18 +67,14 @@ header("Content-type: text/html; charset=utf-8");
 		$clipid = NULL;
 		
 ?>
-<h1>Reports</h1>
 
 
 <?php	
-	include_once ('bin/config.php');
-	include_once ('bin/supportfuncs.php');
-	include_once ('bin/model/clip.php');
-	include_once ('bin/model/report.php');
+	include ('menubar.php');
+?>	
 
-
-	/* Open the database */
-	$mysqli = opendb();
+<h1>Reports</h1>
+<?php
 
 	// Get one extra report so we know if there are more to come
 	if ($clipid)
@@ -172,7 +175,7 @@ header("Content-type: text/html; charset=utf-8");
 		}
 		echo ("</ul>\n");
 		$user = $_SESSION['user'];
-		if ($user->hasRole($mysqli, User::ROLE_EDITOR)) {
+		if ($user->hasRole(User::ROLE_EDITOR)) {
 			echo ("<button type='button' onclick='location.href=\"processdelreport.php?id={$report->id}\"'>");
 			echo ("Delete report</button>");
 			echo ("</td>");
