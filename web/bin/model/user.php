@@ -190,7 +190,6 @@ class User {
 		$val = $this->roles[$role];
 		if (is_null ($val))
 			$val = false;
-		error_log("hasRole on " . $role . " " . $val);
 		return $val;
 	}
 	
@@ -209,7 +208,6 @@ class User {
 				if (is_null($row)) {
 					break;
 				}
-				error_log ("Role " . $row[0]);
 				$retval[intval($row[0])] = true;
 			}
 			return $retval;
@@ -226,7 +224,6 @@ class User {
 		$pwh = sqlPrep($this->passwordHash);
 		$nm = sqlPrep($this->name);
 		$insstmt = "INSERT INTO USERS (LOGIN_ID, PASSWORD_HASH, NAME) VALUES ($lgn, $pwh, $nm)";
-		error_log($insstmt);
 		$res = $mysqli->query ($insstmt);
 		if ($res) {
 			// Retrieve the ID of the row we just inserted

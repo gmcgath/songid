@@ -4,11 +4,14 @@
    Copyright 2014 by Gary McGath.
    This code is made available under the MIT license.
    See README.txt in the source distribution.
+   
+   Users with the Contributor and Editor roles can view this page.
+   
 */
 
-include_once('bin/model/user.php');
+require_once('bin/model/user.php');
 session_start();
-include('bin/sessioncheck.php');
+require_once('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
@@ -37,6 +40,11 @@ header("Content-type: text/html; charset=utf-8");
 
 	/* Open the database */
 	$mysqli = opendb();
+	$user = $_SESSION['user'];
+	if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_EDITOR))) {
+		header ("Location: norole.php", true, 302);
+		return;
+	}
 
 	/* Determine the range of reports to present */	
 	// param m is start index, default 0

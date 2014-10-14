@@ -4,6 +4,8 @@
    Copyright 2014 by Gary McGath.
    This code is made available under the MIT license.
    See README.txt in the source distribution.
+   
+   Users with the Contributor and Editor roles can view this page.
 */
 
 header("Content-type: text/html; charset=utf-8");
@@ -33,6 +35,11 @@ if (!sessioncheck())
 	
 	/* Open the database */
 	$mysqli = opendb();
+	$user = $_SESSION['user'];
+	if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_EDITOR))) {
+		header ("Location: norole.php", true, 302);
+		return;
+	}
 	include ('menubar.php');
 ?>
 

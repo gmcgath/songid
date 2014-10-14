@@ -12,6 +12,7 @@
    whole page will be executed. The caller has to return
    if sessioncheck returns false. */
 
+/* Automatically kick the user to the login page if no session with a user */
 function sessioncheck () {
 	if (!$_SESSION['user']) {
 		header ("Location: login.php", true, 302);
@@ -20,5 +21,12 @@ function sessioncheck () {
 	else {
 		return true;
 	}
+}
+
+/* Return true if there is a session with a user */
+function isSessionActive () {
+	if ($_SESSION['user']) 
+		return true;
+	return false;
 }
 ?>
