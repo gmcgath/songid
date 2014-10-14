@@ -80,16 +80,16 @@ if (!sessioncheck())
 			echo ("<td><a href='idform.php?id=");
 			echo ($clip->id);
 			echo ("'>");
-			echo ("Create report</a></td>\n");
+			echo ("Create report</a>&nbsp;</td>\n");
 			
 			echo ("<td><a href='reports.php?clip={$clip->id}'>");
-			echo ("View reports</a></td>\n");
+			echo ("View reports</a>&nbsp;</td>\n");
 			
 			if ($user->hasRole(User::ROLE_EDITOR)) {
 				echo ("<td><a href='editclip.php?id=");
 				echo ($clip->id);
 				echo ("'>");
-				echo ("Edit");
+				echo ("Edit&nbsp;");
 				echo ("</a></td>");
 			}
 			echo ("</tr>\n");

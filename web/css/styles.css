@@ -40,9 +40,9 @@ ul.menubar li {float: left; width: 200px; }
 
 .submitbutton {background-color: #BBCCFF}
 
-table.cliptable {padding-left: 30px;}
+table.cliptable {padding-left: 30px; border-collapse: collapse;}
 
-table.cliptable tr {border: 1px solid blue;}
+table.cliptable tr, table.cliptable td {border: 1px solid blue;}
 
 table.editcliptable {padding-left: 30px;}
 
