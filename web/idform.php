@@ -411,7 +411,6 @@ function removenameinput (buttn) {
 /* Set the value of the dochain field when the submit and continue button
    is clicked */
 function chainOn () {
-//	$("input[id=dochain]").val("yes");
 	$('#dochain').attr("value", "yes");
 }
 

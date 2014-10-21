@@ -4,6 +4,8 @@
    Copyright 2014 by Gary McGath.
    This code is made available under the MIT license.
    See README.txt in the source distribution.
+   
+   This page lets a user with the Editor role modify the information about a clip.
 */
 
 header("Content-type: text/html; charset=utf-8");

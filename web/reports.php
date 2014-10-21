@@ -26,17 +26,22 @@ header("Content-type: text/html; charset=utf-8");
 	<title>Reports</title>
 	<meta name="generator" content="BBEdit 10.5" />
 	<link href="css/styles.css" rel="stylesheet">
-	
+	<script type="text/JavaScript"
+		src="http://code.jquery.com/jquery-1.11.1.js">
+	</script>
+	<script type="text/JavaScript"
+		src="//code.jquery.com/ui/1.11.1/jquery-ui.js">
+	</script>
 </head>
 <body>
 <noscript><strong>Sorry, JavaScript is required.</strong>
 </noscript>
 
 <?php
-	include_once ('bin/config.php');
-	include_once ('bin/supportfuncs.php');
-	include_once ('bin/model/clip.php');
-	include_once ('bin/model/report.php');
+	require_once ('bin/config.php');
+	require_once ('bin/supportfuncs.php');
+	require_once ('bin/model/clip.php');
+	require_once ('bin/model/report.php');
 
 	/* Open the database */
 	$mysqli = opendb();
@@ -54,9 +59,8 @@ header("Content-type: text/html; charset=utf-8");
 		if ($start < 0)
 			$start = 0;
 	}
-	$hideprev = false;
-	if ($start == 0) 
-		$hideprev = true;
+
+	$hideprev = ($start == 0);
 	
 	// param n is end index, default 10
 	$nstr = $_GET["n"];
@@ -71,52 +75,101 @@ header("Content-type: text/html; charset=utf-8");
 	
 	// param clip says to just show for one clip, default all clips
 	$clipid = $_GET["clip"];
-	if (!ctype_digit($clipid))
+	if ( !ctype_digit($clipid) ) {
 		$clipid = NULL;
+	}
+	
+	// Get parameters for report date range. Format is yyyymmdd
+	$stdt = $_GET["stdt"];
+	$endt = $_GET["endt"];
+	$startDate = new ShortDate("20140701");		// The beginning of the world to us
+	if ($stdt) {
+		try {
+			$startDate = new ShortDate($stdt);
+		} catch (Exception $ex) {
+		}
+	}
+	$endDate = new ShortDate(null);
+	if ($endt) {
+		try {
+			$endDate = new ShortDate($endt);
+		} catch (Exception $ex) {
+		}
+	}
 		
-?>
-
-
-<?php	
 	include ('menubar.php');
 ?>	
 
 <h1>Reports</h1>
+
 <?php
 
 	// Get one extra report so we know if there are more to come
 	if ($clipid)
-		$reports = Report::getReportsForClip ($mysqli, $clipid, $start, $itemsPerPage + 1);
+		$reports = Report::getReportsForClip ($mysqli, $clipid, $start,
+				$itemsPerPage + 1, 
+				$startDate,
+				$endDate);
 	else
-		$reports = Report::getReports ($mysqli, $start, $itemsPerPage + 1);
+		$reports = Report::getReports ($mysqli, $start, 
+				$itemsPerPage + 1,
+				$startDate,
+				$endDate);
 	if (count($reports) <= $itemsPerPage)
 		$hidenext = true;
-?>
 
-<table class="reportnav">
-<tr>
-<td id="reportprev">
-<?php
-	/* Previous n */
+	/* Calculate previous n */
 	if (!$hideprev) {
 		$prevm = $start - $itemsPerPage;
 		if ($prevm < 0)
 			$prevm = 0;
-		echo ("<a href='reports.php?m=$prevm'>Previous</a>\n");
 	}
-?>
-</td>
-<td id="reportnext">
-<?php
-	/* Next n */
+
+	/* Calculate next n */
 	if (!$hidenext) {
 		$nextm = $start + $itemsPerPage;
-		echo ("<a href='reports.php?m=$nextm'>Next</a>\n");
 	}
 ?>
-</td>
+
+<form action="reports.php" method="get" accept-charset="UTF-8">
+<div style="background-color:#D0D0E0">
+<table><tr class="datepicker">
+<td>Start date:
+<span id="startpicker" class="ui-datepicker ui-datepicker-inline"></span></td>
+<td>End date:
+<span id="endpicker" class="ui-datepicker ui-datepicker-inline"></span></td>
+
+<input type="hidden" id="stdt" name="stdt">
+<input type="hidden" id="endt" name="endt">
+<input type="hidden" id="mvalue" name="m">
 </tr>
 </table>
+<table>
+<td class="reportnavtd">
+<?php
+if (! $hideprev ) {
+?>
+<input type="submit" class="submitbutton" value="Previous" onclick="submitPrev();">
+<?php
+}
+?>
+</td>
+<td class="reportnavtd">
+<input type="submit" class="submitbutton" value="Refresh">
+</td>
+<td class="reportnavtd">
+<?php
+if ( !$hidenext ) {
+?>
+	<input type="submit" class="submitbutton" value="Next" onclick="submitNext();">
+<?php
+}
+?>
+</td>
+</table>
+</form>
+</div>
+<div style="font-size:20pt;">&nbsp;</div>
 
 <form action="exportcsv.php" method="post" accept-charset="UTF-8">
 <input type='submit' class="submitbutton" value="Export CSV">
@@ -260,6 +313,83 @@ header("Content-type: text/html; charset=utf-8");
 	}
 	
 ?>
+<script type="text/JavaScript">
+$( "#startpicker" ).datepicker({dateFormat: 'yymmdd', 
+	inline: true,
+	onSelect: function(dateText, inst) {
+		$('#stdt').val(dateText);
+	}
+	});
+
+/* Set the calendar widget dates. Datepicker months are zero-based, 
+   so we have to adjust for that. */
+$( "#startpicker" ).datepicker("setDate", new Date(
+<?php
+	echo ("'" . $startDate->year . "'");
+?>
+	,
+<?php
+	echo ("'" . ($startDate->month - 1) . "'");
+?>
+	,
+<?php
+	echo ("'" . $startDate->day . "'");
+?>
+	));
+
+$( "#endpicker" ).datepicker({dateFormat: 'yymmdd', 
+	inline: true,
+	onSelect: function(dateText, inst) {
+		$('#endt').val(dateText);
+	}
+	});
+$( "#endpicker" ).datepicker("setDate", new Date(
+<?php
+	echo ("'" . $endDate->year . "'");
+?>
+	,
+<?php
+	echo ("'" . ($endDate->month - 1) . "'");
+?>
+	,
+<?php
+	echo ("'" . $endDate->day . "'");
+?>
+	));
+
+/* The "Next" button calls this as an onclick function to fill the
+   appropriate hidden fields. */
+function submitPrev() {
+	$('#mvalue').val(
+<?php
+		echo ('"' . $prevm . '"');
+?>
+	);
+}
+
+/* The "Previous" button calls this as an onclick function to fill the
+   appropriate hidden fields. */
+function submitNext() {
+	$('#mvalue').val(
+<?php
+		echo ('"' . $nextm . '"');
+?>
+	);
+}
+
+/* Initialize values for hidden date fields to the values we received */
+$('#stdt').val(
+<?php
+	echo ("'" . $startDate->toShortString() . "'");
+?>
+);
+$('#endt').val(
+<?php
+	echo ("'" . $endDate->toShortString() . "'");
+?>
+);
+
+</script>
 
 </body>
 </html>

@@ -13,6 +13,7 @@ include_once (dirname(__FILE__) . '/actor.php');
 include_once (dirname(__FILE__) . '/song.php');
 include_once (dirname(__FILE__) . '/clip.php');
 include_once (dirname(__FILE__) . '/instrument.php');
+include_once (dirname(__FILE__) . '/../shortdate.php');
 
 class Report {
 
@@ -325,21 +326,33 @@ class Report {
 	   is put into the array. Chained reports are linked by the nextReport
 	   field.
 	   
+	   startDate and endDate are ShortDate objects or null.
+	   
 	   -1 for either range value gets you all the reports.
 	*/
-	public static function getReports ($mysqli, $m, $n) {
+	public static function getReports ($mysqli, $m, $n, $startDate, $endDate) {
+		// Basic where clause; get the head of each chain, signified by a null MASTER_ID
+		$whereClause = "MASTER_ID IS NULL";
+		if ($startDate) {
+			$whereClause .= " AND DATE >= timestamp '" . $startDate->toDateTime('start') . "'";
+		}
+		if ($endDate) {
+			$whereClause .= " AND DATE <= timestamp '" . $endDate->toDateTime('end') . "'";
+		}
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS  " .
-			"WHERE MASTER_ID IS NULL " .
-			"ORDER BY DATE DESC";
+			"WHERE " .
+			$whereClause .
+			" ORDER BY DATE DESC";
 		if ($m >= 0 && $n >= 0)
 			$selstmt .= " LIMIT $m, $n ";
+		error_log($selstmt);
 		return Report::getReports1 ($mysqli, $selstmt, $m, $n);
 	}
 	
 	/* Like getReports, but for just one clip */
-	public static function getReportsForClip($mysqli, $clipid, $m, $n) {
+	public static function getReportsForClip($mysqli, $clipid, $m, $n, $startDate, $endDate) {
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS  " .

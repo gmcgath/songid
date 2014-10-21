@@ -40,6 +40,8 @@ ul.menubar li {float: left; width: 200px; }
 
 .submitbutton {background-color: #BBCCFF}
 
+.reportnavtd {vertical-align:top; width:150px;}
+
 table.cliptable {padding-left: 30px; border-collapse: collapse;}
 
 table.cliptable tr, table.cliptable td {border: 1px solid blue;}
@@ -57,3 +59,61 @@ td.reportnav { width: 100px; }
 .notice {color: blue; font-weight: bold; font-size: 120%;}
 
 .flagged {color: red; font-weight: bold; font-style: italic; }
+
+.ui-datepicker {
+	width: 216px;
+	height: auto;
+	margin: 5px auto 0;
+	font: 9pt Arial, sans-serif;
+	-webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, .5);
+	-moz-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, .5);
+	box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, .5);
+}
+
+.ui-datepicker a {
+	text-decoration: none;
+}
+
+.ui-datepicker table {
+	width: 100%;
+}
+
+.ui-datepicker-prev, .ui-datepicker-next {
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	color: green;
+	text-align: center;
+	cursor: pointer;
+}
+
+.ui-datepicker-prev {
+	float: left;
+	background-position: center -30px;
+}
+.ui-datepicker-next {
+	float: right;
+	background-position: center 0px;
+}
+
+.ui-datepicker-title {
+	text-align: center;
+	font-weight: bold;
+}
+
+.ui-datepicker-calendar .ui-state-active {
+	color: #e0e0e0;
+	background: #002030;
+	text-shadow: 0px 1px 0px #4d7a85;
+	margin: -1px;
+}
+
+tr.datepicker {
+	height:200px;	
+}
+
+tr.datepicker > td {
+	width:250px;
+	height:200px;
+	vertical-align:top;
+}
