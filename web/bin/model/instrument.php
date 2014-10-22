@@ -18,7 +18,7 @@ class Instrument {
 
 	/** Return an Instrument matching the specified ID. If no song matches,
 	    returns null. Throws an Exception if there is an SQL error. */
-	public static function findById ($mysqli, $instId) {
+	public static function findById (mysqli $mysqli, $instId) {
 		$selstmt = "SELECT NAME, CATEGORY_ID FROM INSTRUMENTS WHERE ID = '" . $instId . "'";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
@@ -41,7 +41,7 @@ class Instrument {
 	
 	/** Return an array of Instruments, ordered by name, that belong to a
 	    specified category. */
-	public static function getInstrumentsByCategory ($mysqli, $catId) {
+	public static function getInstrumentsByCategory (mysqli $mysqli, $catId) {
 		$selstmt = "SELECT ID, NAME FROM INSTRUMENTS WHERE CATEGORY_ID = $catId " .
 			"ORDER BY NAME";
 		$res = $mysqli->query($selstmt);

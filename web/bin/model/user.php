@@ -31,7 +31,7 @@ class User {
 	/* Check the login credentials. Return a User object if good,
 	   pw must NOT be escaped.
 	   NULL otherwise. */
-	public static function verifyLogin($mysqli, $username, $pw) {
+	public static function verifyLogin(mysqli $mysqli, $username, $pw) {
 		$usr = sqlPrep($username);
 		$selstmt = "SELECT ID, PASSWORD_HASH, NAME FROM USERS WHERE LOGIN_ID = $usr";
 		$res = $mysqli->query($selstmt);
@@ -56,7 +56,7 @@ class User {
 	}
 	
 	/* Retrieve a row with a given login name, not checking the password */
-	public static function findByLoginId ($mysqli, $username) {
+	public static function findByLoginId (mysqli $mysqli, $username) {
 		$usr = sqlPrep($username);
 		$selstmt = "SELECT ID, PASSWORD_HASH, NAME FROM USERS WHERE LOGIN_ID = $usr";
 		$res = $mysqli->query($selstmt);
@@ -80,7 +80,7 @@ class User {
 	}
 	
 	/* Retrieve a row with a given ID */
-	public static function findById ($mysqli, $id) {
+	public static function findById (mysqli $mysqli, $id) {
 		$selstmt = "SELECT LOGIN_ID, PASSWORD_HASH, NAME FROM USERS WHERE ID = $id";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
@@ -103,7 +103,7 @@ class User {
 	}
 	
 	/* Get all the users. */
-	public static function getAllUsers($mysqli) {
+	public static function getAllUsers(mysqli $mysqli) {
 		$selstmt = "SELECT ID, LOGIN_ID, NAME FROM USERS";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
@@ -129,7 +129,7 @@ class User {
 	}
 	
 	/* Assign a role to a user. */
-	public function assignRole ($mysqli, $role) {
+	public function assignRole (mysqli $mysqli, $role) {
 		// Check if the role is already assigned
 		if ($this->hasRole ($role)) {
 			return;			// nothing to do
@@ -146,7 +146,7 @@ class User {
 	}
 	
 	/* Remove a role from a user. */
-	public function removeRole ($mysqli, $role) {
+	public function removeRole (mysqli $mysqli, $role) {
 		if (!$this->hasRole ($role)) {
 			return;			// nothing to do
 		}
@@ -164,25 +164,6 @@ class User {
 		$this->roles[$role] = false;
 	}
 	
-	/* Return true if a user has a specified role. DEPRECATED. */
-//	public function hasRole_old ($mysqli, $role) {
-//		$cntstmt = "SELECT COUNT(*) FROM USERS_ROLES WHERE USER_ID = {$this->id} " .
-//					"AND ROLE = $role";
-//		$res = $mysqli->query($cntstmt);
-//		if ($mysqli->connect_errno) {
-//			error_log("Connect error getting User role: " . $mysqli->connect_error);
-//			throw new Exception ($mysqli->connect_error);
-//		}
-//		if ($res) {
-//			$row = $res->fetch_row();
-//			if (!is_null($row)) {
-//				$count = (int) $row[0];
-//				if ($count > 0)
-//					return true;
-//			}
-//		}
-//		return false;
-//	}
 	
 	/* Return true if a user has a specified role, otherwise false. */
 	public function hasRole ($role) {
@@ -194,7 +175,7 @@ class User {
 	}
 	
 	/* Return an array of all roles belonging to a user. */
-	private function getRoles($mysqli) {
+	private function getRoles(mysqli $mysqli) {
 		$selstmt = "SELECT ROLE FROM USERS_ROLES WHERE USER_ID = {$this->id} ";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
@@ -219,7 +200,7 @@ class User {
 	/* Inserts a User into the database. Throws an Exception on failure.
 	   Returns the ID if successful.
 	*/
-	public function insert ($mysqli) {
+	public function insert (mysqli $mysqli) {
 		$lgn = sqlPrep($this->loginId);
 		$pwh = sqlPrep($this->passwordHash);
 		$nm = sqlPrep($this->name);

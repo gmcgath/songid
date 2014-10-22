@@ -98,8 +98,7 @@ if (!sessioncheck())
 	}
 	catch (Exception $e) {
 		error_log($e->getMessage());
-		echo ("<p>There was a problem.</p>\n");
-		error_log ($e->getMessage());
+		echo ("<p>Sorry, an error occurred.</p>");
 	}
 ?>
 </body>

@@ -18,7 +18,7 @@ class ShortDate {
 	var $day;
 	
 	/* Constructor. If dateStr is not provided, set the date to today. */
-	public function ShortDate($dateStr) {
+	public function __construct($dateStr) {
 		if (!$dateStr) {
 			// Set the date to today
 			$this->year = date("Y");

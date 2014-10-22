@@ -330,7 +330,11 @@ class Report {
 	   
 	   -1 for either range value gets you all the reports.
 	*/
-	public static function getReports ($mysqli, $m, $n, $startDate, $endDate) {
+	public static function getReports ($mysqli, 
+			$m, 
+			$n, 
+			ShortDate $startDate, 
+			ShortDate $endDate) {
 		// Basic where clause; get the head of each chain, signified by a null MASTER_ID
 		$whereClause = "MASTER_ID IS NULL";
 		if ($startDate) {
@@ -352,7 +356,12 @@ class Report {
 	}
 	
 	/* Like getReports, but for just one clip */
-	public static function getReportsForClip($mysqli, $clipid, $m, $n, $startDate, $endDate) {
+	public static function getReportsForClip($mysqli, 
+			$clipid, 
+			$m, 
+			$n, 
+			ShortDate $startDate, 
+			ShortDate $endDate) {
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS  " .

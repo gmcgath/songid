@@ -30,7 +30,7 @@ class Orchestra {
 	var $mysqli;
 	var $sections;		// an array of Sections, ordered by the display sequence
 	
-	public function Orchestra ($mysqli) {
+	public function __construct ($mysqli) {
 		error_log("Constructing Orchestra");
 		$this->mysqli = $mysqli;
 		$this->sections = array();

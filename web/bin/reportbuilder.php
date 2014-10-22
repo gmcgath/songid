@@ -22,7 +22,7 @@ class ReportBuilder {
 	var $isSongAmbiguous;
 	
 	/* Constructor. Creates an empty Report object. */
-	public function ReportBuilder ($sqli) {
+	public function __construct ($sqli) {
 		if (is_null($sqli))
 			throw new Exception ("reportbuilder.php: null mysqli object");
 		$this->mysqli = $sqli;

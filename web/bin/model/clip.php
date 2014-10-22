@@ -24,7 +24,7 @@ class Clip {
 	   returns an empty array. If there's a database problem,
 	   throws an Exception with the SQL error message.
 	*/
-	public static function getRows ($mysqli, $idx, $n, $onlyUnrep) {
+	public static function getRows (mysqli $mysqli, $idx, $n, $onlyUnrep) {
 		if ($onlyUnrep) 
 			$selstmt = "SELECT DISTINCT c.ID, c.DESCRIPTION, c.URL, c.DATE FROM CLIPS c LEFT JOIN REPORTS r " .
 				"ON c.ID = r.CLIP_ID " .
@@ -56,7 +56,7 @@ class Clip {
 	}
 	
 	/* Return the Clip with the specified ID, or NULL. */
-	public static function findById($mysqli, $id) {
+	public static function findById(mysqli $mysqli, $id) {
 		
 		$id = sqlPrep($id);
 		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS WHERE ID = $id";
@@ -81,7 +81,7 @@ class Clip {
 	}
 	
 	/* Write the updated values of the clip out. */
-	public function update($mysqli) {
+	public function update(mysqli $mysqli) {
 		$desc = sqlPrep($this->description);
 		$ur = sqlPrep($this->url);
 		$id = sqlPrep($this->id);
@@ -99,7 +99,7 @@ class Clip {
 	   Returns the ID if successful. 
 	   The Date field will not be filled in. You have to re-get the Clip to do that.
 	*/
-	public function insert ($mysqli) {
+	public function insert (mysqli $mysqli) {
 		$dsc = sqlPrep($this->description);
 		$url = sqlPrep($this->url);
 		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
