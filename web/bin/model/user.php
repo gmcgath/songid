@@ -34,12 +34,11 @@ class User {
 	   pw must NOT be escaped.
 	   NULL otherwise. */
 	public static function verifyLogin(mysqli $mysqli, $username, $pw) {
-		global $logger;
 		$usr = sqlPrep($username);
 		$selstmt = "SELECT ID, PASSWORD_HASH, NAME FROM USERS WHERE LOGIN_ID = $usr";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Error getting Users: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error getting Users: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {
@@ -60,13 +59,11 @@ class User {
 	
 	/* Retrieve a row with a given login name, not checking the password */
 	public static function findByLoginId (mysqli $mysqli, $username) {
-		global $logger;
-		
 		$usr = sqlPrep($username);
 		$selstmt = "SELECT ID, PASSWORD_HASH, NAME FROM USERS WHERE LOGIN_ID = $usr";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Error getting Users: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error getting Users: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {
@@ -86,11 +83,10 @@ class User {
 	
 	/* Retrieve a row with a given ID */
 	public static function findById (mysqli $mysqli, $id) {
-		global $logger;
 		$selstmt = "SELECT LOGIN_ID, PASSWORD_HASH, NAME FROM USERS WHERE ID = $id";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Error getting Users: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error getting Users: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {
@@ -110,11 +106,10 @@ class User {
 	
 	/* Get all the users. */
 	public static function getAllUsers(mysqli $mysqli) {
-		global $logger;
 		$selstmt = "SELECT ID, LOGIN_ID, NAME FROM USERS";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Connection error getting Users: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Connection error getting Users: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		$rows = array();
@@ -137,7 +132,6 @@ class User {
 	
 	/* Assign a role to a user. */
 	public function assignRole (mysqli $mysqli, $role) {
-		global $logger;
 		// Check if the role is already assigned
 		if ($this->hasRole ($role)) {
 			return;			// nothing to do
@@ -147,7 +141,7 @@ class User {
 				"({$this->id}, $role)";
 		$res = $mysqli->query($insstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Error getting User role: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error getting User role: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		$this->roles[$role] = true;
@@ -155,7 +149,6 @@ class User {
 	
 	/* Remove a role from a user. */
 	public function removeRole (mysqli $mysqli, $role) {
-		global $logger;
 		if (!$this->hasRole ($role)) {
 			return;			// nothing to do
 		}
@@ -166,7 +159,7 @@ class User {
 			"'";
 		$res = $mysqli->query($delstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Error getting User role: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error getting User role: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		$this->roles[$role] = false;
@@ -184,11 +177,10 @@ class User {
 	
 	/* Return an array of all roles belonging to a user. */
 	private function getRoles(mysqli $mysqli) {
-		global $logger;
 		$selstmt = "SELECT ROLE FROM USERS_ROLES WHERE USER_ID = {$this->id} ";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Connect error getting User roles: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Connect error getting User roles: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		$retval = array();
@@ -202,7 +194,7 @@ class User {
 			}
 			return $retval;
 		}
-		$logger->error("Error in getRoles: " . $mysqli->error);
+		$GLOBALS["logger"]->error("Error in getRoles: " . $mysqli->error);
 		return false;
 	}
 	
@@ -210,7 +202,6 @@ class User {
 	   Returns the ID if successful.
 	*/
 	public function insert (mysqli $mysqli) {
-		global $logger;
 		$lgn = sqlPrep($this->loginId);
 		$pwh = sqlPrep($this->passwordHash);
 		$nm = sqlPrep($this->name);
@@ -221,7 +212,7 @@ class User {
 			$this->id = $mysqli->insert_id;
 			return $this->id;
 		}
-		$logger->error ("Error inserting User: " . $mysqli->error);
+		$GLOBALS["logger"]->error ("Error inserting User: " . $mysqli->error);
 		throw new Exception ("Could not add User {$this->loginId} to database");
 	}
 }

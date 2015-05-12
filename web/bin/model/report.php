@@ -105,13 +105,12 @@ class Report {
 	/** Return a Report matching the specified ID. If no report matches,
 	    returns null. Throws an Exception if there is an SQL error. */
 	public static function findById ($mysqli, $reportId) {
-		global $logger;
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
 			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 			"FROM REPORTS WHERE ID = " . $reportId;
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error($mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error in Report findById: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {
@@ -140,8 +139,6 @@ class Report {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
-		global $logger;
-		
 		$sngid = NULL;
 		if (!is_null($this->song)) 
 			$sngid = $this->song->id;
@@ -160,7 +157,7 @@ class Report {
 			" VALUES ($clpid, $mstrid, $seqn, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng, $flgd)";
 		$res = $mysqli->query ($insstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error($mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error in Report insert: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {
@@ -170,19 +167,18 @@ class Report {
 			$this->writeInstruments ($mysqli);
 			return $this->id;
 		}
-		$logger->error ("Error inserting report: " . $mysqli->error);
+		$GLOBALS["logger"]->error ("Error inserting report: " . $mysqli->error);
 		
 		return false;
 	}
 	
 	/* Deletes the current Report from the database. */
 	public function delete ($mysqli) {
-		global $logger;
 		$id = sqlPrep($this->id);
 		$delstmt = "DELETE FROM REPORTS WHERE ID = $id";
 		$res = $mysqli->query ($delstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error($mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error in Report delete: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 	}
@@ -268,11 +264,10 @@ class Report {
 
 	/* After writing the Report, write the Performers if necessary. */
 	private function writePerformers ($mysqli) {
-		global $logger;
-		$logger->debug("writePerformers");
+		$GLOBALS["logger"]->debug("writePerformers");
 		if ($this->performers != NULL) {
 			foreach ($this->performers as $performer) {
-				$logger->debug("Got a performer {$performer->id}");
+				$GLOBALS["logger"]->debug("Got a performer {$performer->id}");
 				// $performer is an Actor
 				$rptid = sqlPrep($this->id);
 				$actid = sqlPrep($performer->id);
@@ -280,7 +275,7 @@ class Report {
 					"VALUES ($rptid, $actid)";
 				$mysqli->query($insstmt);
 				if ($mysqli->connect_errno) {
-					$logger->error($mysqli->connect_error);
+					$GLOBALS["logger"]->error("Error in Report writePerformers: " . $mysqli->connect_error);
 					throw new Exception ("Error writing performers: " . $mysqli->connect_error);
 				}
 			}
@@ -289,8 +284,6 @@ class Report {
 	
 	/* After writing the Report, write the Instruments if necessary. */
 	private function writeInstruments ($mysqli) {
-		global $logger;
-		
 		if ($this->instruments != NULL) {
 			foreach ($this->instruments as $instrument) {
 				$rptid = sqlPrep($this->id);
@@ -299,7 +292,7 @@ class Report {
 					"VALUES ($rptid, $instid)";
 				$mysqli->query($insstmt);
 				if ($mysqli->connect_errno) {
-					$logger->error($mysqli->connect_error);
+					$GLOBALS["logger"]->error("Error in Report writeInstruments: " . $mysqli->connect_error);
 					throw new Exception ("Error writing instruments: " . $mysqli->connect_error);
 				}
 			}
@@ -316,8 +309,7 @@ class Report {
 	
 	/* Set the sound subtype, either using one of the string constants or integers. */
 	public function setSoundSubtype ($typ) {
-		global $logger;
-		$logger->debug("setSoundSubtype: $typ");
+		$GLOBALS["logger"]->debug("setSoundSubtype: $typ");
 		if (ctype_digit ($typ))
 			$this->soundSubtype = $typ;
 		else if (!is_null($this->soundSubtypeMap[$typ]))
@@ -344,8 +336,6 @@ class Report {
 			$n, 
 			ShortDate $startDate, 
 			ShortDate $endDate) {
-		global $logger;
-		
 		// Basic where clause; get the head of each chain, signified by a null MASTER_ID
 		$whereClause = "MASTER_ID IS NULL";
 		if ($startDate) {
@@ -362,7 +352,6 @@ class Report {
 			" ORDER BY DATE DESC";
 		if ($m >= 0 && $n >= 0)
 			$selstmt .= " LIMIT $m, $n ";
-		$logger->debug($selstmt);
 		return Report::getReports1 ($mysqli, $selstmt, $m, $n);
 	}
 	
@@ -384,17 +373,16 @@ class Report {
 
 
 	private static function getReports1($mysqli, $selstmt, $m, $n) {
-		global $logger;
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error($mysqli->connect_error);
+			$GLOBALS["logger"]->error($mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		$reports = array();
 		if ($res) {
 			while (true) {
 				$row = $res->fetch_row();
-				$logger->debug("Got a report row");
+				$GLOBALS["logger"]->debug("Got a report row");
 				if (is_null($row))
 					break;
 				$rep = new Report();
@@ -409,13 +397,12 @@ class Report {
 	/* Construct the report from a result row. This is used from getReports and
 	   findById, which need to return the same row elements. */
 	private function buildFromRow($mysqli, $row) {
-		global $logger;
 		$this->id = $row[0];
 		$clipId = $row[1];
 		$this->clip = Clip::findById($mysqli, $clipId);
 		
 		$userId = $row[2];
-		$logger->debug("User id = $userId");
+		$GLOBALS["logger"]->debug("User id = $userId");
 		if ($userId) {
 			$this->user = User::findById($mysqli, $userId);
 		}
@@ -424,7 +411,7 @@ class Report {
 		$this->performerType = $row[5];
 		$songId = $row[6];
 		if (!is_null($songId)) {
-			$logger->debug ("Finding song by ID $songId");
+			$GLOBALS["logger"]->debug ("Finding song by ID $songId");
 			$this->song = Song::findById($mysqli, $songId);
 		}
 		$this->singalong = ($row[7] == 1) ? true : false;
@@ -458,10 +445,9 @@ class Report {
 	
 	/* Add any instruments to the Report object */
 	private function addInstruments ($mysqli) {
-		global $logger;
 		$rptid = sqlPrep($this->id);
 		$selstmt = "SELECT INSTRUMENT_ID FROM REPORTS_INSTRUMENTS WHERE REPORT_ID = $rptid";
-		$logger->debug($selstmt);
+		$GLOBALS["logger"]->debug($selstmt);
 		$res = $mysqli->query($selstmt);
 		$this->instruments = array();
 		if ($res) {
@@ -480,7 +466,6 @@ class Report {
 	
 	/* Build the chain of reports that follows a master report. */
 	private function buildChain ($mysqli) {
-		global $logger;
 		$rpt = $this;
 		$rptid = sqlPrep($this->id);
 		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
@@ -488,7 +473,7 @@ class Report {
 			"FROM REPORTS WHERE MASTER_ID = " . $rptid;
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error($mysqli->connect_error);
+			$GLOBALS["logger"]->error($mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {

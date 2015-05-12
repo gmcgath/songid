@@ -43,7 +43,6 @@ class Song {
 	
 	/** Returns an array of Songs matching the title. May be empty. */
 	public static function findByTitle ($mysqli, $title) {
-		global $logger;
 		$ttl = sqlPrep ($title);
 		$selstmt = "SELECT ID, NOTE FROM SONGS WHERE TITLE = $ttl";
 		$res = $mysqli->query($selstmt);
@@ -70,7 +69,6 @@ class Song {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
-		global $logger;
 		$ttl = sqlPrep($this->title);
 		$nte = sqlPrep($this->note);
 		$insstmt = "INSERT INTO SONGS (TITLE, NOTE) VALUES ($ttl, $nte)";
@@ -80,7 +78,7 @@ class Song {
 			$this->id = $mysqli->insert_id;
 			return $this->id;
 		}
-		$logger->error ("Error inserting Song: " . $mysqli->error);
+		$GLOBALS["logger"]->error ("Error inserting Song: " . $mysqli->error);
 		throw new Exception ("Could not add Song {$this->title} to database");
 	}
 	

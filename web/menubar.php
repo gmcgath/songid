@@ -11,7 +11,7 @@ if ($usr) {
 	echo ($usr->name);
 }
 else {
-	$logger->info ("No user???");
+	$GLOBALS["logger"]->info ("No user???");
 }
 ?>
 </p>

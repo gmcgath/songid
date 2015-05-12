@@ -31,7 +31,7 @@ $mysqli = opendb();
 $userids = array();
 while ( list( $param, $val ) = each( $_POST ) ) {
 	if (substr($param, 0, 4) == "user") {
-		$logger->debug("updateusers: Got parameter " . $param);
+		$GLOBALS["logger"]->debug("updateusers: Got parameter " . $param);
 		$userids[] = intval(substr($param, 4));
 	}
 }
@@ -50,33 +50,33 @@ foreach ($userids as $userid) {
 		// Handle addition of roles
 		if ($adminChecked && !$u->hasRole(User::ROLE_ADMINISTRATOR)) {
 			$changed = true;
-			$logger->info ("Adding Administrator role for " . $u->loginId);
+			$GLOBALS["logger"]->info ("Adding Administrator role for " . $u->loginId);
 			$u->assignRole($mysqli, User::ROLE_ADMINISTRATOR);
 		}
 		if ($editorChecked && !$u->hasRole(User::ROLE_EDITOR)) {
 			$changed = true;
-			$logger->info ("Adding Editor role for " . $u->loginId);
+			$GLOBALS["logger"]->info ("Adding Editor role for " . $u->loginId);
 			$u->assignRole($mysqli, User::ROLE_EDITOR);
 		}
 		if ($contribChecked && !$u->hasRole(User::ROLE_CONTRIBUTOR)) {
 			$changed = true;
-			$logger->info ("Adding Contributor role for " . $u->loginId);
+			$GLOBALS["logger"]->info ("Adding Contributor role for " . $u->loginId);
 			$u->assignRole($mysqli, User::ROLE_CONTRIBUTOR);
 		}
 		
 		// Handle removal of roles
 		if (!$adminChecked && $u->hasRole(User::ROLE_ADMINISTRATOR)) {
 			$changed = true;
-			$logger->info ("Would remove Administrator role for " . $u->loginId);
+			$GLOBALS["logger"]->info ("Would remove Administrator role for " . $u->loginId);
 		}
 		if (!$editorChecked && $u->hasRole(User::ROLE_EDITOR)) {
 			$changed = true;
-			$logger->info ("Removing Editor role for " . $u->loginId);
+			$GLOBALS["logger"]->info ("Removing Editor role for " . $u->loginId);
 			$u->removeRole($mysqli, User::ROLE_EDITOR);
 		}
 		if (!$contribChecked && $u->hasRole(User::ROLE_CONTRIBUTOR)) {
 			$changed = true;
-			$logger->info ("Removing Contributor role for " . $u->loginId);
+			$GLOBALS["logger"]->info ("Removing Contributor role for " . $u->loginId);
 			$u->removeRole($mysqli, User::ROLE_CONTRIBUTOR);
 		}
 		
@@ -84,6 +84,6 @@ foreach ($userids as $userid) {
 			$usersChanged++;
 	}
 }
-$logger->info ("Users that would have been changed: " . $usersChanged);
+$GLOBALS["logger"]->info ("Users that would have been changed: " . $usersChanged);
 header ("Location: adminok.php?nusers=$usersChanged", true, 302);
 ?>

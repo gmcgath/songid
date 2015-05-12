@@ -26,8 +26,6 @@ class Clip {
 	   throws an Exception with the SQL error message.
 	*/
 	public static function getRows (mysqli $mysqli, $idx, $n, $onlyUnrep) {
-		global $logger;
-		
 		if ($onlyUnrep) 
 			$selstmt = "SELECT DISTINCT c.ID, c.DESCRIPTION, c.URL, c.DATE FROM CLIPS c LEFT JOIN REPORTS r " .
 				"ON c.ID = r.CLIP_ID " .
@@ -37,7 +35,7 @@ class Clip {
 			$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS LIMIT " . $idx . " , " . $n;
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Error getting Clips: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error getting Clips: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		$rows = array();
@@ -60,13 +58,11 @@ class Clip {
 	
 	/* Return the Clip with the specified ID, or NULL. */
 	public static function findById(mysqli $mysqli, $id) {
-		global $logger;
-		
 		$id = sqlPrep($id);
 		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS WHERE ID = $id";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Error getting clip by ID: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error getting clip by ID: " . $mysqli->connect_error);
 			return NULL;
 		}
 		if ($res) {
@@ -80,13 +76,12 @@ class Clip {
 				return $clip;
 			}
 		}
-		$logger->debug ("No clip found with ID $id");
+		$GLOBALS["logger"]->debug ("No clip found with ID $id");
 		return NULL;
 	}
 	
 	/* Write the updated values of the clip out. */
 	public function update(mysqli $mysqli) {
-		global $logger;
 		$desc = sqlPrep($this->description);
 		$ur = sqlPrep($this->url);
 		$id = sqlPrep($this->id);
@@ -96,7 +91,7 @@ class Clip {
 			"WHERE ID = $id";
 		$res = $mysqli->query($updstmt);
 		if ($mysqli->connect_errno) {
-			$logger->error("Error getting clip by ID: " . $mysqli->connect_error);
+			$GLOBALS["logger"]->error("Error getting clip by ID: " . $mysqli->connect_error);
 		}
 	}
 
@@ -105,7 +100,6 @@ class Clip {
 	   The Date field will not be filled in. You have to re-get the Clip to do that.
 	*/
 	public function insert (mysqli $mysqli) {
-		global $logger;
 		$dsc = sqlPrep($this->description);
 		$url = sqlPrep($this->url);
 		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
@@ -115,7 +109,7 @@ class Clip {
 			$this->id = $mysqli->insert_id;
 			return $this->id;
 		}
-		$logger->error ("Error inserting Clip: " . $mysqli->error);
+		$GLOBALS["logger"]->error ("Error inserting Clip: " . $mysqli->error);
 		throw new Exception ("Could not add Clip {$this->description} to database");
 	}
 }

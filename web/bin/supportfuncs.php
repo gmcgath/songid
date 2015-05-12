@@ -58,13 +58,11 @@ function getInsertId ($mysqli) {
 
 /* Dump a variable to the PHP log. */
 function dumpVar ($v) {
-	global $logger;
-	
 	ob_start();
 	var_dump($v);
 	$contents = ob_get_contents();
 	ob_end_clean();
-	$logger->debug($contents);
+	$GLOBALS["logger"]->debug($contents);
 }
 
 /* Prepare a string (that's already sanitized) for SQL by replacing null

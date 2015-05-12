@@ -35,11 +35,11 @@ $clip->description = strip_tags($mysqli->real_escape_string($_POST["clipdesc"]))
 $clip->url = strip_tags($mysqli->real_escape_string($_POST["clipurl"]));
 if (!is_null($clip->url)) {
 	$clipId = $clip->insert($mysqli);
-	$logger->debug("Clip added");
+	$GLOBALS["logger"]->debug("Clip added");
 	header ("Location: addclipok.php?id=$clipId", true, 302);
 }
 else {
-	$logger->debug("URL missing, clip not added");
+	$GLOBALS["logger"]->debug("URL missing, clip not added");
 	header ("Location: error.php", true, 302);
 }
 ?>

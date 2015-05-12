@@ -99,7 +99,7 @@ if (!sessioncheck())
 	}
 	catch (Exception $e) {
 		
-		$logger->error($e->getMessage());
+		$GLOBALS["logger"]->error($e->getMessage());
 		echo ("<p>Sorry, an error occurred.</p>");
 	}
 ?>

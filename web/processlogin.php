@@ -23,15 +23,15 @@ try {
 	if ($user) {
 		session_start();
 		$_SESSION['user'] = $user;
-		$logger->debug("User login ID = $user->loginId");
+		$GLOBALS["logger"]->debug("User login ID = $user->loginId");
 		$_SESSION['report'] = NULL;
 		header ("Location: cliplist.php", true, 302);
 		return;
 	}
 } catch (Exception $e) {
-	$logger->error($e->getMessage());
+	$GLOBALS["logger"]->error($e->getMessage());
 }
-$logger->info ("Login error for $userName");
+$GLOBALS["logger"]->info ("Login error for $userName");
 header ("Location: login.php?error=1", true, 302);	// Should add an error message to login.php
 
 ?>

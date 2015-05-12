@@ -68,9 +68,9 @@ try {
 	return;
 	
 } catch (Exception $e) {
-	$logger->error($e->getMessage());
+	$GLOBALS["logger"]->error($e->getMessage());
 }
-$logger->info ("Registration error for $loginId");
+$GLOBALS["logger"]->info ("Registration error for $loginId");
 header ("Location: register.php?error=-1", true, 302);	
 
 ?>

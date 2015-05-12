@@ -24,7 +24,7 @@ if (!sessioncheck())
 /* Open the database */
 $mysqli = opendb();
 
-$logger->debug("Getting clip");
+$GLOBALS["logger"]->debug("Getting clip");
 $clipId = $_POST["id"];
 if ($clipId != null && ctype_digit($clipId)) {
 	$clip = Clip::findById($mysqli, $clipId);	

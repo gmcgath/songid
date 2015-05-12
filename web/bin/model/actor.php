@@ -51,8 +51,6 @@ class Actor {
 	    By convention, the primary name in ACTORS is also in ACTOR_NAMES.
 	    Names in ACTOR_NAMES are unique, so there will be no more than one. */
 	public static function findByName ($mysqli, $name) {
-		global $logger;
-		
 		$nam = sqlPrep ($name);
 		$selstmt = "SELECT ACTOR_ID FROM ACTOR_NAMES WHERE NAME = $nam";
 		$res = $mysqli->query($selstmt);
@@ -67,7 +65,7 @@ class Actor {
 			$actorId = $row[0];
 			$actor = Actor::findById ($mysqli, $actorId);
 			if (is_null ($actor)) {
-				$logger->info ("Database inconsistency: No actor with ID $actid");
+				$GLOBALS["logger"]->info ("Database inconsistency: No actor with ID $actid");
 			}
 			return $actor;
 		}
@@ -84,8 +82,6 @@ class Actor {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
-		global $logger;
-		
 		$nam = sqlPrep($this->name);
 		$tpid = sqlPrep($this->typeId);
 		$insstmt = "INSERT INTO ACTORS (NAME, TYPE_ID) VALUES ($nam, $tpid)";
@@ -101,8 +97,8 @@ class Actor {
 			if ($res) 
 				return $this->id;
 		} else
-			$logger->error("Bad response from insert");
-		$logger->error ("Error inserting Actor: " . $mysqli->error);
+			$GLOBALS["logger"]->error("Actor: bad response from insert");
+		$GLOBALS["logger"]->error ("Error inserting Actor: " . $mysqli->error);
 		throw new Exception ("Could not add Actor {$this->name} to database");
 	}
 

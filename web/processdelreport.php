@@ -28,17 +28,17 @@ if (!sessioncheck())
 $mysqli = opendb();
 
 $reportId = $_GET["id"];
-$logger->debug("Deleting report $reportId");
+$GLOBALS["logger"]->debug("Deleting report $reportId");
 if ($reportId != null && ctype_digit($reportId)) {
 	$report = Report::findById($mysqli, $reportId);	
 }
 if ($report == NULL) {
-	$logger->info("No such report: $reportId");
+	$GLOBALS["logger"]->info("No such report: $reportId");
 	header ("Location: error.php", true, 302);
 	return;
 }
-$logger->debug ("Deleting report");
+$GLOBALS["logger"]->debug ("Deleting report");
 $report->delete($mysqli);
-$logger->debug ("Report deleted");
+$GLOBALS["logger"]->debug ("Report deleted");
 header ("Location: reports.php", true, 302);
 ?>
