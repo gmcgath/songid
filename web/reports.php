@@ -11,7 +11,10 @@
 
 require_once('bin/model/user.php');
 session_start();
+
 require_once('bin/sessioncheck.php');
+require_once('bin/loggersetup.php');
+
 if (!sessioncheck())
 	return;
 
@@ -265,7 +268,6 @@ if ( !$hidenext ) {
 	}
 	
 	function doPerformance ($report) {
-		error_log("doPerformance");
 		$title = "(Not given)";
 		if (!is_null($report->song)) 
 			$title = $report->song->title;
@@ -296,7 +298,6 @@ if ( !$hidenext ) {
 	}
 	
 	function doTalk ($report) {
-		error_log("doTalk");
 		$performers = $report->performers;
 		if ($performers != NULL) {
 			echo ("<li><b>People talking:</b>");

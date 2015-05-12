@@ -13,6 +13,7 @@
 */
 
 require_once (dirname(__FILE__) . '/supportfuncs.php');
+require_once (dirname(__FILE__) . '/loggersetup.php');
 require_once (dirname(__FILE__) . '/model/instrument.php');
 require_once (dirname(__FILE__) . '/model/instrumentcategory.php');
 
@@ -31,18 +32,21 @@ class Orchestra {
 	var $sections;		// an array of Sections, ordered by the display sequence
 	
 	public function __construct ($mysqli) {
-		error_log("Constructing Orchestra");
+		global $logger;
+		
+		$logger->debug("Constructing Orchestra");
 		$this->mysqli = $mysqli;
 		$this->sections = array();
 	}
 	
 	/* Build the full orchestra and populate this object with it. */
 	public function assemble () {
+		global $logger;
 		$instCats = InstrumentCategory::getAllCategories($this->mysqli);
 		foreach ($instCats as $instCat) {
 			// Build the list for each category
 			$section = new Section ($instCat);
-			error_log("section name: " . $section->category->name);
+			$logger->debug("section name: " . $section->category->name);
 			$section->instruments = Instrument::getInstrumentsByCategory($this->mysqli, $instCat->id);
 			$this->sections[] = $section;
 		}

@@ -9,9 +9,10 @@
 /* This PHP page is called when the user tries to log in.
    It has no HTML and always redirects.  */
 
-include_once ('bin/config.php');
-include_once ('bin/supportfuncs.php');
-include_once ('bin/model/user.php');
+require_once ('bin/config.php');
+require_once ('bin/supportfuncs.php');
+require_once ('bin/model/user.php');
+require_once ('bin/loggersetup.php');
 
 /* Open the database */
 $mysqli = opendb();
@@ -22,16 +23,15 @@ try {
 	if ($user) {
 		session_start();
 		$_SESSION['user'] = $user;
-		error_log("User login ID = $user->loginId");
-		error_log("User name = $user->name");
+		$logger->debug("User login ID = $user->loginId");
 		$_SESSION['report'] = NULL;
 		header ("Location: cliplist.php", true, 302);
 		return;
 	}
 } catch (Exception $e) {
-	error_log($e->getMessage());
+	$logger->error($e->getMessage());
 }
-error_log ("Login error for $userName");
+$logger->info ("Login error for $userName");
 header ("Location: login.php?error=1", true, 302);	// Should add an error message to login.php
 
 ?>

@@ -9,12 +9,13 @@
 /* This PHP page is called when the clip editing form is submitted. 
    It has no HTML and always redirects.  */
 
-include_once ('bin/config.php');
-include_once ('bin/supportfuncs.php');
-include_once ('bin/model/report.php');
-include_once ('bin/reportbuilder.php');
+require_once ('bin/config.php');
+require_once ('bin/supportfuncs.php');
+require_once ('bin/model/report.php');
+require_once ('bin/reportbuilder.php');
+require_once ('bin/loggersetup.php');
+require_once ('bin/model/user.php');
 
-include_once('bin/model/user.php');
 session_start();
 include('bin/sessioncheck.php');
 if (!sessioncheck())
@@ -23,20 +24,18 @@ if (!sessioncheck())
 /* Open the database */
 $mysqli = opendb();
 
-error_log("Getting clip");
+$logger->debug("Getting clip");
 $clipId = $_POST["id"];
 if ($clipId != null && ctype_digit($clipId)) {
 	$clip = Clip::findById($mysqli, $clipId);	
 }
 if ($clip == NULL) {
-	error_log("Couldn't get clip $clipId");
+	#logger->info("Couldn't get clip $clipId");
 	header ("Location: error.php", true, 302);
 	return;
 }
-error_log ("Filling in clip");
 $clip->description = strip_tags($mysqli->real_escape_string($_POST["clipdesc"]));
 $clip->url = strip_tags($mysqli->real_escape_string($_POST["clipurl"]));
 $clip->update($mysqli);
-error_log("Clip updated");
 header ("Location: editclipok.php?id=$clipId", true, 302);
 ?>

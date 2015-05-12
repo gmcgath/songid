@@ -11,12 +11,13 @@
 /* This PHP page is called when the "delete report" button is clicked. 
    It has no HTML and always redirects.  */
 
-include_once ('bin/config.php');
-include_once ('bin/supportfuncs.php');
-include_once ('bin/model/report.php');
-include_once ('bin/reportbuilder.php');
+require_once ('bin/config.php');
+require_once ('bin/supportfuncs.php');
+require_once ('bin/model/report.php');
+require_once ('bin/reportbuilder.php');
+require_once ('bin/loggersetup.php');
+require_once ('bin/model/user.php');
 
-include_once('bin/model/user.php');
 session_start();
 include('bin/sessioncheck.php');
 if (!sessioncheck())
@@ -27,17 +28,17 @@ if (!sessioncheck())
 $mysqli = opendb();
 
 $reportId = $_GET["id"];
-error_log("Deleting report $reportId");
+$logger->debug("Deleting report $reportId");
 if ($reportId != null && ctype_digit($reportId)) {
 	$report = Report::findById($mysqli, $reportId);	
 }
 if ($report == NULL) {
-	error_log("No such report: $reportId");
+	$logger->info("No such report: $reportId");
 	header ("Location: error.php", true, 302);
 	return;
 }
-error_log ("Deleting report");
+$logger->debug ("Deleting report");
 $report->delete($mysqli);
-error_log("Report deleted");
+$logger->debug ("Report deleted");
 header ("Location: reports.php", true, 302);
 ?>

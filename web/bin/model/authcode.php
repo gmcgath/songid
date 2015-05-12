@@ -17,8 +17,9 @@
    without affecting existing registrations.
 */
 
-include_once (dirname(__FILE__) . '/../supportfuncs.php');
-include_once (dirname(__FILE__) . '/../password.php');	// Required prior to PHP 5.5
+require_once (dirname(__FILE__) . '/../supportfuncs.php');
+require_once (dirname(__FILE__) . '/../password.php');	// Required prior to PHP 5.5
+require_once (dirname(__FILE__) . '/../loggersetup.php');
 
 class Authcode {
 	var $id;
@@ -27,11 +28,13 @@ class Authcode {
 	/* Check the specified authcode. Return true if good,
 	   false otherwise. authcode must not be escaped. */
 	public static function verifyAuth($mysqli, $auth) {
+		global $logger;
+		
 		$usr = sqlPrep($username);
 		$selstmt = "SELECT CODE_HASH FROM AUTHCODES";
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
-			error_log("Error getting Users: " . $mysqli->connect_error);
+			$logger->error("Error getting Users: " . $mysqli->connect_error);
 			throw new Exception ($mysqli->connect_error);
 		}
 		if ($res) {
@@ -52,6 +55,7 @@ class Authcode {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
+		global $logger;
 		$hsh = sqlPrep($this->hash);
 		$insstmt = "INSERT INTO AUTHCODES (CODE_HASH) VALUES ($hsh)";
 		$res = $mysqli->query ($insstmt);
@@ -60,7 +64,7 @@ class Authcode {
 			$this->id = $mysqli->insert_id;
 			return $this->id;
 		}
-		error_log ("Error inserting Auth code: " . $mysqli->error);
+		$logger->error ("Error inserting Auth code: " . $mysqli->error);
 		throw new Exception ("Could not add auth code to database");
 	}
 }

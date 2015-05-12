@@ -9,7 +9,8 @@
    See README.txt in the source distribution.
 */
 
-include_once (dirname(__FILE__) . '/../supportfuncs.php');
+require_once (dirname(__FILE__) . '/../supportfuncs.php');
+require_once (dirname(__FILE__) . '/../loggersetup.php');
 
 class Instrument {
 	var $id;

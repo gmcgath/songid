@@ -9,7 +9,9 @@
    See README.txt in the source distribution.
 */
 
-include_once (dirname(__FILE__) . '/../supportfuncs.php');
+require_once (dirname(__FILE__) . '/../supportfuncs.php');
+require_once (dirname(__FILE__) . '/../loggersetup.php');
+
 
 class Song {
 	var $id;
@@ -41,9 +43,9 @@ class Song {
 	
 	/** Returns an array of Songs matching the title. May be empty. */
 	public static function findByTitle ($mysqli, $title) {
+		global $logger;
 		$ttl = sqlPrep ($title);
 		$selstmt = "SELECT ID, NOTE FROM SONGS WHERE TITLE = $ttl";
-		error_log ($selstmt);
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			throw new Exception ($mysqli->connect_error);
@@ -68,6 +70,7 @@ class Song {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
+		global $logger;
 		$ttl = sqlPrep($this->title);
 		$nte = sqlPrep($this->note);
 		$insstmt = "INSERT INTO SONGS (TITLE, NOTE) VALUES ($ttl, $nte)";
@@ -77,7 +80,7 @@ class Song {
 			$this->id = $mysqli->insert_id;
 			return $this->id;
 		}
-		error_log ("Error inserting Song: " . $mysqli->error);
+		$logger->error ("Error inserting Song: " . $mysqli->error);
 		throw new Exception ("Could not add Song {$this->title} to database");
 	}
 	

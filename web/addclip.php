@@ -8,12 +8,15 @@
 
 header("Content-type: text/html; charset=utf-8");
 
-include_once('bin/config.php');
-include_once('bin/model/user.php');
-include_once('bin/model/clip.php');
-include_once('bin/supportfuncs.php');
+require_once('bin/config.php');
+require_once('bin/model/user.php');
+require_once('bin/model/clip.php');
+require_once('bin/loggersetup.php');
+require_once('bin/supportfuncs.php');
+
 session_start();
-include_once('bin/sessioncheck.php');
+require_once('bin/sessioncheck.php');
+
 if (!sessioncheck())
 	return;
 

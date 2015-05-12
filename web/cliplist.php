@@ -9,10 +9,11 @@
 */
 
 header("Content-type: text/html; charset=utf-8");
-include_once('bin/model/user.php');
+require_once('bin/model/user.php');
 session_start();
-include_once ('bin/config.php');
-include('bin/sessioncheck.php');
+require_once ('bin/config.php');
+require_once ('bin/loggersetup.php');
+require_once ('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
@@ -97,7 +98,8 @@ if (!sessioncheck())
 		echo ("</table>\n");
 	}
 	catch (Exception $e) {
-		error_log($e->getMessage());
+		
+		$logger->error($e->getMessage());
 		echo ("<p>Sorry, an error occurred.</p>");
 	}
 ?>

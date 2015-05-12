@@ -9,10 +9,11 @@
 /* This PHP page is called when a new user tries to register.
    It has no HTML and always redirects.  */
 
-include_once ('bin/config.php');
-include_once ('bin/supportfuncs.php');
-include_once ('bin/model/authcode.php');
-include_once ('bin/model/user.php');
+require_once ('bin/config.php');
+require_once ('bin/supportfuncs.php');
+require_once ('bin/model/authcode.php');
+require_once ('bin/model/user.php');
+require_once ('bin/loggersetup.php');
 
 /* Open the database */
 $mysqli = opendb();
@@ -67,9 +68,9 @@ try {
 	return;
 	
 } catch (Exception $e) {
-	error_log($e->getMessage());
+	$logger->error($e->getMessage());
 }
-error_log ("Registration error for $loginId");
+$logger->info ("Registration error for $loginId");
 header ("Location: register.php?error=-1", true, 302);	
 
 ?>

@@ -12,6 +12,7 @@
 require_once ('bin/config.php');
 require_once ('bin/supportfuncs.php');
 require_once ('bin/model/user.php');
+require_once ('bin/loggersetup.php');
 
 session_start();
 include('bin/sessioncheck.php');
@@ -29,9 +30,8 @@ $mysqli = opendb();
 /* Find all the users, keying off the hidden fields userxx */
 $userids = array();
 while ( list( $param, $val ) = each( $_POST ) ) {
-	error_log ("Examining POST param " . $param . "   value " . $val);
 	if (substr($param, 0, 4) == "user") {
-		error_log("updateusers: Got parameter " . $param);
+		$logger->debug("updateusers: Got parameter " . $param);
 		$userids[] = intval(substr($param, 4));
 	}
 }
@@ -50,33 +50,33 @@ foreach ($userids as $userid) {
 		// Handle addition of roles
 		if ($adminChecked && !$u->hasRole(User::ROLE_ADMINISTRATOR)) {
 			$changed = true;
-			error_log ("Adding Administrator role for " . $u->loginId);
+			$logger->info ("Adding Administrator role for " . $u->loginId);
 			$u->assignRole($mysqli, User::ROLE_ADMINISTRATOR);
 		}
 		if ($editorChecked && !$u->hasRole(User::ROLE_EDITOR)) {
 			$changed = true;
-			error_log ("Adding Editor role for " . $u->loginId);
+			$logger->info ("Adding Editor role for " . $u->loginId);
 			$u->assignRole($mysqli, User::ROLE_EDITOR);
 		}
 		if ($contribChecked && !$u->hasRole(User::ROLE_CONTRIBUTOR)) {
 			$changed = true;
-			error_log ("Adding Contributor role for " . $u->loginId);
+			$logger->info ("Adding Contributor role for " . $u->loginId);
 			$u->assignRole($mysqli, User::ROLE_CONTRIBUTOR);
 		}
 		
 		// Handle removal of roles
 		if (!$adminChecked && $u->hasRole(User::ROLE_ADMINISTRATOR)) {
 			$changed = true;
-			error_log ("Would remove Administrator role for " . $u->loginId);
+			$logger->info ("Would remove Administrator role for " . $u->loginId);
 		}
 		if (!$editorChecked && $u->hasRole(User::ROLE_EDITOR)) {
 			$changed = true;
-			error_log ("Removing Editor role for " . $u->loginId);
+			$logger->info ("Removing Editor role for " . $u->loginId);
 			$u->removeRole($mysqli, User::ROLE_EDITOR);
 		}
 		if (!$contribChecked && $u->hasRole(User::ROLE_CONTRIBUTOR)) {
 			$changed = true;
-			error_log ("Removing Contributor role for " . $u->loginId);
+			$logger->info ("Removing Contributor role for " . $u->loginId);
 			$u->removeRole($mysqli, User::ROLE_CONTRIBUTOR);
 		}
 		
@@ -84,6 +84,6 @@ foreach ($userids as $userid) {
 			$usersChanged++;
 	}
 }
-error_log ("Users that would have been changed: " . $usersChanged);
+$logger->info ("Users that would have been changed: " . $usersChanged);
 header ("Location: adminok.php?nusers=$usersChanged", true, 302);
 ?>

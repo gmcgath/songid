@@ -14,6 +14,7 @@ require_once ('bin/supportfuncs.php');
 require_once ('bin/model/report.php');
 require_once ('bin/model/clip.php');
 require_once ('bin/reportbuilder.php');
+require_once ('bin/loggersetup.php');
 
 require_once('bin/model/user.php');
 session_start();
@@ -34,11 +35,11 @@ $clip->description = strip_tags($mysqli->real_escape_string($_POST["clipdesc"]))
 $clip->url = strip_tags($mysqli->real_escape_string($_POST["clipurl"]));
 if (!is_null($clip->url)) {
 	$clipId = $clip->insert($mysqli);
-	error_log("Clip added");
+	$logger->debug("Clip added");
 	header ("Location: addclipok.php?id=$clipId", true, 302);
 }
 else {
-	error_log("URL missing, clip not added");
+	$logger->debug("URL missing, clip not added");
 	header ("Location: error.php", true, 302);
 }
 ?>

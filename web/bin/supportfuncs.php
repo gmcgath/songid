@@ -8,6 +8,7 @@
 
 require_once (dirname(__FILE__) . '/config.php');
 require_once (dirname(__FILE__) . '/model/user.php');
+require_once (dirname(__FILE__) . '/loggersetup.php');
 
 /* This function removes most HTML tags from text while allowing
    some basic formatting.
@@ -55,13 +56,15 @@ function getInsertId ($mysqli) {
 	return NULL;
 }
 
-/* Dump a variable to the error log. */
+/* Dump a variable to the PHP log. */
 function dumpVar ($v) {
+	global $logger;
+	
 	ob_start();
 	var_dump($v);
 	$contents = ob_get_contents();
 	ob_end_clean();
-	error_log($contents);
+	$logger->debug($contents);
 }
 
 /* Prepare a string (that's already sanitized) for SQL by replacing null
