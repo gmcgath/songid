@@ -26,6 +26,7 @@ else {
 	}
 ?>
 	<li><a href="logout.php">Log out</a></li>
+	<li><a href="help.html">Help</a></li>
 </ul>
 </div>
 <div style="clear:both"><p>&nbsp;</p></div>

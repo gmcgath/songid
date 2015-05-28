@@ -77,7 +77,7 @@ if (!sessioncheck())
 			echo ("<tr><td style='width:500px;'>");
 			echo ($desc);		
 			echo ("</td>");
-
+			
 			echo ("<td><a href='idform.php?id=");
 			echo ($clip->id);
 			echo ("'>");

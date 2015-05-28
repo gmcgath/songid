@@ -21,7 +21,7 @@ header("Content-type: text/html; charset=utf-8");
 
 <h1>Log in</h1>
 <?php
-if (!is_null($_GET["error"]))
+if (array_key_exists("error", $_GET))
 	echo ("<p class='errormsg'>Login error.</p>\n");
 ?>
 <div>

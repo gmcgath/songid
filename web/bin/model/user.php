@@ -169,6 +169,9 @@ class User {
 	/* Return true if a user has a specified role, otherwise false. */
 	public function hasRole ($role) {
 		// $this->roles is an associative array. If a value is missing, treat it as false.
+		if (!array_key_exists ($role, $this->roles))
+			return false;
+			
 		$val = $this->roles[$role];
 		if (is_null ($val))
 			$val = false;

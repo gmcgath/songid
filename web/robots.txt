@@ -1,0 +1,4 @@
+# Default robots.txt file, tells crawlers to go away
+
+User-agent: *
+Disallow: /

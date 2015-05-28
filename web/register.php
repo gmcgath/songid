@@ -21,8 +21,8 @@ header("Content-type: text/html; charset=utf-8");
 
 <h1>Sign up</h1>
 <?php
-$err = $_GET["error"];
-if (!is_null($err)) {
+if (array_key_exists("error", $err)) {
+	$err = $_GET["error"];
 	switch ((int) $err) {
 		case 1:
 			$errmsg = "Password must be 8 to 24 characters long.";
@@ -45,8 +45,8 @@ if (!is_null($err)) {
 		default:
 			$errmsg = "Invalid response.";
 	}
-}
 	echo ("<p class='errormsg'>$errmsg</p>\n");
+}
 ?>
 <p>The user name and password may contain only letters, digits, and underscores.</p>
 <div>
