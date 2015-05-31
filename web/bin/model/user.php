@@ -14,7 +14,7 @@ require_once (dirname(__FILE__) . '/../config.php');
 require_once (dirname(__FILE__) . '/../supportfuncs.php');
 require_once (dirname(__FILE__) . '/../password.php');	// Required prior to PHP 5.5
 require_once (dirname(__FILE__) . '/../loggersetup.php');
-
+require_once (dirname(__FILE__) . '/../initorm1.php');
 
 class User {
 
@@ -33,99 +33,84 @@ class User {
 	/* Check the login credentials. Return a User object if good,
 	   pw must NOT be escaped.
 	   NULL otherwise. */
-	public static function verifyLogin(mysqli $mysqli, $username, $pw) {
-		$usr = sqlPrep($username);
-		$selstmt = "SELECT ID, PASSWORD_HASH, NAME FROM USERS WHERE LOGIN_ID = $usr";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting Users: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
+	public static function verifyLogin($username, $pw) {
+		$result = ORM::for_table('USERS')->
+			select('id')->
+			select('password_hash')->
+			select('name')->
+			where_equal ('login_id', $usr)->
+			find_one();
 		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row))
-				return NULL;				// no matching user
-			if (password_verify($pw, $row[1])) {
-				$user = new User();
-				$user->id = $row[0];
-				$user->loginId = $username;
-				$user->name = $row[2];
-				$user->roles = $user->getRoles($mysqli);
-				return $user;
-			}
+		if ($result && password_verify ($pw, $result->password_hash)) {
+			$user = new User();
+			$user->id = $result->id;
+			$user->loginId = $username;
+			$user->name = $result->name;
+			$user->roles = $user->getRoles();
+			return $user;
 		}
-		return NULL;
+		return NULL;		// no user match, or wrong password
 	}
 	
 	/* Retrieve a row with a given login name, not checking the password */
-	public static function findByLoginId (mysqli $mysqli, $username) {
-		$usr = sqlPrep($username);
-		$selstmt = "SELECT ID, PASSWORD_HASH, NAME FROM USERS WHERE LOGIN_ID = $usr";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting Users: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row))
-				return NULL;
+	public static function findByLoginId ($username) {
+		$result = ORM::for_table('USERS')->
+			select('id')->
+			select('password_hash')->
+			select('name')->
+			where_equal('login_id', $username)->
+			find_one();
+		if ($result) {
 			$user = new User();
-			$user->id = $row[0];
+			$user->id = $result->id;
 			$user->loginId = $username;
-			$user->passwordHash = $row[1];
-			$user->name = $row[2];
-			$user->roles = $user->getRoles($mysqli);
+			$user->passwordHash = $result->password_hash;
+			$user->name = $result->name;
+			$user->roles = $user->getRoles();
 			return $user;
 		}
+			
 		return NULL;
 	}
 	
 	/* Retrieve a row with a given ID */
-	public static function findById (mysqli $mysqli, $id) {
-		$selstmt = "SELECT LOGIN_ID, PASSWORD_HASH, NAME FROM USERS WHERE ID = $id";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting Users: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row))
-				return NULL;
+	public static function findById ($id) {
+		$result = ORM::for_table('USERS')->
+			select('login_id')->
+			select('password_hash')->
+			select('name')->
+			where_equal('login_id', $id)->
+			find_one();
+		if ($result) {
 			$user = new User();
 			$user->id = $id;
-			$user->loginId = $row[0];
-			$user->passwordHash = $row[1];
-			$user->name = $row[2];
-			$user->roles = $user->getRoles($mysqli);
-			return $user;
+			$user->loginId = $result->login_id;
+			$user->passwordHash = $result->password_hash;
+			$user->name = $result->name;
+			$user->roles = $user->getRoles();
+			return $user;		
 		}
+		//$selstmt = "SELECT LOGIN_ID, PASSWORD_HASH, NAME FROM USERS WHERE ID = $id";
 		return NULL;
 	}
 	
 	/* Get all the users. */
 	public static function getAllUsers(mysqli $mysqli) {
-		$selstmt = "SELECT ID, LOGIN_ID, NAME FROM USERS";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Connection error getting Users: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
+//		$selstmt = "SELECT ID, LOGIN_ID, NAME FROM USERS";
+//		$res = $mysqli->query($selstmt);
+		$resultSet = ORM::for_table('USERS')->
+			select('id')->
+			select('login_id')->
+			select('name')->
+			find_many();
+			
 		$rows = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row)) {
-					break;
-				}
-				$user = new User();
-				$user->id = $row[0];
-				$user->loginId = $row[1];
-				$user->name = $row[2];
-				$user->roles = $user->getRoles($mysqli);
-				$rows[] = $user;
-			}
+		foreach ($resultSet as $result) {
+			$user = new User();
+			$user->id = $result->id;
+			$user->loginId = $login_id;
+			$user->name = $result->name;
+			$user->roles = $user->getRoles();	
 		}
 		return $rows;	
 	}
@@ -137,13 +122,18 @@ class User {
 			return;			// nothing to do
 		}
 		
-		$insstmt = "INSERT INTO USERS_ROLES (USER_ID, ROLE) VALUES " .
-				"({$this->id}, $role)";
-		$res = $mysqli->query($insstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting User role: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
+		$roleToInsert = ORM::for_table('ROLES')->create();		// Create empty idiorm object
+		$roleToInsert->user_id = $this->id;
+		$roleToInsert->role = $role;
+		$roleToInsert->save();							// Insert into database
+			
+//		$insstmt = "INSERT INTO USERS_ROLES (USER_ID, ROLE) VALUES " .
+//				"({$this->id}, $role)";
+//		$res = $mysqli->query($insstmt);
+//		if ($mysqli->connect_errno) {
+//			$GLOBALS["logger"]->error("Error getting User role: " . $mysqli->connect_error);
+//			throw new Exception ($mysqli->connect_error);
+//		}
 		$this->roles[$role] = true;
 	}
 	
@@ -152,16 +142,21 @@ class User {
 		if (!$this->hasRole ($role)) {
 			return;			// nothing to do
 		}
-		$delstmt = "DELETE FROM USERS_ROLES WHERE USER_ID = '" .
-			$this->id .
-			"' AND ROLE = '" .
-			$role .
-			"'";
-		$res = $mysqli->query($delstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting User role: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
+		$roleToDel = ORM::for_table('USERS_ROLES')->
+			where_equal('user_id', $this->id)->
+			find_one();
+		$roleToDel->delete ();
+			
+//		$delstmt = "DELETE FROM USERS_ROLES WHERE USER_ID = '" .
+//			$this->id .
+//			"' AND ROLE = '" .
+//			$role .
+//			"'";
+//		$res = $mysqli->query($delstmt);
+//		if ($mysqli->connect_errno) {
+//			$GLOBALS["logger"]->error("Error getting User role: " . $mysqli->connect_error);
+//			throw new Exception ($mysqli->connect_error);
+//		}
 		$this->roles[$role] = false;
 	}
 	
@@ -180,43 +175,33 @@ class User {
 	
 	/* Return an array of all roles belonging to a user. */
 	private function getRoles(mysqli $mysqli) {
-		$selstmt = "SELECT ROLE FROM USERS_ROLES WHERE USER_ID = {$this->id} ";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Connect error getting User roles: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
+		$roleSet = ORM::for_table('USERS_ROLES')->
+			select('role')->
+			where_equal ('user_id', $this->id)->
+			find_many();
+			
+//		$selstmt = "SELECT ROLE FROM USERS_ROLES WHERE USER_ID = {$this->id} ";
 		$retval = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row)) {
-					break;
-				}
-				$retval[intval($row[0])] = true;
-			}
-			return $retval;
+		foreach ($roleSet as $roleRes) {
+			$retval[intval($roleRes)] = true;
 		}
-		$GLOBALS["logger"]->error("Error in getRoles: " . $mysqli->error);
-		return false;
+		return $retval;
 	}
 	
 	/* Inserts a User into the database. Throws an Exception on failure.
 	   Returns the ID if successful.
 	*/
 	public function insert (mysqli $mysqli) {
-		$lgn = sqlPrep($this->loginId);
-		$pwh = sqlPrep($this->passwordHash);
-		$nm = sqlPrep($this->name);
-		$insstmt = "INSERT INTO USERS (LOGIN_ID, PASSWORD_HASH, NAME) VALUES ($lgn, $pwh, $nm)";
-		$res = $mysqli->query ($insstmt);
-		if ($res) {
-			// Retrieve the ID of the row we just inserted
-			$this->id = $mysqli->insert_id;
-			return $this->id;
-		}
-		$GLOBALS["logger"]->error ("Error inserting User: " . $mysqli->error);
-		throw new Exception ("Could not add User {$this->loginId} to database");
+		//$lgn = sqlPrep($this->loginId);
+		//$pwh = sqlPrep($this->passwordHash);
+		//$nm = sqlPrep($this->name);
+		//$insstmt = "INSERT INTO USERS (LOGIN_ID, PASSWORD_HASH, NAME) VALUES ($lgn, $pwh, $nm)";
+		$newUser = ORM::for_table('USERS')->create();
+		$newUser->login_id = $this->loginId;
+		$newUser->password_hash = $this->passwordHash;
+		$newUser->name = $this->name;
+		$newUser->save();
+		return $newUser->id();
 	}
 }
 ?>
