@@ -18,14 +18,10 @@ require_once (dirname(__FILE__) . '/supportfuncs.php');
 
 class ReportBuilder {
 	var $report;
-	var $mysqli;
 	var $isSongAmbiguous;
 	
 	/* Constructor. Creates an empty Report object. */
-	public function __construct ($sqli) {
-		if (is_null($sqli))
-			throw new Exception ("reportbuilder.php: null mysqli object");
-		$this->mysqli = $sqli;
+	public function __construct () {
 		$this->report = new Report();
 		$this->isSongAmbiguous = false;
 	}
@@ -37,7 +33,7 @@ class ReportBuilder {
 		$clipId = $_POST["clipid"];
 		$clip = null;
 		if ($clipId != null && ctype_digit($clipId)) {
-			$clip = Clip::findById($this->mysqli, $clipId);	
+			$clip = Clip::findById($clipId);	
 		}
 		if ($clip == NULL)
 			return;
@@ -47,7 +43,7 @@ class ReportBuilder {
 		// If previd was passed, put this into the chain.
 		$this->chainReport ($_POST["previd"]);
 
-		$tracktype = trim(strip_tags($this->mysqli->real_escape_string($_POST['tracktype'])));
+		$tracktype = trim(strip_tags($_POST['tracktype']));
 		switch ($tracktype) {
 			case "performance":
 				$this->doPerformance();
@@ -77,10 +73,10 @@ class ReportBuilder {
 		$this->report->setSoundSubtype($_POST["performancetype"]);
 		
 		if ($_POST["canidsong"]) {
-			$title = trim(strip_tags($this->mysqli->real_escape_string($_POST["songtitle"])));
+			$title = trim(strip_tags($_POST["songtitle"]));
 			if (strlen($title) > 0) {
 				// strlen returns 0 for null object.
-				$songs = Song::findByTitle ($this->mysqli, $title);
+				$songs = Song::findByTitle ($title);
 				// How do we deal with 2 songs by the same title?
 				// TODO If we detect an ambiguity, set isSongAmbiguous to true
 				// and keep going as far as we can.
@@ -91,7 +87,7 @@ class ReportBuilder {
 				if (is_null($song)) {
 					$song = new Song ();
 					$song->title = $title;
-					$song->insert($this->mysqli);
+					$song->insert();
 				}
 				$this->report->song = $song;
 			}
@@ -119,7 +115,7 @@ class ReportBuilder {
 	
 	/* Insert the object into the database. */
 	public function insert () {
-		if (!$this->report->insert ($this->mysqli)) {
+		if (!$this->report->insert ()) {
 			throw new Exception (DB_INSERT_FAILURE);
 		}
 	}
@@ -174,8 +170,8 @@ class ReportBuilder {
 			if ($performerNames != NULL) {
 				$performers = array();
 				foreach ($performerNames as $performerName)  {
-					$performerName = trim(strip_tags($this->mysqli->real_escape_string($performerName)));
-					$actor = Actor::findByName ($this->mysqli, $performerName);
+					$performerName = trim(strip_tags($performerName));
+					$actor = Actor::findByName ($performerName);
 					if (!is_null($actor)) {
 						// name belongs to an Actor
 						$performers[] = $actor;
@@ -186,7 +182,7 @@ class ReportBuilder {
 						$actor->name = $performerName;
 						// TODO for now, assume all performers are individuals (I'm not!)
 						$actor->typeId = Actor::TYPE_INDIVIDUAL;
-						$actor->insert($this->mysqli);
+						$actor->insert();
 						$performers[] = $actor;
 					}
 				}
@@ -206,7 +202,7 @@ class ReportBuilder {
 				if ($checkedinst != NULL) {
 					// The ID is passed as instxx. Strip it down to the actual ID.
 					$instid = substr($instid, 4);
-					$inst = Instrument::findById($this->mysqli, $instid);
+					$inst = Instrument::findById($instid);
 					if ($inst != NULL) {
 						$instruments[] = $inst;
 					}
@@ -224,10 +220,10 @@ class ReportBuilder {
 			if ($talkerNames != NULL) {
 				$talkers = array();
 				foreach ($talkerNames as $talkerName)  {
-					$talkerName = trim(strip_tags($this->mysqli->real_escape_string($talkerName)));
+					$talkerName = trim(strip_tags($talkerName));
 					if ($talkerName == NULL)
 						continue;
-					$actor = Actor::findByName ($this->mysqli, $talkerName);
+					$actor = Actor::findByName ($talkerName);
 					if (!is_null($actor)) {
 						// name belongs to an Actor
 						$talkers[] = $actor;
@@ -238,7 +234,7 @@ class ReportBuilder {
 						$actor->name = $talkerName;
 						// All talkers are individuals. Assuming no group chanting.
 						$actor->typeId = Actor::TYPE_INDIVIDUAL;
-						$actor->insert($this->mysqli);
+						$actor->insert();
 						$talkers[] = $actor;
 					}
 				}
@@ -252,7 +248,7 @@ class ReportBuilder {
 	   and some sanity checks are passed. */
 	private function chainReport($prevId) {
 		if ($prevId && ctype_digit($prevId)) {
-			$prevReport = Report::findById($this->mysqli, $prevId); 
+			$prevReport = Report::findById($prevId); 
 			if ($prevReport->user->id != $this->report->user->id ||
 					$prevReport->clip->id != $this->report->clip->id) {
 				return;

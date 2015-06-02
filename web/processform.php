@@ -20,11 +20,8 @@ include('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
-
-/* Open the database */
-$mysqli = opendb();
 	
-$reportBuilder = new ReportBuilder($mysqli);
+$reportBuilder = new ReportBuilder();
 try {
 	$reportBuilder->populate($_POST, $_SESSION['user']);
 

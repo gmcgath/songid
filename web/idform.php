@@ -24,10 +24,9 @@ if (!sessioncheck())
 
 /* This function fills in the instrument portion of the form */
 function doInstruments () {
-	global $mysqli;
 	echo ('<ul id="instrumentnames" class="hidden nobullet">' . "\n");
 	// Get all the instruments from the database
-	$orch = new Orchestra ($mysqli);
+	$orch = new Orchestra ();
 	$orch->assemble();
 	
 	foreach ($orch->sections as $section ) {
@@ -80,14 +79,11 @@ function doInstruments () {
 </noscript>
 
 <?php
-	/* Open the database */
-	$mysqli = opendb();
-
 	
 	$id = $_GET["id"];
 	if (!ctype_digit ($id))
 		$id = "";		// defeat dirty tricks
-	$clip = Clip::findById($mysqli, $id);
+	$clip = Clip::findById($id);
 	if (is_null($clip)) {
 		echo ("<p class='bg-warning'>Clip not found.</p>\n");
 		return;

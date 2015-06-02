@@ -18,9 +18,16 @@ date_default_timezone_set('America/New_York');
 
 $logger = new Katzgrau\KLogger\Logger($logdir, LogLevel::DEBUG);
 
-function handlePHPErrors ($errno, $errstr) {
+function handlePHPErrors ($errno, $errstr, $errfile, $errline) {
 	
-	$GLOBALS["logger"]->error ("Error reported, errno = " . $errno . ", errstr = " . $errstr);
+	$GLOBALS["logger"]->error ("Error reported, errno = " . 
+			$errno . 
+			", errstr = " . 
+			$errstr . 
+			" in line " .
+			$errline .
+			" of file " .
+			$errfile);
 }
 
 set_error_handler ("handlePHPErrors");

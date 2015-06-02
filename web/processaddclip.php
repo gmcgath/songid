@@ -27,14 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 	return;
 }
 
-/* Open the database */
-$mysqli = opendb();
 
 $clip = new Clip;
-$clip->description = strip_tags($mysqli->real_escape_string($_POST["clipdesc"]));
-$clip->url = strip_tags($mysqli->real_escape_string($_POST["clipurl"]));
+$clip->description = strip_tags($_POST["clipdesc"]);
+$clip->url = strip_tags($_POST["clipurl"]);
 if (!is_null($clip->url)) {
-	$clipId = $clip->insert($mysqli);
+	$clipId = $clip->insert();
 	$GLOBALS["logger"]->debug("Clip added");
 	header ("Location: addclipok.php?id=$clipId", true, 302);
 }

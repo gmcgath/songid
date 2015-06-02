@@ -15,14 +15,12 @@ require_once ('bin/model/authcode.php');
 require_once ('bin/model/user.php');
 require_once ('bin/loggersetup.php');
 
-/* Open the database */
-$mysqli = opendb();
 	
 try {
 	$loginId = $_POST["user"];
 	$pw = $_POST["pw"];
-	$realName = trim(strip_tags($mysqli->real_escape_string($_POST["realname"])));
-	$authcode = trim(strip_tags($mysqli->real_escape_string($_POST["authcode"])));
+	$realName = trim(strip_tags($_POST["realname"]));
+	$authcode = trim(strip_tags($_POST["authcode"]));
 	
 	// Check for valid fields
 	if ($loginId == NULL || $pw == NULL || $realName == NULL || $authcode == NULL) {
@@ -45,13 +43,13 @@ try {
 	}
 	
 	// Check authorization code
-	if (!Authcode::verifyAuth($mysqli, $authcode)) {
+	if (!Authcode::verifyAuth($authcode)) {
 		header ("Location: register.php?error=6", true, 302);
 		return;
 	}
 	
 	// Check if login name is already in use
-	if (User::findByLoginId($mysqli, $loginId)) {
+	if (User::findByLoginId($loginId)) {
 		header ("Location: register.php?error=2", true, 302);
 		return;
 	}
@@ -61,8 +59,8 @@ try {
 	$user->loginId = $loginId;
 	$user->name = $realName;
 	$user->passwordHash = password_hash($pw, PASSWORD_DEFAULT);
-	$user->insert($mysqli);
-	$user->assignRole($mysqli, User::ROLE_CONTRIBUTOR);
+	$user->insert();
+	$user->assignRole(User::ROLE_CONTRIBUTOR);
 	
 	header ("Location: registerok.php", true, 200);
 	return;

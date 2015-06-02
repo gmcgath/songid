@@ -14,8 +14,6 @@
 	require_once ('supportfuncs.php');
 	require_once ('model/authcode.php');
 	
-	/* Open the database */
-	$mysqli = opendb();
 
 	echo ("Auth code: ");
 	$authc = trim(fgets(STDIN));
@@ -24,7 +22,7 @@
 	$authcode = new Authcode;
 	$authcode->hash = $acHash;
 	try {
-		$authcode->insert($mysqli);
+		$authcode->insert();
 		echo ("Successfully created authcode.");
 	} catch (Exception $ex) {
 		echo ($ex->getMessage());

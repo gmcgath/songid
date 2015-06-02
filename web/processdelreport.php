@@ -24,21 +24,17 @@ if (!sessioncheck())
 	return;
 
 
-/* Open the database */
-$mysqli = opendb();
-
 $reportId = $_GET["id"];
 $GLOBALS["logger"]->debug("Deleting report $reportId");
 if ($reportId != null && ctype_digit($reportId)) {
-	$report = Report::findById($mysqli, $reportId);	
+	$report = Report::findById($reportId);	
 }
 if ($report == NULL) {
 	$GLOBALS["logger"]->info("No such report: $reportId");
 	header ("Location: error.php", true, 302);
 	return;
 }
-$GLOBALS["logger"]->debug ("Deleting report");
-$report->delete($mysqli);
+$report->delete();
 $GLOBALS["logger"]->debug ("Report deleted");
 header ("Location: reports.php", true, 302);
 ?>

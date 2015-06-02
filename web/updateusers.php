@@ -24,8 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 	return;
 }
 
-/* Open the database */
-$mysqli = opendb();
 
 /* Find all the users, keying off the hidden fields userxx */
 $userids = array();
@@ -40,7 +38,7 @@ while ( list( $param, $val ) = each( $_POST ) ) {
 $usersChanged = 0;
 
 foreach ($userids as $userid) {
-	$u = User::findById($mysqli, $userid);
+	$u = User::findById($userid);
 	if (!is_null($u)) {
 		$changed = false;
 		$adminChecked = !is_null($_POST['admn' . $userid]);
@@ -51,17 +49,17 @@ foreach ($userids as $userid) {
 		if ($adminChecked && !$u->hasRole(User::ROLE_ADMINISTRATOR)) {
 			$changed = true;
 			$GLOBALS["logger"]->info ("Adding Administrator role for " . $u->loginId);
-			$u->assignRole($mysqli, User::ROLE_ADMINISTRATOR);
+			$u->assignRole(User::ROLE_ADMINISTRATOR);
 		}
 		if ($editorChecked && !$u->hasRole(User::ROLE_EDITOR)) {
 			$changed = true;
 			$GLOBALS["logger"]->info ("Adding Editor role for " . $u->loginId);
-			$u->assignRole($mysqli, User::ROLE_EDITOR);
+			$u->assignRole(User::ROLE_EDITOR);
 		}
 		if ($contribChecked && !$u->hasRole(User::ROLE_CONTRIBUTOR)) {
 			$changed = true;
 			$GLOBALS["logger"]->info ("Adding Contributor role for " . $u->loginId);
-			$u->assignRole($mysqli, User::ROLE_CONTRIBUTOR);
+			$u->assignRole(User::ROLE_CONTRIBUTOR);
 		}
 		
 		// Handle removal of roles
@@ -72,12 +70,12 @@ foreach ($userids as $userid) {
 		if (!$editorChecked && $u->hasRole(User::ROLE_EDITOR)) {
 			$changed = true;
 			$GLOBALS["logger"]->info ("Removing Editor role for " . $u->loginId);
-			$u->removeRole($mysqli, User::ROLE_EDITOR);
+			$u->removeRole(User::ROLE_EDITOR);
 		}
 		if (!$contribChecked && $u->hasRole(User::ROLE_CONTRIBUTOR)) {
 			$changed = true;
 			$GLOBALS["logger"]->info ("Removing Contributor role for " . $u->loginId);
-			$u->removeRole($mysqli, User::ROLE_CONTRIBUTOR);
+			$u->removeRole(User::ROLE_CONTRIBUTOR);
 		}
 		
 		if ($changed)

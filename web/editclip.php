@@ -19,7 +19,6 @@ include_once('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
-$mysqli = opendb();
 $user = $_SESSION['user'];
 if (!($user->hasRole(User::ROLE_EDITOR))) {
 	header ("Location: norole.php", true, 302);
@@ -39,7 +38,7 @@ if (!($user->hasRole(User::ROLE_EDITOR))) {
 	$id = $_GET["id"];
 	if (!ctype_digit ($id))
 		$id = "";		// defeat dirty tricks
-	$clip = Clip::findById($mysqli, $id);
+	$clip = Clip::findById($id);
 	if (is_null($clip)) {
 		echo ("<p class='errormsg'>Clip not found.</p>\n");
 		return;

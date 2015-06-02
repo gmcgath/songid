@@ -14,7 +14,7 @@ require_once (dirname(__FILE__) . '/../config.php');
 require_once (dirname(__FILE__) . '/../supportfuncs.php');
 require_once (dirname(__FILE__) . '/../password.php');	// Required prior to PHP 5.5
 require_once (dirname(__FILE__) . '/../loggersetup.php');
-require_once (dirname(__FILE__) . '/../initorm1.php');
+require_once (dirname(__FILE__) . '/../initorm.php');
 
 class User {
 
@@ -22,6 +22,9 @@ class User {
 	const ROLE_CONTRIBUTOR = 1;
 	const ROLE_EDITOR = 2;
 	const ROLE_ADMINISTRATOR = 3;
+	
+	const USER_TABLE = 'USERS';
+	const USERS_ROLES_TABLE = 'USERS_ROLES';
 	
 	var $id;
 	var $loginId;
@@ -34,13 +37,13 @@ class User {
 	   pw must NOT be escaped.
 	   NULL otherwise. */
 	public static function verifyLogin($username, $pw) {
-		$result = ORM::for_table('USERS')->
+		$result = ORM::for_table(self::USER_TABLE)->
 			select('id')->
 			select('password_hash')->
 			select('name')->
-			where_equal ('login_id', $usr)->
+			where_equal ('login_id', $username)->
 			find_one();
-		}
+
 		if ($result && password_verify ($pw, $result->password_hash)) {
 			$user = new User();
 			$user->id = $result->id;
@@ -54,7 +57,7 @@ class User {
 	
 	/* Retrieve a row with a given login name, not checking the password */
 	public static function findByLoginId ($username) {
-		$result = ORM::for_table('USERS')->
+		$result = ORM::for_table(self::USER_TABLE)->
 			select('id')->
 			select('password_hash')->
 			select('name')->
@@ -75,7 +78,7 @@ class User {
 	
 	/* Retrieve a row with a given ID */
 	public static function findById ($id) {
-		$result = ORM::for_table('USERS')->
+		$result = ORM::for_table(self::USER_TABLE)->
 			select('login_id')->
 			select('password_hash')->
 			select('name')->
@@ -95,10 +98,10 @@ class User {
 	}
 	
 	/* Get all the users. */
-	public static function getAllUsers(mysqli $mysqli) {
+	public static function getAllUsers() {
 //		$selstmt = "SELECT ID, LOGIN_ID, NAME FROM USERS";
 //		$res = $mysqli->query($selstmt);
-		$resultSet = ORM::for_table('USERS')->
+		$resultSet = ORM::for_table(self::USER_TABLE)->
 			select('id')->
 			select('login_id')->
 			select('name')->
@@ -116,7 +119,7 @@ class User {
 	}
 	
 	/* Assign a role to a user. */
-	public function assignRole (mysqli $mysqli, $role) {
+	public function assignRole ($role) {
 		// Check if the role is already assigned
 		if ($this->hasRole ($role)) {
 			return;			// nothing to do
@@ -138,11 +141,11 @@ class User {
 	}
 	
 	/* Remove a role from a user. */
-	public function removeRole (mysqli $mysqli, $role) {
+	public function removeRole ($role) {
 		if (!$this->hasRole ($role)) {
 			return;			// nothing to do
 		}
-		$roleToDel = ORM::for_table('USERS_ROLES')->
+		$roleToDel = ORM::for_table(self::USERS_ROLES_TABLE)->
 			where_equal('user_id', $this->id)->
 			find_one();
 		$roleToDel->delete ();
@@ -174,8 +177,8 @@ class User {
 	}
 	
 	/* Return an array of all roles belonging to a user. */
-	private function getRoles(mysqli $mysqli) {
-		$roleSet = ORM::for_table('USERS_ROLES')->
+	private function getRoles() {
+		$roleSet = ORM::for_table(self::USERS_ROLES_TABLE)->
 			select('role')->
 			where_equal ('user_id', $this->id)->
 			find_many();
@@ -191,12 +194,12 @@ class User {
 	/* Inserts a User into the database. Throws an Exception on failure.
 	   Returns the ID if successful.
 	*/
-	public function insert (mysqli $mysqli) {
+	public function insert () {
 		//$lgn = sqlPrep($this->loginId);
 		//$pwh = sqlPrep($this->passwordHash);
 		//$nm = sqlPrep($this->name);
 		//$insstmt = "INSERT INTO USERS (LOGIN_ID, PASSWORD_HASH, NAME) VALUES ($lgn, $pwh, $nm)";
-		$newUser = ORM::for_table('USERS')->create();
+		$newUser = ORM::for_table(self::USER_TABLE)->create();
 		$newUser->login_id = $this->loginId;
 		$newUser->password_hash = $this->passwordHash;
 		$newUser->name = $this->name;
@@ -204,4 +207,5 @@ class User {
 		return $newUser->id();
 	}
 }
+
 ?>

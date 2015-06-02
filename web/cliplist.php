@@ -13,7 +13,9 @@ require_once('bin/model/user.php');
 session_start();
 require_once ('bin/config.php');
 require_once ('bin/loggersetup.php');
+require_once ('bin/initorm.php');
 require_once ('bin/sessioncheck.php');
+
 if (!sessioncheck())
 	return;
 
@@ -34,8 +36,6 @@ if (!sessioncheck())
 	
 	$user = $_SESSION['user'];
 	
-	/* Open the database */
-	$mysqli = opendb();
 	$user = $_SESSION['user'];
 	if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_EDITOR))) {
 		header ("Location: norole.php", true, 302);
@@ -48,7 +48,7 @@ if (!sessioncheck())
 
 <?php
 	$onlyUnreported = false;
-	if ($_GET["unrep"])
+	if (isset($_GET["unrep"]))
 		$onlyUnreported = true;
 	
 	if ($user->hasRole(User::ROLE_EDITOR)) {
@@ -66,7 +66,7 @@ if (!sessioncheck())
 	echo ("</div>\n");
 	
 	try {
-		$clips = Clip::getRows ($mysqli, 0, 100, $onlyUnreported);
+		$clips = Clip::getRows (0, 100, $onlyUnreported);
 		// TODO paginate
 		echo ("<table class='cliptable'>\n");
 		

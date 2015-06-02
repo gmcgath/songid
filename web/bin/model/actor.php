@@ -12,6 +12,7 @@
 
 require_once (dirname(__FILE__) . '/../supportfuncs.php');
 require_once (dirname(__FILE__) . '/../loggersetup.php');
+require_once (dirname(__FILE__) . '/../initorm.php');
 
 class Actor {
 
@@ -22,24 +23,22 @@ class Actor {
 	const TYPE_INDIVIDUAL = 1;
 	const TYPE_GROUP = 2;
 	
+	const ACTOR_TABLE = 'ACTORS';
+	
 	/** Return an Actor matching the specified ID. If no Actor matches,
 	    returns null. Throws an Exception if there is an SQL error. */
-	public static function findById ($mysqli, $actorId) {
-		$actId = sqlPrep($actorId);
-		$selstmt = "SELECT NAME, TYPE_ID FROM ACTORS WHERE ID = $actId";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row)) {
-				return NULL;
-			}
+	public static function findById ($actorId) {
+		$result = ORM::for_table(self::ACTOR_TABLE)->
+			select('name')->
+			select('type_id')->
+			where_equal('id', $actorId)->
+			find_one();
+//		$selstmt = "SELECT NAME, TYPE_ID FROM ACTORS WHERE ID = $actId";
+		if ($result) {
 			$actor = new Actor ();
 			$actor->id = $actorId;
-			$actor->name = $row[0];
-			$actor->typeId = $row[1];
+			$actor->name = $result->name;
+			$actor->typeId = $result->typeId;
 			
 			return $actor;
 		}
@@ -50,26 +49,18 @@ class Actor {
 	    We use the table ACTOR_NAMES to check all aliases.
 	    By convention, the primary name in ACTORS is also in ACTOR_NAMES.
 	    Names in ACTOR_NAMES are unique, so there will be no more than one. */
-	public static function findByName ($mysqli, $name) {
-		$nam = sqlPrep ($name);
-		$selstmt = "SELECT ACTOR_ID FROM ACTOR_NAMES WHERE NAME = $nam";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			throw new Exception ($mysqli->connect_error);
+	public static function findByName ($name) {
+//		$selstmt = "SELECT ACTOR_ID FROM ACTOR_NAMES WHERE NAME = $nam";
+		$resultSet = ORM::for_table('ACTOR_NAMES')->
+			select('actor_id')->
+			where_equal('name', $name)->
+			find_one();
+		
+		$actor = Actor::findById($result->actor_id);
+		if (is_null ($actor)) {
+			$GLOBALS["logger"]->info ("Database inconsistency: No actor with ID $actid");
 		}
-		$retval = array();
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row))
-				return NULL;
-			$actorId = $row[0];
-			$actor = Actor::findById ($mysqli, $actorId);
-			if (is_null ($actor)) {
-				$GLOBALS["logger"]->info ("Database inconsistency: No actor with ID $actid");
-			}
-			return $actor;
-		}
-		return NULL;
+		return $actor;
 	}
 	
 	/* Inserts an Actor into the database. Throws an Exception on failure.
@@ -81,25 +72,20 @@ class Actor {
 	   
 	   Returns the ID if successful.
 	*/
-	public function insert ($mysqli) {
-		$nam = sqlPrep($this->name);
+	public function insert () {
 		$tpid = sqlPrep($this->typeId);
-		$insstmt = "INSERT INTO ACTORS (NAME, TYPE_ID) VALUES ($nam, $tpid)";
-		$res = $mysqli->query($insstmt);
-		if ($res) {
-			// Retrieve the ID of the row we just inserted
-			$this->id = $mysqli->insert_id;
-
-			// Now add the name to ACTOR_NAMES
-			$actrid = sqlPrep($this->id);
-			$insstmt2 = "INSERT INTO ACTOR_NAMES (ACTOR_ID, NAME) values ($actrid, $nam)";
-			$res = $mysqli->query ($insstmt2);
-			if ($res) 
-				return $this->id;
-		} else
-			$GLOBALS["logger"]->error("Actor: bad response from insert");
-		$GLOBALS["logger"]->error ("Error inserting Actor: " . $mysqli->error);
-		throw new Exception ("Could not add Actor {$this->name} to database");
+		$actorObj = ORM::for_table(self::ACTOR_TABLE)->create();
+		$actorObj->name = $this->name;
+		$actorObj->type_id = $this->typeId;
+		$actorObj->save();
+		$this->id = $actorObj->id();
+		
+		// Now add the name to ACTOR_NAMES
+		$actorNameObj = ORM::for_table('ACTOR_NAMES')->create();
+		$actorNameObj->actor_id = $this->id;
+		$actorNameObj->name = $this->name;
+		return $this->id;
+//		$insstmt = "INSERT INTO ACTORS (NAME, TYPE_ID) VALUES ($nam, $tpid)";
 	}
 
 }

@@ -31,12 +31,9 @@
 		Export::EXPORT_PERFORMERS,
 		Export::EXPORT_COMPOSERS,
 		Export::EXPORT_INSTRUMENTS);
-		
-	/* Open the database */
-	$mysqli = opendb();
 	
 	/* Set up the export */
-	$reports = Report::getReports ($mysqli, -1, -1);		// All reports
+	$reports = Report::getReports (-1, -1);		// All reports
 
 	/* Create a file pointer for the output stream, so we can use fputcsv */
 	$fh = fopen( 'php://output', 'w' );

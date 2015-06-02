@@ -13,9 +13,6 @@
 	require_once ('supportfuncs.php');
 	require_once ('model/user.php');
 	
-	/* Open the database */
-	$mysqli = opendb();
-
 	
 	echo ("User name: ");
 	$uname = trim(fgets(STDIN));
@@ -26,7 +23,7 @@
 	$pwHash = password_hash($pw, PASSWORD_DEFAULT);
 
 	// Check if user already exists
-	$user = User::findByLoginId($mysqli, $uname);
+	$user = User::findByLoginId($uname);
 	if (!is_null($user)) {
 		echo ("User already exists.\n");
 		exit;
@@ -43,7 +40,7 @@
 		exit;
 	}
 	try {
-		$user->insert($mysqli);
+		$user->insert();
 		echo ("Successfully added user " . $uname);
 	} catch (Exception $ex) {
 		echo ($ex->getMessage());

@@ -20,7 +20,6 @@ require_once('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
-$mysqli = opendb();
 $user = $_SESSION['user'];
 if (!($user->hasRole(User::ROLE_EDITOR))) {
 	header ("Location: norole.php", true, 302);

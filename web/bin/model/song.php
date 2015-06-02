@@ -14,54 +14,48 @@ require_once (dirname(__FILE__) . '/../loggersetup.php');
 
 
 class Song {
+
+	const SONG_TABLE = 'SONGS';
+	
 	var $id;
 	var $title;
 	var $note;
 	
 	/** Return a Song matching the specified ID. If no song matches,
 	    returns null. Throws an Exception if there is an SQL error. */
-	public static function findById ($mysqli, $songId) {
-		$selstmt = "SELECT TITLE, NOTE FROM SONGS WHERE ID = '" . $songId . "'";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row)) {
-				return NULL;
-			}
-			$song = new Song ();
+	public static function findById ($songId) {
+		$result = ORM::for_table(self::SONG_TABLE)->
+			select('title')->
+			select('note')->
+			where_id_is($songId)->
+			find_one();
+		if ($result) {
+			$song = new Song();
 			$song->id = $songId;
-			$song->title = $row[0];
-			$song->note = $row[1];
-			
+			$song->title = $result->title;
+			$song->note = $result->note;
 			return $song;
 		}
 		return NULL;
+//		$selstmt = "SELECT TITLE, NOTE FROM SONGS WHERE ID = '" . $songId . "'";
 	}
 	
 	/** Returns an array of Songs matching the title. May be empty. */
 	public static function findByTitle ($mysqli, $title) {
-		$ttl = sqlPrep ($title);
-		$selstmt = "SELECT ID, NOTE FROM SONGS WHERE TITLE = $ttl";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			throw new Exception ($mysqli->connect_error);
-		}
+		$resultSet = ORM::for_table(self::SONG_TABLE)->
+			select('id')->
+			select('note')->
+			where_equal('title', $title)->
+			find_many();
 		$retval = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row))
-					break;
-				$song = new Song();
-				$song->id = $row[0];
-				$song->note = $row[1];
-				$song->title = $title;
-				$retval[] = $song;
-			}		
+		foreach ($resultSet as $result) {
+			$song = new Song();
+			$song->id = $result->id;
+			$song->note = $result->note;
+			$song->title = $title;
+			$retval[] = $song;
 		}
+//		$selstmt = "SELECT ID, NOTE FROM SONGS WHERE TITLE = $ttl";
 		return $retval;
 	}
 	
@@ -69,17 +63,12 @@ class Song {
 	   Returns the ID if successful.
 	*/
 	public function insert ($mysqli) {
-		$ttl = sqlPrep($this->title);
-		$nte = sqlPrep($this->note);
-		$insstmt = "INSERT INTO SONGS (TITLE, NOTE) VALUES ($ttl, $nte)";
-		$res = $mysqli->query ($insstmt);
-		if ($res) {
-			// Retrieve the ID of the row we just inserted
-			$this->id = $mysqli->insert_id;
-			return $this->id;
-		}
-		$GLOBALS["logger"]->error ("Error inserting Song: " . $mysqli->error);
-		throw new Exception ("Could not add Song {$this->title} to database");
+		$recToInsert = ORM::for_table(self::SONG_TABLE)->create();
+		$recToInsert->title = $this->title;
+		$recToInsert->note = $this->note;
+//		$insstmt = "INSERT INTO SONGS (TITLE, NOTE) VALUES ($ttl, $nte)";
+		$recToInsert->save();
+		return $recToInsert->id();
 	}
 	
 }

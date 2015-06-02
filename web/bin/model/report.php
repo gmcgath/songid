@@ -18,6 +18,10 @@ require_once (dirname(__FILE__) . '/../loggersetup.php');
 
 class Report {
 
+	const REPORT_TABLE = 'REPORTS';
+	const REPTS_PERFS_TABLE = 'REPORTS_PERFORMERS';
+	const REPTS_INSTS_TABLE = 'REPORTS_INSTRUMENTS';
+	
 	// values for soundType in database
 	const SOUND_TYPE_PERFORMANCE = 1;
 	const SOUND_TYPE_TALK = 2;
@@ -68,26 +72,26 @@ class Report {
 	
 	// Map from sound type strings to numeric constants 
 	var $soundTypeMap = array (
-		"performance"=>Report::SOUND_TYPE_PERFORMANCE,
-		"talk"=>Report::SOUND_TYPE_TALK,
-		"noise"=>Report::SOUND_TYPE_OTHER
+		"performance"=>self::SOUND_TYPE_PERFORMANCE,
+		"talk"=>self::SOUND_TYPE_TALK,
+		"noise"=>self::SOUND_TYPE_OTHER
 	);
 	
 	// Map from sound subtype strings to numeric constants
 	var $soundSubtypeMap = array (
-		"perftype_song"=>Report::SOUND_SUBTYPE_PRF_SONG,
-		"perftype_medley"=>Report::SOUND_SUBTYPE_PRF_MEDLEY,
-		"perftype_instrumental"=>Report::SOUND_SUBTYPE_PRF_INST,
-		"perftype_spoken"=>Report::SOUND_SUBTYPE_PRF_SPOKEN,
-		"perftype_other"=>Report::SOUND_SUBTYPE_PRF_OTHER,
-		"talktype_annc"=>Report::SOUND_SUBTYPE_TALK_ANNC,
-		"talktype_conv"=>Report::SOUND_SUBTYPE_TALK_CONV,
-		"talktype_auction"=>Report::SOUND_SUBTYPE_TALK_AUCTION,
-		"talktype_songid"=>Report::SOUND_SUBTYPE_TALK_SONGID,
-		"talktype_other"=>Report::SOUND_SUBTYPE_TALK_OTHER,
-		"noisetype_setup"=>Report::SOUND_SUBTYPE_NOISE_SETUP,
-		"noisetype_silence"=>Report::SOUND_SUBTYPE_NOISE_SILENCE,
-		"noisetype_other"=>Report::SOUND_SUBTYPE_NOISE_OTHER
+		"perftype_song"=>self::SOUND_SUBTYPE_PRF_SONG,
+		"perftype_medley"=>self::SOUND_SUBTYPE_PRF_MEDLEY,
+		"perftype_instrumental"=>self::SOUND_SUBTYPE_PRF_INST,
+		"perftype_spoken"=>self::SOUND_SUBTYPE_PRF_SPOKEN,
+		"perftype_other"=>self::SOUND_SUBTYPE_PRF_OTHER,
+		"talktype_annc"=>self::SOUND_SUBTYPE_TALK_ANNC,
+		"talktype_conv"=>self::SOUND_SUBTYPE_TALK_CONV,
+		"talktype_auction"=>self::SOUND_SUBTYPE_TALK_AUCTION,
+		"talktype_songid"=>self::SOUND_SUBTYPE_TALK_SONGID,
+		"talktype_other"=>self::SOUND_SUBTYPE_TALK_OTHER,
+		"noisetype_setup"=>self::SOUND_SUBTYPE_NOISE_SETUP,
+		"noisetype_silence"=>self::SOUND_SUBTYPE_NOISE_SILENCE,
+		"noisetype_other"=>self::SOUND_SUBTYPE_NOISE_OTHER
 	);
 	
 	public function Report () {
@@ -104,22 +108,16 @@ class Report {
 	
 	/** Return a Report matching the specified ID. If no report matches,
 	    returns null. Throws an Exception if there is an SQL error. */
-	public static function findById ($mysqli, $reportId) {
-		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
-			"FROM REPORTS WHERE ID = " . $reportId;
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error in Report findById: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row)) {
-				return NULL;
-			}
+	public static function findById ($reportId) {
+		$result = ORM::for_table(self::REPORT_TABLE)->
+			where_equal('id', $reportId)->
+			find_one();
+//		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
+//			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
+//			"FROM REPORTS WHERE ID = " . $reportId;
+		if ($result) {
 			$report = new Report ();
-			$report->buildFromRow($mysqli, $row);
+			$report->buildFromOrm($result);
 			return $report;
 		}
 		return NULL;
@@ -138,92 +136,75 @@ class Report {
 	/* Inserts a Report into the database. Throws an Exception on failure.
 	   Returns the ID if successful.
 	*/
-	public function insert ($mysqli) {
+	public function insert () {
+		$newRec = ORM::for_table (self::REPORT_TABLE)->create();
+		$newRec->clip_id = $this->clip->id;
+		$newRec->master_id = $this->masterId;
 		$sngid = NULL;
 		if (!is_null($this->song)) 
 			$sngid = $this->song->id;
-		$sngid = sqlPrep ($sngid);
-		$sngalng = sqlPrep($this->singalong);
-		$clpid = sqlPrep($this->clip->id);
-		$mstrid = sqlPrep($this->masterId);
-		$seqn = sqlPrep($this->seqNum);
-		$usrid = sqlPrep($this->user->id);
-		$sndtyp = sqlPrep($this->soundType);
-		$sndsbtyp = sqlPrep($this->soundSubtype);
-		$prftyp = sqlPrep($this->performerType);
-		$flgd = sqlPrep($this->flagged);
-		$insstmt = "INSERT INTO REPORTS (CLIP_ID, MASTER_ID, SEQ_NUM, USER_ID, SOUND_TYPE, " .
-			" SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG, FLAGGED) " .
-			" VALUES ($clpid, $mstrid, $seqn, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng, $flgd)";
-		$res = $mysqli->query ($insstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error in Report insert: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			// Retrieve the ID of the row we just inserted
-			$this->id = $mysqli->insert_id;
-			$this->writePerformers ($mysqli);
-			$this->writeInstruments ($mysqli);
-			return $this->id;
-		}
-		$GLOBALS["logger"]->error ("Error inserting report: " . $mysqli->error);
-		
-		return false;
+		$newRec->song_id = $sngid;
+		$newRec->singalong = $this->singalong;
+		$newRec->seq_num = $this->seqNum;
+		$newRec->user_id = $this->user->id;
+		$newRec->sound_type = $this->soundType;
+		$newRec->sound_subtype = $this->soundSubtype;
+		$newRec->performer_type = $this->performerType;
+		$newRec->flagged = $this->flagged;
+		$newRec->save();
+		return $newRec->id();		
+//		$insstmt = "INSERT INTO REPORTS (CLIP_ID, MASTER_ID, SEQ_NUM, USER_ID, SOUND_TYPE, " .
+//			" SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG, FLAGGED) " .
+//			" VALUES ($clpid, $mstrid, $seqn, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng, $flgd)";
 	}
 	
 	/* Deletes the current Report from the database. */
-	public function delete ($mysqli) {
-		$id = sqlPrep($this->id);
-		$delstmt = "DELETE FROM REPORTS WHERE ID = $id";
-		$res = $mysqli->query ($delstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error in Report delete: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
+	public function delete () {
+		$recToDelete = ORM::for_table(self::REPORT_TABLE)->find_one($this->id);
+		$recToDelete->delete();
 	}
 	
 	/* Convert a soundSubtype constant to a user-friendly string. */
 	public static function soundSubtypeToString ($sndSubtype) {
 		$val = NULL;
 		switch ($sndSubtype) {
-			case Report::SOUND_SUBTYPE_PRF_SONG:
+			case self::SOUND_SUBTYPE_PRF_SONG:
 				$val = "song";
 				break;
-			case Report::SOUND_SUBTYPE_PRF_MEDLEY:
+			case self::SOUND_SUBTYPE_PRF_MEDLEY:
 				$val = "medley";
 				break;
-			case Report::SOUND_SUBTYPE_PRF_INST:
+			case self::SOUND_SUBTYPE_PRF_INST:
 				$val = "instrumental";
 				break;
-			case Report::SOUND_SUBTYPE_PRF_SPOKEN:
+			case self::SOUND_SUBTYPE_PRF_SPOKEN:
 				$val = "spoken or shtick";
 				break;
-			case Report::SOUND_SUBTYPE_PRF_OTHER:
+			case self::SOUND_SUBTYPE_PRF_OTHER:
 				$val = "other";
 				break;
-			case Report::SOUND_SUBTYPE_TALK_ANNC:
+			case self::SOUND_SUBTYPE_TALK_ANNC:
 				$val = "announcement";
 				break;
-			case Report::SOUND_SUBTYPE_TALK_CONV:
+			case self::SOUND_SUBTYPE_TALK_CONV:
 				$val = "conversation";
 				break;
-			case Report::SOUND_SUBTYPE_TALK_AUCTION:
+			case self::SOUND_SUBTYPE_TALK_AUCTION:
 				$val = "auction";
 				break;
-			case Report::SOUND_SUBTYPE_TALK_SONGID:
+			case self::SOUND_SUBTYPE_TALK_SONGID:
 				$val = "song identification";
 				break;
-			case Report::SOUND_SUBTYPE_TALK_OTHER:
+			case self::SOUND_SUBTYPE_TALK_OTHER:
 				$val = "other";
 				break;
-			case Report::SOUND_SUBTYPE_NOISE_SETUP:
+			case self::SOUND_SUBTYPE_NOISE_SETUP:
 				$val = "setup";
 				break;
-			case Report::SOUND_SUBTYPE_NOISE_SILENCE:
+			case self::SOUND_SUBTYPE_NOISE_SILENCE:
 				$val = "silence";
 				break;
-			case Report::SOUND_SUBTYPE_NOISE_OTHER:
+			case self::SOUND_SUBTYPE_NOISE_OTHER:
 				$val = "other";
 				break;
 		}
@@ -263,38 +244,31 @@ class Report {
 	}
 
 	/* After writing the Report, write the Performers if necessary. */
-	private function writePerformers ($mysqli) {
+	private function writePerformers () {
 		$GLOBALS["logger"]->debug("writePerformers");
 		if ($this->performers != NULL) {
 			foreach ($this->performers as $performer) {
 				$GLOBALS["logger"]->debug("Got a performer {$performer->id}");
 				// $performer is an Actor
-				$rptid = sqlPrep($this->id);
-				$actid = sqlPrep($performer->id);
-				$insstmt = "INSERT INTO REPORTS_PERFORMERS (REPORT_ID, ACTOR_ID) " .
-					"VALUES ($rptid, $actid)";
-				$mysqli->query($insstmt);
-				if ($mysqli->connect_errno) {
-					$GLOBALS["logger"]->error("Error in Report writePerformers: " . $mysqli->connect_error);
-					throw new Exception ("Error writing performers: " . $mysqli->connect_error);
-				}
+				$newRec = ORM::for_table(self::REPTS_PERFS_TABLE)->create();
+				$newRec->report_id = $this->id;
+				$newRec->actor_id = $performer->id;
+//				$insstmt = "INSERT INTO REPORTS_PERFORMERS (REPORT_ID, ACTOR_ID) " .
+//					"VALUES ($rptid, $actid)";
 			}
 		}
 	}
 	
 	/* After writing the Report, write the Instruments if necessary. */
-	private function writeInstruments ($mysqli) {
+	private function writeInstruments () {
 		if ($this->instruments != NULL) {
 			foreach ($this->instruments as $instrument) {
-				$rptid = sqlPrep($this->id);
-				$instid = sqlPrep($instrument->id);
-				$insstmt = "INSERT INTO REPORTS_INSTRUMENTS (REPORT_ID, INSTRUMENT_ID) " .
-					"VALUES ($rptid, $instid)";
-				$mysqli->query($insstmt);
-				if ($mysqli->connect_errno) {
-					$GLOBALS["logger"]->error("Error in Report writeInstruments: " . $mysqli->connect_error);
-					throw new Exception ("Error writing instruments: " . $mysqli->connect_error);
-				}
+				$newRec = ORM::for_table(self::REPTS_INSTS_TABLE)->create();
+				$newRec->report_id = $this->id;
+				$newRec->instrument_id = $instrument->id;
+				$newRec->save();
+//				$insstmt = "INSERT INTO REPORTS_INSTRUMENTS (REPORT_ID, INSTRUMENT_ID) " .
+//					"VALUES ($rptid, $instid)";
 			}
 		}
 	}
@@ -330,165 +304,142 @@ class Report {
 	   startDate and endDate are ShortDate objects or null.
 	   
 	   -1 for either range value gets you all the reports.
+	   
+	   This requires one of those 2-argument LIMIT clauses that Idiorm can't handle,
+	   so we need a raw query;
+	   otherwise we could get away with just the where_raw function.
 	*/
-	public static function getReports ($mysqli, 
-			$m, 
+	public static function getReports ($m, 
 			$n, 
 			ShortDate $startDate, 
 			ShortDate $endDate) {
 		// Basic where clause; get the head of each chain, signified by a null MASTER_ID
-		$whereClause = "MASTER_ID IS NULL";
+		$whereClause = "master_id IS NULL";
 		if ($startDate) {
-			$whereClause .= " AND DATE >= timestamp '" . $startDate->toDateTime('start') . "'";
+			$whereClause .= " AND date >= timestamp '" . $startDate->toDateTime('start') . "'";
 		}
 		if ($endDate) {
-			$whereClause .= " AND DATE <= timestamp '" . $endDate->toDateTime('end') . "'";
+			$whereClause .= " AND date <= timestamp '" . $endDate->toDateTime('end') . "'";
 		}
-		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
-			"FROM REPORTS  " .
+		$selstmt = "SELECT * " .
+			"FROM ${self::REPORT_TABLE} " .
 			"WHERE " .
 			$whereClause .
-			" ORDER BY DATE DESC";
+			" ORDER BY date DESC";
 		if ($m >= 0 && $n >= 0)
 			$selstmt .= " LIMIT $m, $n ";
-		return Report::getReports1 ($mysqli, $selstmt, $m, $n);
+		$resultSet = ORM::for_table(self::REPORT_TABLE)->raw_query($selstmt);
+		return self::getReports1 ($resultSet, $m, $n);
 	}
 	
 	/* Like getReports, but for just one clip */
-	public static function getReportsForClip($mysqli, 
-			$clipid, 
+	public static function getReportsForClip($clipid, 
 			$m, 
 			$n, 
 			ShortDate $startDate, 
 			ShortDate $endDate) {
-		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
+		$selstmt = "SELECT * " .
 			"FROM REPORTS  " .
-			"WHERE MASTER_ID IS NULL AND CLIP_ID = '$clipid' " .
-			"ORDER BY DATE DESC " .
+			"WHERE master_id IS NULL AND clip_id = '$clipid' " .
+			"ORDER BY date DESC " .
 			"LIMIT $m, $n ";
-		return Report::getReports1 ($mysqli, $selstmt, $m, $n);
+		$resultSet = ORM::for_table(self::REPORT_TABLE)->raw_query($selstmt);
+		return self::getReports1 ($resultSet, $m, $n);
 	}
 
 
-	private static function getReports1($mysqli, $selstmt, $m, $n) {
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error($mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
+	private static function getReports1($resultSet, $m, $n) {
 		$reports = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				$GLOBALS["logger"]->debug("Got a report row");
-				if (is_null($row))
-					break;
-				$rep = new Report();
-				$rep->buildFromRow($mysqli, $row);
-				$reports[] = $rep;
-				$rep->buildChain($mysqli);
-				}
+		foreach ($resultSet as $result) {
+			$rep = new Report();
+			$rep->buildFromOrm($result);
+			$reports[] = $rep;
+			$rep->buildChain();
 		}
 		return $reports;
 	}
 	
-	/* Construct the report from a result row. This is used from getReports and
+	/* Construct the report from an ORM result object. This is used from getReports and
 	   findById, which need to return the same row elements. */
-	private function buildFromRow($mysqli, $row) {
-		$this->id = $row[0];
-		$clipId = $row[1];
-		$this->clip = Clip::findById($mysqli, $clipId);
+	private function buildFromOrm($result) {
+		$this->id = $result->id;
+		$clipId = $result->clip_id;
+		$this->clip = Clip::findById($clipId);
 		
-		$userId = $row[2];
+		$userId = $result->user_id;
 		$GLOBALS["logger"]->debug("User id = $userId");
 		if ($userId) {
-			$this->user = User::findById($mysqli, $userId);
+			$this->user = User::findById($userId);
 		}
-		$this->soundType = $row[3];
-		$this->soundSubtype = $row[4];
-		$this->performerType = $row[5];
-		$songId = $row[6];
+		$this->soundType = $result->sound_type;
+		$this->soundSubtype = $result->sound_subtype;
+		$this->performerType = $result->performer_type;
+		$songId = $result->song_id;
 		if (!is_null($songId)) {
 			$GLOBALS["logger"]->debug ("Finding song by ID $songId");
-			$this->song = Song::findById($mysqli, $songId);
+			$this->song = Song::findById($songId);
 		}
-		$this->singalong = ($row[7] == 1) ? true : false;
-		$this->date = $row[8];
-		$this->masterId = $row[9];
-		$this->seqNum = $row[10];
-		$this->flagged = $row[11];
-		$this->addPerformers($mysqli);
-		$this->addInstruments($mysqli);
+		$this->singalong = ($result->singalong == 1) ? true : false;
+		$this->date = $result->date;
+		$this->masterId = $result->master_id;
+		$this->seqNum = $result->seq_num;
+		$this->flagged = $result->flagged;
+		$this->addPerformers();
+		$this->addInstruments();
 	}
 	
 	/* Add any performers to the Report object */
-	private function addPerformers ($mysqli) {
-		$rptid = sqlPrep($this->id);
-		$selstmt = "SELECT ACTOR_ID FROM REPORTS_PERFORMERS WHERE REPORT_ID = $rptid";
-		$res = $mysqli->query($selstmt);
+	private function addPerformers () {
+//		$selstmt = "SELECT ACTOR_ID FROM REPORTS_PERFORMERS WHERE REPORT_ID = $rptid";
+		$resultSet = ORM::for_table (self::REPTS_PERFS_TABLE)->
+			select('actor_id')->
+			where_equal('report_id', $this->id)->
+			find_many();
 		$this->performers = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row))
-					break;
-				$actorId = $row[0];
-				$performer = Actor::findById($mysqli, $actorId);
-				if ($performer != NULL) {
-					$this->performers[] = $performer;
-				}
+		foreach ($resultSet as $result) {
+			$actorId = $result->actor_id;
+			$performer = Actor::findById($actorId);
+			if ($performer != NULL) {
+				$this->performers[] = $performer;
 			}
 		}
 	}
 	
 	/* Add any instruments to the Report object */
-	private function addInstruments ($mysqli) {
-		$rptid = sqlPrep($this->id);
-		$selstmt = "SELECT INSTRUMENT_ID FROM REPORTS_INSTRUMENTS WHERE REPORT_ID = $rptid";
-		$GLOBALS["logger"]->debug($selstmt);
-		$res = $mysqli->query($selstmt);
+	private function addInstruments () {
+//		$rptid = sqlPrep($this->id);
+//		$selstmt = "SELECT INSTRUMENT_ID FROM REPORTS_INSTRUMENTS WHERE REPORT_ID = $rptid";
+		$resultSet = ORM::for_table (self::REPTS_INSTS_TABLE)->
+			select('instrument_id')->
+			where_equal('report_id', $this->id)->
+			find_many();
 		$this->instruments = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row))
-					break;
-				$instId = $row[0];
-				$instrument = Instrument::findById($mysqli, $instId);
-				if ($instrument != NULL) {
-					$this->instruments[] = $instrument;
-				}
+		foreach ($resultSet as $result) {
+			$instId = $result->instrument_id;
+			$instrument = Instrument::findById($instId);
+			if ($instrument != NULL) {
+				$this->instruments[] = $instrument;
 			}
 		}
 	}
 	
 	/* Build the chain of reports that follows a master report. */
-	private function buildChain ($mysqli) {
+	private function buildChain () {
 		$rpt = $this;
-		$rptid = sqlPrep($this->id);
-		$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
-			"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
-			"FROM REPORTS WHERE MASTER_ID = " . $rptid;
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error($mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
+		//$rptid = sqlPrep($this->id);
+		//$selstmt = "SELECT ID, CLIP_ID, USER_ID, SOUND_TYPE, SOUND_SUBTYPE, " .
+		//	"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
+		//	"FROM REPORTS WHERE MASTER_ID = " . $rptid;
+		$resultSet = ORM::for_table(self::REPORT_TABLE)->
+			where_equal('master_id', $rptid)->
+			find_many();
+			
+		foreach ($resultSet as $result) {
+			$report = new Report ();
+			$report->buildFromOrm($result);
+			$rpt->nextReport = $report;
+			$rpt = $report;
 		}
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row)) {
-					break;
-				}
-				$report = new Report ();
-				$report->buildFromRow($mysqli, $row);
-				$rpt->nextReport = $report;
-				$rpt = $report;
-			}
-		}
-		return NULL;
 	}
 	   
 }

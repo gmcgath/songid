@@ -13,54 +13,50 @@ require_once (dirname(__FILE__) . '/../supportfuncs.php');
 require_once (dirname(__FILE__) . '/../loggersetup.php');
 
 class InstrumentCategory {
+
+	const INST_CAT_TABLE = 'INSTRUMENT_CATEGORIES';
+	
 	var $id;
 	var $name;
 	var $displaySequence;
 
 	/** Return an InstrumentCategory matching the specified ID. If no song matches,
 	    returns null. Throws an Exception if there is an SQL error. */
-	public static function findById ($mysqli, $catId) {
-		$selstmt = "SELECT NAME, DISPLAY_SEQUENCE FROM INSTRUMENT_CATEGORIES WHERE ID = '" . $catId . "'";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row)) {
-				return NULL;
-			}
-			$cat = new InstrumentCategory ();
+	public static function findById ($catId) {
+		$result = ORM::for_table(self::INST_CAT_TABLE)->
+			select('name')->
+			select('display_sequence')->
+			where_equal ('id', $catId)->
+			find_one();
+		if ($result) {
+			$cat = new InstrumentCategory();
 			$cat->id = $catId;
-			$cat->name = $row[0];
-			$cat->displaySequence = $row[1];
-			
+			$cat->name = $result->name;
+			$cat->displaySequence = $result->display_sequence;
 			return $cat;
 		}
+		
 		return NULL;
+//		$selstmt = "SELECT NAME, DISPLAY_SEQUENCE FROM INSTRUMENT_CATEGORIES WHERE ID = '" . $catId . "'";
 	}	
 	
 	/** Return an array of all InstrumentsCategorys [sic], ordered by display sequence. */
 	public static function getAllCategories ($mysqli) {
-		$selstmt = "SELECT ID, NAME, DISPLAY_SEQUENCE FROM INSTRUMENT_CATEGORIES " .
-			"ORDER BY DISPLAY_SEQUENCE";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			throw new Exception ($mysqli->connect_error);
-		}
+		$resultSet = ORM::for_table(self::INST_CAT_TABLE)->
+			select('id')->
+			select('name')->
+			select('display_sequence')->
+			order_by_asc('display_sequence')->
+			find_many();
+//		$selstmt = "SELECT ID, NAME, DISPLAY_SEQUENCE FROM INSTRUMENT_CATEGORIES " .
+//			"ORDER BY DISPLAY_SEQUENCE";
 		$cats = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row)) {
-					break;
-				}
-				$cat = new InstrumentCategory();
-				$cat->id = $row[0];
-				$cat->name = $row[1];
-				$cat->displaySequence = $row[2];
-				$cats[] = $cat;
-			}
+		foreach ($resultSet as $result) {
+			$cat = new InstrumentCategory();
+			$cat->id = $result->id;
+			$cat->name = $result->name;
+			$cat->displaySequence = $result->display_sequence;
+			$cats[] = $cat;
 		}
 		// The cats have all been herded
 		return $cats;

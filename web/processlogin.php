@@ -13,13 +13,13 @@ require_once ('bin/config.php');
 require_once ('bin/supportfuncs.php');
 require_once ('bin/model/user.php');
 require_once ('bin/loggersetup.php');
+require_once ('bin/initorm.php');
 
-/* Open the database */
-$mysqli = opendb();
+error_log ("Got all the required PHP files");
 	
 try {
-	$userName = trim(strip_tags($mysqli->real_escape_string($_POST["user"])));
-	$user = User::verifyLogin($mysqli, $userName, $_POST["pw"]);
+	$userName = trim(strip_tags($_POST["user"]));
+	$user = User::verifyLogin($userName, $_POST["pw"]);
 	if ($user) {
 		session_start();
 		$_SESSION['user'] = $user;

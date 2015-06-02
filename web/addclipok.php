@@ -19,7 +19,6 @@ include_once('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
-$mysqli = opendb();
 ?>
 
 <html>
@@ -35,7 +34,7 @@ include ('menubar.php');
 $clipid = $_GET[id];
 if (!ctype_digit ($clipid))
 	$clipid = "";		// defeat dirty tricks
-$clip = Clip::findById($mysqli, $clipid);
+$clip = Clip::findById($clipid);
 
 if (is_null($clip)) {
 	echo ("<p class='errormsg'>Clip not found.</p>\n");

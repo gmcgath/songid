@@ -13,6 +13,8 @@ require_once (dirname(__FILE__) . '/../supportfuncs.php');
 require_once (dirname(__FILE__) . '/../loggersetup.php');
 
 class Instrument {
+
+	const INST_TABLE = 'INSTRUMENTS';
 	var $id;
 	var $name;
 	var $categoryId;
@@ -20,21 +22,17 @@ class Instrument {
 	/** Return an Instrument matching the specified ID. If no song matches,
 	    returns null. Throws an Exception if there is an SQL error. */
 	public static function findById (mysqli $mysqli, $instId) {
-		$selstmt = "SELECT NAME, CATEGORY_ID FROM INSTRUMENTS WHERE ID = '" . $instId . "'";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (is_null($row)) {
-				return NULL;
-			}
-			$inst = new Instrument ();
-			$inst->id = $instId;
-			$inst->name = $row[0];
-			$inst->categoryId = $row[1];
-			
+		$result = ORM::for_table(self::INST_TABLE)->
+			select('name')->
+			select('category_id')->
+			where_equal('id', $instId)->
+			find_one();
+//		$selstmt = "SELECT NAME, CATEGORY_ID FROM INSTRUMENTS WHERE ID = '" . $instId . "'";
+		if ($result) {
+			$inst = new Instrument();
+			$inst->id = $instId);
+			$inst->name = $result->name;
+			$inst->categoryId = $result->category_id;
 			return $inst;
 		}
 		return NULL;
@@ -43,8 +41,9 @@ class Instrument {
 	/** Return an array of Instruments, ordered by name, that belong to a
 	    specified category. */
 	public static function getInstrumentsByCategory (mysqli $mysqli, $catId) {
-		$selstmt = "SELECT ID, NAME FROM INSTRUMENTS WHERE CATEGORY_ID = $catId " .
-			"ORDER BY NAME";
+//		$selstmt = "SELECT ID, NAME FROM INSTRUMENTS WHERE CATEGORY_ID = $catId " .
+//			"ORDER BY NAME";
+		$resultSet = ORM::for_table(self::INST_TABLE)
 		$res = $mysqli->query($selstmt);
 		if ($mysqli->connect_errno) {
 			throw new Exception ($mysqli->connect_error);

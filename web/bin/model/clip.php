@@ -14,6 +14,10 @@ require_once (dirname(__FILE__) . '/../supportfuncs.php');
 require_once (dirname(__FILE__) . '/../loggersetup.php');
 
 class Clip {
+
+	const CLIPS_TABLE = 'CLIPS';
+	const REPORTS_TABLE = 'REPORTS';
+	
 	var $id;
 	var $description;
 	var $url;
@@ -25,74 +29,75 @@ class Clip {
 	   returns an empty array. If there's a database problem,
 	   throws an Exception with the SQL error message.
 	*/
-	public static function getRows (mysqli $mysqli, $idx, $n, $onlyUnrep) {
-		if ($onlyUnrep) 
-			$selstmt = "SELECT DISTINCT c.ID, c.DESCRIPTION, c.URL, c.DATE FROM CLIPS c LEFT JOIN REPORTS r " .
-				"ON c.ID = r.CLIP_ID " .
-				"WHERE r.ID IS NULL " .
-				"LIMIT " . $idx . " , " . $n;
-		else
-			$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS LIMIT " . $idx . " , " . $n;
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting Clips: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
+	public static function getRows ($idx, $n, $onlyUnrep) {
+		// *** Changing this to Idiorm is impossible because it doesn't
+		// support LIMIT with lower bounds, and it would be messier than
+		// the SQL even if it were possible. There's a raw_query method
+		// or something like it. Use that.
+		$clptab = self::CLIPS_TABLE;
+		$rpttab = self::REPORTS_TABLE;
+		$selstmt = NULL;
+		if ($onlyUnrep) {
+			$selstmt = "SELECT DISTINCT c.id, c.description, c.url, c.date " .
+				"FROM $clptab c LEFT JOIN $rpttab r " .
+				"ON c.id = r.clip_id " .
+				"WHERE r.id IS NULL " .
+				"LIMIT :idx , :n";
 		}
+		else {
+			$selstmt = "SELECT id, description, url, date FROM $clptab LIMIT :idx , :n";
+		}
+		$paramArray = array ('idx' => $idx , 'n' => $n);
+		$GLOBALS["logger"]->debug("Querying for rows");
+		$resultSet = ORM::for_table('CLIPS')->
+			raw_query($selstmt, $paramArray)->
+			find_many();
 		$rows = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row)) {
-					break;
-				}
-				$clip = new Clip();
-				$clip->id = $row[0];
-				$clip->description = $row[1];
-				$clip->url= $row[2];
-				$clip->date = $row[3];
-				$rows[] = $clip;
-			}
+		$GLOBALS["logger"]->debug("Building rows in getRows");
+		foreach ($resultSet as $result) {
+			$GLOBALS["logger"]->debug("Adding a row");
+			$clip = new Clip();
+			$clip->id = $result->id;
+			$clip->description = $result->description;
+			$clip->url = $result->url;
+			$clip->date = $result->date;
+			$rows[] = $clip;
 		}
 		return $rows;	
 	}
 	
 	/* Return the Clip with the specified ID, or NULL. */
-	public static function findById(mysqli $mysqli, $id) {
-		$id = sqlPrep($id);
-		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS WHERE ID = $id";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting clip by ID: " . $mysqli->connect_error);
+	public static function findById($id) {
+		$result = ORM::for_table(self::CLIPS_TABLE)->
+			select('id')->
+			select('description')->
+			select('url')->
+			select('date')->
+			where_equal('id', $id)->
+			find_one();
+		if (!$result) {
+			$GLOBALS["logger"]->debug ("No clip found with ID $id");
 			return NULL;
 		}
-		if ($res) {
-			$row = $res->fetch_row();
-			if (!is_null($row)) {
-				$clip = new Clip();
-				$clip->id = $row[0];
-				$clip->description = $row[1];
-				$clip->url= $row[2];
-				$clip->date = $row[3];
-				return $clip;
-			}
-		}
-		$GLOBALS["logger"]->debug ("No clip found with ID $id");
-		return NULL;
+		$clip = new Clip();
+		$clip->id = $result->id;
+		$clip->description = $result->description;
+		$clip->url = $result->url;
+		$clip->date = $result->date;
+		return $clip;
+//		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS WHERE ID = $id";
 	}
 	
 	/* Write the updated values of the clip out. */
-	public function update(mysqli $mysqli) {
-		$desc = sqlPrep($this->description);
-		$ur = sqlPrep($this->url);
-		$id = sqlPrep($this->id);
-		$updstmt = "UPDATE CLIPS SET " .
-			"DESCRIPTION = $desc, ".
-			"URL = $ur " .
-			"WHERE ID = $id";
-		$res = $mysqli->query($updstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting clip by ID: " . $mysqli->connect_error);
-		}
+	public function update() {
+		$recToUpdate = ORM::for_table(self::CLIPS_TABLE)->find_one($this->id);
+		$recToUpdate->description = $this->description;
+		$recToUpdate->url = $this->url;
+		$recToUpdate->save();
+//		$updstmt = "UPDATE CLIPS SET " .
+//			"DESCRIPTION = $desc, ".
+//			"URL = $ur " .
+//			"WHERE ID = $id";
 	}
 
 	/* Inserts a Clip into the database. Throws an Exception on failure.
@@ -102,15 +107,11 @@ class Clip {
 	public function insert (mysqli $mysqli) {
 		$dsc = sqlPrep($this->description);
 		$url = sqlPrep($this->url);
-		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
-		$res = $mysqli->query ($insstmt);
-		if ($res) {
-			// Retrieve the ID of the row we just inserted
-			$this->id = $mysqli->insert_id;
-			return $this->id;
-		}
-		$GLOBALS["logger"]->error ("Error inserting Clip: " . $mysqli->error);
-		throw new Exception ("Could not add Clip {$this->description} to database");
+		$newRecord = ORM::for_table(self::CLIPS_TABLE)->create();
+		$newRecord->description = $this->description;
+		$newRecord->url = $this->url;
+//		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
+		$newRecord->save();
 	}
 }
 

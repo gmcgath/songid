@@ -46,8 +46,6 @@ header("Content-type: text/html; charset=utf-8");
 	require_once ('bin/model/clip.php');
 	require_once ('bin/model/report.php');
 
-	/* Open the database */
-	$mysqli = opendb();
 	$user = $_SESSION['user'];
 	if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_EDITOR))) {
 		header ("Location: norole.php", true, 302);
@@ -109,12 +107,12 @@ header("Content-type: text/html; charset=utf-8");
 
 	// Get one extra report so we know if there are more to come
 	if ($clipid)
-		$reports = Report::getReportsForClip ($mysqli, $clipid, $start,
+		$reports = Report::getReportsForClip ($clipid, $start,
 				$itemsPerPage + 1, 
 				$startDate,
 				$endDate);
 	else
-		$reports = Report::getReports ($mysqli, $start, 
+		$reports = Report::getReports ($start, 
 				$itemsPerPage + 1,
 				$startDate,
 				$endDate);

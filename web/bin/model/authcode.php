@@ -22,46 +22,38 @@ require_once (dirname(__FILE__) . '/../password.php');	// Required prior to PHP 
 require_once (dirname(__FILE__) . '/../loggersetup.php');
 
 class Authcode {
+
+	const AUTHCODE_TABLE = 'AUTHCODES';
+	
 	var $id;
 	var $hash;
 	
 	/* Check the specified authcode. Return true if good,
 	   false otherwise. authcode must not be escaped. */
-	public static function verifyAuth($mysqli, $auth) {
-		$usr = sqlPrep($username);
-		$selstmt = "SELECT CODE_HASH FROM AUTHCODES";
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			$GLOBALS["logger"]->error("Error getting Users: " . $mysqli->connect_error);
-			throw new Exception ($mysqli->connect_error);
-		}
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row))
-					break;
-				if (password_verify($auth, $row[0])) {
-					return true;
-				}
+	public static function verifyAuth($auth) {
+		$resultSet = ORM::for_table(self::AUTHCODE_TABLE)->
+			select('code_hash')->
+			find_many();
+		foreach ($resultSet as $result) {
+			$hash = $result->code_hash;
+			if (password_verify($auth, $hash)) {
+				return true;
 			}
 		}
 		return false;
+		//$selstmt = "SELECT CODE_HASH FROM AUTHCODES";
 	}
 
 
 	/* Inserts an Authcode into the database. Throws an Exception on failure.
 	   Returns the ID if successful.
 	*/
-	public function insert ($mysqli) {
-		$hsh = sqlPrep($this->hash);
-		$insstmt = "INSERT INTO AUTHCODES (CODE_HASH) VALUES ($hsh)";
-		$res = $mysqli->query ($insstmt);
-		if ($res) {
-			// Retrieve the ID of the row we just inserted
-			$this->id = $mysqli->insert_id;
-			return $this->id;
-		}
-		$GLOBALS["logger"]->error ("Error inserting Auth code: " . $mysqli->error);
-		throw new Exception ("Could not add auth code to database");
+	public function insert () {
+		$insertObj = ORM::for_table(self::AUTHCODE_TABLE)->create();
+		$insertObj->code_hash = $this->hash;
+		$insertObj->save();
+		return $insertObj->id();
+		//$hsh = sqlPrep($this->hash);
+		//$insstmt = "INSERT INTO AUTHCODES (CODE_HASH) VALUES ($hsh)";
 	}
 }

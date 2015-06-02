@@ -18,7 +18,6 @@ include_once('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
-$mysqli = opendb();
 $user = $_SESSION['user'];
 if (!($user->hasRole(User::ROLE_ADMINISTRATOR))) {
 	header ("Location: norole.php", true, 302);
@@ -35,7 +34,7 @@ if (!($user->hasRole(User::ROLE_ADMINISTRATOR))) {
 */
 
 
-	$users = User::getAllUsers($mysqli);
+	$users = User::getAllUsers();
 ?>
 <html lang="en">
 <head>

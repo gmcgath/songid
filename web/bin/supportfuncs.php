@@ -6,8 +6,9 @@
    See README.txt in the source distribution.
 */
 
+error_reporting (E_ALL);
+
 require_once (dirname(__FILE__) . '/config.php');
-require_once (dirname(__FILE__) . '/model/user.php');
 require_once (dirname(__FILE__) . '/loggersetup.php');
 require_once (dirname(__FILE__) . '/lib/idiorm.php');
 

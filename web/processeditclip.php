@@ -21,21 +21,19 @@ include('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
-/* Open the database */
-$mysqli = opendb();
 
 $GLOBALS["logger"]->debug("Getting clip");
 $clipId = $_POST["id"];
 if ($clipId != null && ctype_digit($clipId)) {
-	$clip = Clip::findById($mysqli, $clipId);	
+	$clip = Clip::findById($clipId);	
 }
 if ($clip == NULL) {
 	#logger->info("Couldn't get clip $clipId");
 	header ("Location: error.php", true, 302);
 	return;
 }
-$clip->description = strip_tags($mysqli->real_escape_string($_POST["clipdesc"]));
-$clip->url = strip_tags($mysqli->real_escape_string($_POST["clipurl"]));
-$clip->update($mysqli);
+$clip->description = strip_tags($_POST["clipdesc"]);
+$clip->url = strip_tags($_POST["clipurl"]);
+$clip->update();
 header ("Location: editclipok.php?id=$clipId", true, 302);
 ?>
