@@ -5,7 +5,6 @@
 
 require_once('bin/loggersetup.php');
 
-/* Be sure to open $mysqli before including menubar.php */
 $usr = $_SESSION['user'];
 if ($usr) {
 	echo ($usr->name);

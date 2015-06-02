@@ -41,7 +41,7 @@ class Song {
 	}
 	
 	/** Returns an array of Songs matching the title. May be empty. */
-	public static function findByTitle ($mysqli, $title) {
+	public static function findByTitle ($title) {
 		$resultSet = ORM::for_table(self::SONG_TABLE)->
 			select('id')->
 			select('note')->
@@ -62,7 +62,7 @@ class Song {
 	/* Inserts a Song into the database. Throws an Exception on failure.
 	   Returns the ID if successful.
 	*/
-	public function insert ($mysqli) {
+	public function insert () {
 		$recToInsert = ORM::for_table(self::SONG_TABLE)->create();
 		$recToInsert->title = $this->title;
 		$recToInsert->note = $this->note;

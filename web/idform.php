@@ -33,6 +33,7 @@ function doInstruments () {
 		// Start section
 		echo ("<li>\n");
 			$sectionName = $section->category->name;
+			$GLOBALS["logger"]->debug("doInstruments: sectionName = " . $sectionName);
 			// id and name attrs are section name, minus white space,
 			// plus "present"
 			$sectionLabel = preg_replace('/\s+/', '', $sectionName) . "present";
@@ -53,6 +54,7 @@ function doInstruments () {
 				// names, and then look for the subset which are names passed by
 				// checkboxes.
 				$instname = "inst" . $instrument->id;
+				$GLOBALS["logger"]->debug("doInstruments: instname = " . $instname);
 				echo ("<li>\n");
 				echo ("<input type='hidden' name='instrumentids[]' value='$instname'>\n");
 				echo ("<input type='checkbox' id='$instname' name='$instname' value='yes'>\n");
@@ -134,7 +136,7 @@ if ($errparm != NULL) {
 ?>
 <input type="hidden" id="dochain" name="dochain">
 <?php
-$previd = $_GET["previd"];
+$previd = isset($_GET["previd"]) ? $_GET["previd"] : NULL;
 if ($previd) 
 	echo ("<input type='hidden' name='previd' value='$previd'>\n");
 ?>

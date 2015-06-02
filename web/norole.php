@@ -18,7 +18,6 @@ header("Content-type: text/html; charset=utf-8");
 </head>
 <body>
 <?php
-$mysqli = opendb();
 include ('menubar.php');
 ?>
 <p>You aren't allowed to do that from your account.</p>

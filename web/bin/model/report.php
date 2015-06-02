@@ -13,6 +13,7 @@ require_once (dirname(__FILE__) . '/actor.php');
 require_once (dirname(__FILE__) . '/song.php');
 require_once (dirname(__FILE__) . '/clip.php');
 require_once (dirname(__FILE__) . '/instrument.php');
+require_once (dirname(__FILE__) . '/user.php');
 require_once (dirname(__FILE__) . '/../shortdate.php');
 require_once (dirname(__FILE__) . '/../loggersetup.php');
 
@@ -137,7 +138,10 @@ class Report {
 	   Returns the ID if successful.
 	*/
 	public function insert () {
+		$GLOBALS["logger"]->debug("report:insert");
+		
 		$newRec = ORM::for_table (self::REPORT_TABLE)->create();
+		$GLOBALS["logger"]->debug('Created newRec');
 		$newRec->clip_id = $this->clip->id;
 		$newRec->master_id = $this->masterId;
 		$sngid = NULL;
@@ -151,8 +155,10 @@ class Report {
 		$newRec->sound_subtype = $this->soundSubtype;
 		$newRec->performer_type = $this->performerType;
 		$newRec->flagged = $this->flagged;
+		$GLOBALS["logger"]->debug("Saving newRec");
 		$newRec->save();
-		return $newRec->id();		
+		$GLOBALS["logger"]->debug("insert: saved new record into reports table");
+		return $newRec->id();
 //		$insstmt = "INSERT INTO REPORTS (CLIP_ID, MASTER_ID, SEQ_NUM, USER_ID, SOUND_TYPE, " .
 //			" SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG, FLAGGED) " .
 //			" VALUES ($clpid, $mstrid, $seqn, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng, $flgd)";
@@ -313,6 +319,7 @@ class Report {
 			$n, 
 			ShortDate $startDate, 
 			ShortDate $endDate) {
+		$GLOBALS["logger"]->debug('getReports');
 		// Basic where clause; get the head of each chain, signified by a null MASTER_ID
 		$whereClause = "master_id IS NULL";
 		if ($startDate) {
@@ -322,13 +329,17 @@ class Report {
 			$whereClause .= " AND date <= timestamp '" . $endDate->toDateTime('end') . "'";
 		}
 		$selstmt = "SELECT * " .
-			"FROM ${self::REPORT_TABLE} " .
-			"WHERE " .
+			"FROM " .
+			self::REPORT_TABLE .
+			" WHERE " .
 			$whereClause .
 			" ORDER BY date DESC";
 		if ($m >= 0 && $n >= 0)
 			$selstmt .= " LIMIT $m, $n ";
-		$resultSet = ORM::for_table(self::REPORT_TABLE)->raw_query($selstmt);
+		$GLOBALS["logger"]->debug('selstmt = ' . $selstmt);
+		$resultSet = ORM::for_table(self::REPORT_TABLE)->
+			raw_query($selstmt)->
+			find_many();
 		return self::getReports1 ($resultSet, $m, $n);
 	}
 	
@@ -338,19 +349,27 @@ class Report {
 			$n, 
 			ShortDate $startDate, 
 			ShortDate $endDate) {
+		$GLOBALS["logger"]->debug('getReportsForClip');
 		$selstmt = "SELECT * " .
-			"FROM REPORTS  " .
-			"WHERE master_id IS NULL AND clip_id = '$clipid' " .
+			"FROM " .
+			self::REPORT_TABLE .
+			" WHERE master_id IS NULL AND clip_id = '$clipid' " .
 			"ORDER BY date DESC " .
 			"LIMIT $m, $n ";
-		$resultSet = ORM::for_table(self::REPORT_TABLE)->raw_query($selstmt);
+		$GLOBALS["logger"]->debug('selstmt = ' . $selstmt);
+		$resultSet = ORM::for_table(self::REPORT_TABLE)->
+			raw_query($selstmt)->
+			find_many();
+		$GLOBALS["logger"]->debug('returned from query');
 		return self::getReports1 ($resultSet, $m, $n);
 	}
 
 
 	private static function getReports1($resultSet, $m, $n) {
+		$GLOBALS["logger"]->debug('getReports1');
 		$reports = array();
 		foreach ($resultSet as $result) {
+			$GLOBALS["logger"]->debug('Got a report result');
 			$rep = new Report();
 			$rep->buildFromOrm($result);
 			$reports[] = $rep;
@@ -362,6 +381,7 @@ class Report {
 	/* Construct the report from an ORM result object. This is used from getReports and
 	   findById, which need to return the same row elements. */
 	private function buildFromOrm($result) {
+		$GLOBALS["logger"]->debug('buildFromOrm');
 		$this->id = $result->id;
 		$clipId = $result->clip_id;
 		$this->clip = Clip::findById($clipId);
@@ -370,6 +390,9 @@ class Report {
 		$GLOBALS["logger"]->debug("User id = $userId");
 		if ($userId) {
 			$this->user = User::findById($userId);
+			if ($this->user) {
+				$GLOBALS["logger"]->debug("Got user: " . $this->user->name);
+			}
 		}
 		$this->soundType = $result->sound_type;
 		$this->soundSubtype = $result->sound_subtype;
@@ -431,7 +454,7 @@ class Report {
 		//	"PERFORMER_TYPE, SONG_ID, SINGALONG, DATE, MASTER_ID, SEQ_NUM, FLAGGED " .
 		//	"FROM REPORTS WHERE MASTER_ID = " . $rptid;
 		$resultSet = ORM::for_table(self::REPORT_TABLE)->
-			where_equal('master_id', $rptid)->
+			where_equal('master_id', $this->id)->
 			find_many();
 			
 		foreach ($resultSet as $result) {

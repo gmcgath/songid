@@ -20,10 +20,12 @@ include('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
-	
+$GLOBALS["logger"]->debug("creating ReportBuilder");
+
 $reportBuilder = new ReportBuilder();
 try {
 	$reportBuilder->populate($_POST, $_SESSION['user']);
+	$GLOBALS["logger"]->debug("created reportBuilder");
 
 	$_SESSION['report'] = $reportBuilder;
 
@@ -38,6 +40,7 @@ try {
 		header ("Location: formsuccess.php", true, 302);
 } catch (Exception $e) {
 	// Only our own exceptions, with numeric codes, will turn into useful messages.
+	$GLOBALS["logger"]->error("Error in creating reportBuilder: " . $e->getMessage());
 	$newloc = "idform.php?id=" . $_POST["clipid"] . "&err=" . $e->getMessage();
 	header ("Location: $newloc", true, 302);
 	return;

@@ -18,7 +18,6 @@ include_once('bin/sessioncheck.php');
 if (!sessioncheck())
 	return;
 
-$mysqli = opendb();
 ?>
 
 <html>

@@ -41,7 +41,7 @@ class InstrumentCategory {
 	}	
 	
 	/** Return an array of all InstrumentsCategorys [sic], ordered by display sequence. */
-	public static function getAllCategories ($mysqli) {
+	public static function getAllCategories () {
 		$resultSet = ORM::for_table(self::INST_CAT_TABLE)->
 			select('id')->
 			select('name')->

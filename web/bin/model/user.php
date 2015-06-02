@@ -82,9 +82,10 @@ class User {
 			select('login_id')->
 			select('password_hash')->
 			select('name')->
-			where_equal('login_id', $id)->
+			where_equal('id', $id)->
 			find_one();
 		if ($result) {
+			$GLOBALS["logger"]->debug("User:findById found a user");
 			$user = new User();
 			$user->id = $id;
 			$user->loginId = $result->login_id;
@@ -111,9 +112,10 @@ class User {
 		foreach ($resultSet as $result) {
 			$user = new User();
 			$user->id = $result->id;
-			$user->loginId = $login_id;
+			$user->loginId = $result->login_id;
 			$user->name = $result->name;
 			$user->roles = $user->getRoles();	
+			$rows[] = $user;
 		}
 		return $rows;	
 	}
@@ -125,7 +127,7 @@ class User {
 			return;			// nothing to do
 		}
 		
-		$roleToInsert = ORM::for_table('ROLES')->create();		// Create empty idiorm object
+		$roleToInsert = ORM::for_table(self::USERS_ROLES_TABLE)->create();		// Create empty idiorm object
 		$roleToInsert->user_id = $this->id;
 		$roleToInsert->role = $role;
 		$roleToInsert->save();							// Insert into database
@@ -185,8 +187,9 @@ class User {
 			
 //		$selstmt = "SELECT ROLE FROM USERS_ROLES WHERE USER_ID = {$this->id} ";
 		$retval = array();
-		foreach ($roleSet as $roleRes) {
-			$retval[intval($roleRes)] = true;
+		foreach ($roleSet as $roleResult) {
+			$roleVal = $roleResult->role;
+			$retval[intval($roleVal)] = true;
 		}
 		return $retval;
 	}

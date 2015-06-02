@@ -41,9 +41,12 @@ foreach ($userids as $userid) {
 	$u = User::findById($userid);
 	if (!is_null($u)) {
 		$changed = false;
-		$adminChecked = !is_null($_POST['admn' . $userid]);
-		$editorChecked = !is_null($_POST['edit' . $userid]);
-		$contribChecked = !is_null($_POST['cont' . $userid]);
+		$admnu = 'admn' . $userid;
+		$editu = 'edit' . $userid;
+		$contu = 'cont' . $userid;
+		$adminChecked = array_key_exists($admnu, $_POST) && !is_null($_POST[$admnu]);
+		$editorChecked = array_key_exists($editu, $_POST) && !is_null($_POST[$editu]);
+		$contribChecked = array_key_exists($contu, $_POST) && !is_null($_POST[$contu]);
 		
 		// Handle addition of roles
 		if ($adminChecked && !$u->hasRole(User::ROLE_ADMINISTRATOR)) {
@@ -66,6 +69,7 @@ foreach ($userids as $userid) {
 		if (!$adminChecked && $u->hasRole(User::ROLE_ADMINISTRATOR)) {
 			$changed = true;
 			$GLOBALS["logger"]->info ("Would remove Administrator role for " . $u->loginId);
+			$u->removeRole(User::ROLE_ADMINISTRATOR);
 		}
 		if (!$editorChecked && $u->hasRole(User::ROLE_EDITOR)) {
 			$changed = true;

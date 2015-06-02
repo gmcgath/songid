@@ -104,9 +104,7 @@ class Clip {
 	   Returns the ID if successful. 
 	   The Date field will not be filled in. You have to re-get the Clip to do that.
 	*/
-	public function insert (mysqli $mysqli) {
-		$dsc = sqlPrep($this->description);
-		$url = sqlPrep($this->url);
+	public function insert () {
 		$newRecord = ORM::for_table(self::CLIPS_TABLE)->create();
 		$newRecord->description = $this->description;
 		$newRecord->url = $this->url;

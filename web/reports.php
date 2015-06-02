@@ -20,6 +20,8 @@ if (!sessioncheck())
 
 header("Content-type: text/html; charset=utf-8");
 
+$nextm = 0;
+$prevm = 0;
 
 ?>
 <!DOCTYPE html>
@@ -47,6 +49,9 @@ header("Content-type: text/html; charset=utf-8");
 	require_once ('bin/model/report.php');
 
 	$user = $_SESSION['user'];
+	
+	$GLOBALS["logger"]->debug('reports.php');
+	
 	if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_EDITOR))) {
 		header ("Location: norole.php", true, 302);
 		return;
@@ -54,7 +59,9 @@ header("Content-type: text/html; charset=utf-8");
 
 	/* Determine the range of reports to present */	
 	// param m is start index, default 0
-	$start = (int)$_GET["m"];
+	$start = NULL;
+	if (isset($_GET["m"]))
+		$start = (int)$_GET["m"];
 	if (is_null($start)) {
 		$start = 0;
 		if ($start < 0)
@@ -64,7 +71,9 @@ header("Content-type: text/html; charset=utf-8");
 	$hideprev = ($start == 0);
 	
 	// param n is end index, default 10
-	$nstr = $_GET["n"];
+	$nstr = NULL;
+	if (isset($_GET["n"]))
+		$nstr = $_GET["n"];
 	if (is_null ($nstr)) 
 		$itemsPerPage = 10;
 	else {
@@ -81,8 +90,14 @@ header("Content-type: text/html; charset=utf-8");
 	}
 	
 	// Get parameters for report date range. Format is yyyymmdd
-	$stdt = $_GET["stdt"];
-	$endt = $_GET["endt"];
+	$stdt = NULL;
+	if (isset($_GET["stdt"])) {
+		$stdt = $_GET["stdt"];
+	}
+	$endt = NULL;
+	if (isset($_GET["endt"])) {
+		$endt = $_GET["endt"];
+	}
 	$startDate = new ShortDate("20140701");		// The beginning of the world to us
 	if ($stdt) {
 		try {
@@ -97,6 +112,8 @@ header("Content-type: text/html; charset=utf-8");
 		} catch (Exception $ex) {
 		}
 	}
+	
+	$GLOBALS["logger"]->debug('Got parameters');
 		
 	include ('menubar.php');
 ?>	
@@ -106,6 +123,7 @@ header("Content-type: text/html; charset=utf-8");
 <?php
 
 	// Get one extra report so we know if there are more to come
+	$GLOBALS["logger"]->debug('clipid = ' . $clipid);
 	if ($clipid)
 		$reports = Report::getReportsForClip ($clipid, $start,
 				$itemsPerPage + 1, 
@@ -310,8 +328,10 @@ if ( !$hidenext ) {
 	function doNoise ($report) {
 	
 	}
-	
+
+	/* Strings to insert in the following JavaScript */
 ?>
+
 <script type="text/JavaScript">
 $( "#startpicker" ).datepicker({dateFormat: 'yymmdd', 
 	inline: true,
@@ -323,18 +343,9 @@ $( "#startpicker" ).datepicker({dateFormat: 'yymmdd',
 /* Set the calendar widget dates. Datepicker months are zero-based, 
    so we have to adjust for that. */
 $( "#startpicker" ).datepicker("setDate", new Date(
-<?php
-	echo ("'" . $startDate->year . "'");
-?>
-	,
-<?php
-	echo ("'" . ($startDate->month - 1) . "'");
-?>
-	,
-<?php
-	echo ("'" . $startDate->day . "'");
-?>
-	));
+		<?php echo ("'" . $startDate->year . "'"); ?>,
+		<?php echo ("'" . ($startDate->month - 1) . "'"); ?>,
+		<?php echo ("'" . $startDate->day . "'"); ?> ));
 
 $( "#endpicker" ).datepicker({dateFormat: 'yymmdd', 
 	inline: true,
@@ -343,50 +354,30 @@ $( "#endpicker" ).datepicker({dateFormat: 'yymmdd',
 	}
 	});
 $( "#endpicker" ).datepicker("setDate", new Date(
-<?php
-	echo ("'" . $endDate->year . "'");
-?>
-	,
-<?php
-	echo ("'" . ($endDate->month - 1) . "'");
-?>
-	,
-<?php
-	echo ("'" . $endDate->day . "'");
-?>
-	));
+		<?php echo ("'" . $endDate->year . "'"); ?>,
+		<?php echo ("'" . ($endDate->month - 1) . "'"); ?>,
+		<?php echo ("'" . $endDate->day . "'"); ?> ));
 
 /* The "Next" button calls this as an onclick function to fill the
    appropriate hidden fields. */
 function submitPrev() {
 	$('#mvalue').val(
-<?php
-		echo ('"' . $prevm . '"');
-?>
-	);
+		<?php echo ('"' . $prevm . '"'); ?>	);
 }
 
 /* The "Previous" button calls this as an onclick function to fill the
    appropriate hidden fields. */
 function submitNext() {
 	$('#mvalue').val(
-<?php
-		echo ('"' . $nextm . '"');
-?>
-	);
+		<?php echo ('"' . $nextm . '"'); ?> );
 }
 
 /* Initialize values for hidden date fields to the values we received */
 $('#stdt').val(
-<?php
-	echo ("'" . $startDate->toShortString() . "'");
-?>
-);
+	<?php echo ("'" . $startDate->toShortString() . "'"); ?> );
+	
 $('#endt').val(
-<?php
-	echo ("'" . $endDate->toShortString() . "'");
-?>
-);
+	<?php echo ("'" . $endDate->toShortString() . "'"); ?> );
 
 </script>
 

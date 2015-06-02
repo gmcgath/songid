@@ -14,7 +14,6 @@ require_once ('bin/supportfuncs.php');
 require_once('bin/model/user.php');
 
 /* Open the database */
-$mysqli = opendb();
 session_start();
 require_once('bin/sessioncheck.php');
 

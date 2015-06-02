@@ -21,7 +21,7 @@ class Instrument {
 
 	/** Return an Instrument matching the specified ID. If no song matches,
 	    returns null. Throws an Exception if there is an SQL error. */
-	public static function findById (mysqli $mysqli, $instId) {
+	public static function findById ($instId) {
 		$result = ORM::for_table(self::INST_TABLE)->
 			select('name')->
 			select('category_id')->
@@ -30,7 +30,7 @@ class Instrument {
 //		$selstmt = "SELECT NAME, CATEGORY_ID FROM INSTRUMENTS WHERE ID = '" . $instId . "'";
 		if ($result) {
 			$inst = new Instrument();
-			$inst->id = $instId);
+			$inst->id = $instId;
 			$inst->name = $result->name;
 			$inst->categoryId = $result->category_id;
 			return $inst;
@@ -40,27 +40,23 @@ class Instrument {
 	
 	/** Return an array of Instruments, ordered by name, that belong to a
 	    specified category. */
-	public static function getInstrumentsByCategory (mysqli $mysqli, $catId) {
+	public static function getInstrumentsByCategory ($catId) {
 //		$selstmt = "SELECT ID, NAME FROM INSTRUMENTS WHERE CATEGORY_ID = $catId " .
 //			"ORDER BY NAME";
-		$resultSet = ORM::for_table(self::INST_TABLE)
-		$res = $mysqli->query($selstmt);
-		if ($mysqli->connect_errno) {
-			throw new Exception ($mysqli->connect_error);
-		}
+		$resultSet = ORM::for_table(self::INST_TABLE)->
+			select('id')->
+			select('name')->
+			where_equal('category_id', $catId)->
+			order_by_asc('name')->
+			find_many();
+//		$res = $mysqli->query($selstmt);
 		$instruments = array();
-		if ($res) {
-			while (true) {
-				$row = $res->fetch_row();
-				if (is_null($row)) {
-					break;
-				}
-				$inst = new Instrument();
-				$inst->id = $row[0];
-				$inst->categoryId = $catId;
-				$inst->name = $row[1];
-				$instruments[] = $inst;
-			}
+		foreach ($resultSet as $result) {
+			$inst = new Instrument();
+			$inst->id = $result->id;
+			$inst->categoryId = $catId;
+			$inst->name = $result->name;
+			$instruments[] = $inst;
 		}
 		return $instruments;
 	}
