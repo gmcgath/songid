@@ -24,7 +24,6 @@ header("Content-type: text/html; charset=utf-8");
 if (array_key_exists("error", $_GET))
 	echo ("<p class='errormsg'>Login error.</p>\n");
 ?>
-<div>
 <form action="processlogin.php" method="post" accept-charset="UTF-8">
 <table class="logintab">
 <tr>

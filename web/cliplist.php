@@ -103,5 +103,12 @@ if (!sessioncheck())
 		echo ("<p>Sorry, an error occurred.</p>");
 	}
 ?>
+
+<div>
+<?php
+	phpinfo();		// **** TODO remove in production
+?>
+<div>
+
 </body>
 </html>

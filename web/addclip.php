@@ -37,7 +37,49 @@ if (!($user->hasRole(User::ROLE_EDITOR))) {
 	include ('menubar.php');
 ?>
 <h1>Add clip</h1>
-<form action="processaddclip.php" method="post" accept-charset="UTF-8">
+<p class="errormsg">
+<?php
+	$errcode = array_key_exists('err', $_GET) ? intval($_GET['err']) : -1;
+	$errmsg = NULL;
+	switch ($errcode) {
+		case 1:
+		$errmsg = "Please specify a description.";
+		break;
+		
+		case 2:
+		$errmsg = "Please specify a URL or upload a file (but not both).";
+		break;
+		
+		case 3:
+		$errmsg = "Only MP3 files are allowed.";
+		break;
+		
+		case 4:
+		$errmsg = "The file is bigger than the permitted size.";
+		break;
+		
+		case 5:
+		$errmsg = "The file name can have only letters, numbers, spaces, periods, and underscores " .
+				"and may not start with a period.";
+		break;
+		
+		case 6:
+		$errmsg = "That file name is in use already.";
+		break;
+		
+		case 7:
+		$errmsg = "Upload error";
+		break;
+		
+		default:
+		break;
+	}
+	if ($errmsg) {
+		echo ($errmsg);
+	}
+?>
+</p>
+<form action="processaddclip.php" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 <table class="editcliptable">
 <tr>
 <td class="formlabel;">Description:</td>
@@ -50,13 +92,23 @@ if (!($user->hasRole(User::ROLE_EDITOR))) {
 <tr>
 <td class="formlabel;">URL:</td>
 <td>
-	<input type="url" style="width:550px;" name="clipurl" required
+	<input type="url" style="width:550px;" name="clipurl" 
 	title="The URL of the audio resource">
+</td>
+<td>
+</tr>
+<tr><td>
+<b>OR</b>
+</td>
+</tr>
+<tr>
+<td>
+<input type="file" name="clipupload" id="clipupload">
 </td>
 </tr>
 
 <tr>
-<td><input type="submit" class="submitbutton" value="Submit clip"></td>
+<td><input type="submit" id="submitbutton" class="submitbutton" value="Submit clip"></td>
 <td>&nbsp;</td>
 </tr>
 </table>

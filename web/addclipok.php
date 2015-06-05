@@ -31,7 +31,7 @@ if (!sessioncheck())
 <?php
 include ('menubar.php');
 
-$clipid = $_GET[id];
+$clipid = array_key_exists('id', $_GET) ? $_GET['id'] : "";
 if (!ctype_digit ($clipid))
 	$clipid = "";		// defeat dirty tricks
 $clip = Clip::findById($clipid);

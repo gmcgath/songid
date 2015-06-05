@@ -55,7 +55,6 @@ class Clip {
 		$rows = array();
 		$GLOBALS["logger"]->debug("Building rows in getRows");
 		foreach ($resultSet as $result) {
-			$GLOBALS["logger"]->debug("Adding a row");
 			$clip = new Clip();
 			$clip->id = $result->id;
 			$clip->description = $result->description;
@@ -108,8 +107,10 @@ class Clip {
 		$newRecord = ORM::for_table(self::CLIPS_TABLE)->create();
 		$newRecord->description = $this->description;
 		$newRecord->url = $this->url;
+		$GLOBALS["logger"]->debug("Saving clip with URL " . $newRecord->url);
 //		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
 		$newRecord->save();
+		return $newRecord->id();
 	}
 }
 
