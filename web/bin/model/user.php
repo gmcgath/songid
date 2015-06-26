@@ -33,6 +33,10 @@ class User {
 	var $dateRegistered;
 	var $roles;			// associative array with boolean values. Missing = false.
 	
+	public function __construct () {
+		$this->roles = array();
+	}
+	
 	/* Check the login credentials. Return a User object if good,
 	   pw must NOT be escaped.
 	   NULL otherwise. */
@@ -130,6 +134,7 @@ class User {
 		$roleToInsert = ORM::for_table(self::USERS_ROLES_TABLE)->create();		// Create empty idiorm object
 		$roleToInsert->user_id = $this->id;
 		$roleToInsert->role = $role;
+		$GLOBALS["logger"]->debug ("assignRole, role user ID = " . $roleToInsert->user_id);
 		$roleToInsert->save();							// Insert into database
 			
 //		$insstmt = "INSERT INTO USERS_ROLES (USER_ID, ROLE) VALUES " .
@@ -207,6 +212,8 @@ class User {
 		$newUser->password_hash = $this->passwordHash;
 		$newUser->name = $this->name;
 		$newUser->save();
+		$this->id = $newUser->id();
+		$GLOBALS["logger"]->debug("New user id is " . $this->id);
 		return $newUser->id();
 	}
 }

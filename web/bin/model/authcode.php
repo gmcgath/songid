@@ -31,15 +31,19 @@ class Authcode {
 	/* Check the specified authcode. Return true if good,
 	   false otherwise. authcode must not be escaped. */
 	public static function verifyAuth($auth) {
+		$GLOBALS["logger"]->debug("in verifyAuth, code  " . $auth);
 		$resultSet = ORM::for_table(self::AUTHCODE_TABLE)->
 			select('code_hash')->
 			find_many();
+		$GLOBALS["logger"]->debug("completed query");
 		foreach ($resultSet as $result) {
 			$hash = $result->code_hash;
+			$GLOBALS["logger"]->debug("Checking hash " . $hash);
 			if (password_verify($auth, $hash)) {
 				return true;
 			}
 		}
+		$GLOBALS["logger"]->debug("No hash matched");
 		return false;
 		//$selstmt = "SELECT CODE_HASH FROM AUTHCODES";
 	}

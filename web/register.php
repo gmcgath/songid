@@ -21,7 +21,7 @@ header("Content-type: text/html; charset=utf-8");
 
 <h1>Sign up</h1>
 <?php
-if (array_key_exists("error", $err)) {
+if (array_key_exists("error", $_GET)) {
 	$err = $_GET["error"];
 	switch ((int) $err) {
 		case 1:
@@ -43,7 +43,7 @@ if (array_key_exists("error", $err)) {
 			$errmsg = "Invalid authorization code.";
 			break;
 		default:
-			$errmsg = "Invalid response.";
+			$errmsg = "Internal error. Please report the problem.";
 	}
 	echo ("<p class='errormsg'>$errmsg</p>\n");
 }

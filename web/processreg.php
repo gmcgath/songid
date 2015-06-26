@@ -60,9 +60,11 @@ try {
 	$user->name = $realName;
 	$user->passwordHash = password_hash($pw, PASSWORD_DEFAULT);
 	$user->insert();
+	$GLOBALS["logger"]->debug("user id after creation is " . $user->id);
 	$user->assignRole(User::ROLE_CONTRIBUTOR);
+	$GLOBALS["logger"]->debug("returned from assignRole, redirecting");
 	
-	header ("Location: registerok.php", true, 200);
+	header ("Location: registerok.php", true, 302);
 	return;
 	
 } catch (Exception $e) {

@@ -30,6 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 /* Maximum upload size. The limit in php.ini should be at least as big. */
 $MAX_FILE_SIZE = 8 * 1024 * 1024;
 
+$ALLOWED_TYPES = array("mp3");
+
 if (!isset($AUDIO_DIR)) {
 	$GLOBALS["logger"]->error("AUDIO_DIR is not defined");
 	header ("Location: addclipok.php?id=$clipId", true, 500);
@@ -55,28 +57,43 @@ else {
 	dumpVar($file);
 }
 
+/* Get the subdirectory for the user, creating it if necessary. */
+function getUserSubdirectory () {
+	global $AUDIO_DIR;
+	$usr = $_SESSION['user'];
+	$path = $AUDIO_DIR . $usr->id . '/';
+	mkdir ($path);
+	chmod ($path, 0777);		// For some reason putting the mode in mkdir doesn't work
+	return $path;
+}
+
 /* Returns an error code if the request can't be accepted, otherwise -1 */
 function processFile ($file) {
 	global $MAX_FILE_SIZE;
-	global $AUDIO_DIR;
+	global $ALLOWED_TYPES;
 	if ($file["size"] > $MAX_FILE_SIZE) {
 		return 4;			// file too large
 	}
-	$target_basename = basename($file["name"]);
-	$GLOBALS["logger"]->debug ("basename = " . $target_basename);
-	if (preg_match("/[^\w _.]/", $target_basename) ||
-		preg_match("/^\./", $target_basename))
+	$targetBasename = basename($file["name"]);
+	if (preg_match("/[^\w _.]/", $targetBasename) ||
+		preg_match("/^\./", $targetBasename))
 		return 5;				// disallowed characters in name
-	$target_file = $AUDIO_DIR . $target_basename;
-	if (file_exists($target_file)) {
+	$targetFile = getUserSubdirectory() . $targetBasename;
+	$GLOBALS["logger"]->debug("targetFile is " . $targetFile);
+	if (file_exists($targetFile)) {
 		return 6;				// file with same name exists
 	}
-	$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
-	$GLOBALS["logger"]->debug ("imageFileType is " . $imageFileType);
-	if ($imageFileType != "mp3") {
+	$audioFileTYpe = pathinfo($targetFile,PATHINFO_EXTENSION);
+	$GLOBALS["logger"]->debug ("audioFileTYpe is " . $audioFileTYpe);
+	$typeOK = false;
+	foreach ($ALLOWED_TYPES as $typ) {
+		if ($typ == $audioFileType)
+			$typeOK = true;
+	}
+	if (!$typeOK) {
 		return 3;			// Wrong file type
 	}
-	if (!move_uploaded_file($file["tmp_name"], $target_file))
+	if (!move_uploaded_file($file["tmp_name"], $targetFile))
 		return 7;			// Mysterious upload error
 	
 	return -1;				// OK
@@ -92,7 +109,9 @@ else if (is_null($clip->description)) {
 
 if ($err <= 0 && $file) {
 	$err = processFile($file);
-	$clip->url = $URL_BASE . basename($file["name"]);
+	$usr = $_SESSION['user'];
+	$clip->url = $URL_BASE . $usr->id . '/' . basename($file["name"]);
+	$GLOBALS["logger"]->debug("clip URL is " . $clip->url);
 }
 
 if ($err > 0) {

@@ -110,6 +110,7 @@ class Clip {
 		$GLOBALS["logger"]->debug("Saving clip with URL " . $newRecord->url);
 //		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
 		$newRecord->save();
+		$this->id = $newRecord->id();
 		return $newRecord->id();
 	}
 }
