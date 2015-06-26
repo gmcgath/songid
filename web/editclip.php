@@ -34,8 +34,12 @@ if (!($user->hasRole(User::ROLE_EDITOR))) {
 <body>
 <?php
 	include ('menubar.php');
-
-	$id = $_GET["id"];
+	if (array_key_exists("id", $_GET) {
+		$id = $_GET["id"];
+	}
+	else {
+		$id = "";
+	}
 	if (!ctype_digit ($id))
 		$id = "";		// defeat dirty tricks
 	$clip = Clip::findById($id);

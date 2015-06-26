@@ -62,9 +62,14 @@ try {
 	$user->insert();
 	$GLOBALS["logger"]->debug("user id after creation is " . $user->id);
 	$user->assignRole(User::ROLE_CONTRIBUTOR);
-	$GLOBALS["logger"]->debug("returned from assignRole, redirecting");
 	
-	header ("Location: registerok.php", true, 302);
+	$newurl = "registerok.php?login=" .
+		$user->loginId .
+		"&name=" .
+		$user->name;
+	
+	
+	header ("Location: " . $newurl, true, 302);
 	return;
 	
 } catch (Exception $e) {

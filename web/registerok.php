@@ -10,6 +10,8 @@
 */
 header("Content-type: text/html; charset=utf-8");
 
+include_once('bin/model/user.php');
+
 ?>
 
 <html>
@@ -20,8 +22,28 @@ header("Content-type: text/html; charset=utf-8");
 </head>
 <body>
 
-<p>You have successfully registered. You may now <a href="login.php">log in</a>.</p>
 
+
+<p>You have successfully registered. You may now <a href="login.php">log in</a>.</p>
+<?php
+
+if (array_key_exists ("login", $_GET)) {
+	$login = $_GET["login"];
+}
+else {
+	$login = "";
+}
+if (array_key_exists ("name", $_GET)) {
+	$userName = $_GET["name"];
+}
+else {
+	$userName = "";
+}
+
+echo ('<p>Login ID: ' . $login . "</p>\n");
+echo ('<p>Your name: ' . $userName . "</p>\n");
+echo ("</ul>\n");
+?>
 
 </body>
 </html>
