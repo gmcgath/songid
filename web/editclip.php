@@ -34,7 +34,7 @@ if (!($user->hasRole(User::ROLE_EDITOR))) {
 <body>
 <?php
 	include ('menubar.php');
-	if (array_key_exists("id", $_GET) {
+	if (array_key_exists("id", $_GET)) {
 		$id = $_GET["id"];
 	}
 	else {

@@ -55,6 +55,9 @@ if (is_null($file)) {
 else {
 	$GLOBALS["logger"]->debug ("Dumping file");
 	dumpVar($file);
+	
+	if (!$file["name"])
+		$file = null;		// File object may be passed even if there's no file
 }
 
 /* Get the subdirectory for the user, creating it if necessary. */
@@ -68,13 +71,13 @@ function getUserSubdirectory () {
 }
 
 /* Returns an error code if the request can't be accepted, otherwise -1 */
-function processFile ($file) {
+function processFile ($fil) {
 	global $MAX_FILE_SIZE;
 	global $ALLOWED_TYPES;
-	if ($file["size"] > $MAX_FILE_SIZE) {
+	if ($fil["size"] > $MAX_FILE_SIZE) {
 		return 4;			// file too large
 	}
-	$targetBasename = basename($file["name"]);
+	$targetBasename = basename($fil["name"]);
 	if (preg_match("/[^\w _.]/", $targetBasename) ||
 		preg_match("/^\./", $targetBasename))
 		return 5;				// disallowed characters in name
@@ -83,8 +86,7 @@ function processFile ($file) {
 	if (file_exists($targetFile)) {
 		return 6;				// file with same name exists
 	}
-	$audioFileTYpe = pathinfo($targetFile,PATHINFO_EXTENSION);
-	$GLOBALS["logger"]->debug ("audioFileTYpe is " . $audioFileTYpe);
+	$audioFileType = pathinfo($targetFile,PATHINFO_EXTENSION);
 	$typeOK = false;
 	foreach ($ALLOWED_TYPES as $typ) {
 		if ($typ == $audioFileType)
@@ -93,7 +95,7 @@ function processFile ($file) {
 	if (!$typeOK) {
 		return 3;			// Wrong file type
 	}
-	if (!move_uploaded_file($file["tmp_name"], $targetFile))
+	if (!move_uploaded_file($fil["tmp_name"], $targetFile))
 		return 7;			// Mysterious upload error
 	
 	return -1;				// OK

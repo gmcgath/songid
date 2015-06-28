@@ -1,0 +1,7 @@
+/**
+ * 
+ */
+
+function togglePHPInfo() {
+	$("#phpinfo").toggle();
+}

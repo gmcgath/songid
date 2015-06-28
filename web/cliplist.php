@@ -105,10 +105,18 @@ if (!sessioncheck())
 ?>
 
 <div>
+
+<form>
+<button type="button" onclick="togglePHPInfo();">Toggle PHP diagnostic info</button>
+</form>
+<div id="phpinfo" class="hidden">
 <?php
 	phpinfo();		// **** TODO remove in production
 ?>
-<div>
-
+</div>
+<script type="text/javascript" src="scripts/jquery-2.1.3.js">
+</script>
+<script type="text/javascript" src="js/cliplist.js">
+</script>
 </body>
 </html>

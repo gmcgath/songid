@@ -84,7 +84,7 @@ if (!($user->hasRole(User::ROLE_EDITOR))) {
 <tr>
 <td class="formlabel;">Description:</td>
 <td>
-	<input type="text" style="width:550px;" name="clipdesc" required autofocus
+	<input type="text" maxlength="256" style="width:550px;" name="clipdesc" required autofocus
 	title="Any descriptive text, maximum 256 characters">
 </td>
 </tr>
