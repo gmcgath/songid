@@ -39,10 +39,17 @@ class ReportBuilder {
 		if ($clip == NULL)
 			return;
 		$this->report->clip = $clip;
-		$this->report->flagged = $_POST["flagged"] ? 1 : 0;
+		if (array_key_exists("flagged", $_POST)) {
+			$this->report->flagged = $_POST["flagged"] ? 1 : 0;
+		}
+		else {
+			$this->report->flagged = 0;
+		}
 		
 		// If previd was passed, put this into the chain.
-		$this->chainReport ($_POST["previd"]);
+		if (array_key_exists("previd", $_POST)) {
+			$this->chainReport ($_POST["previd"]);
+		}
 
 		$tracktype = trim(strip_tags($_POST['tracktype']));
 		$GLOBALS["logger"]->debug('tracktype = ' . $tracktype);
@@ -59,7 +66,9 @@ class ReportBuilder {
 			default:
 				throw new Exception (IDFORM_NO_CLIPTYPE);
 		}
+		$GLOBALS["logger"]->debug ($this->report->song ? "There is a song" : "There is no song");
 		// Can I make this all more consistent?
+		$GLOBALS["logger"]->debug('calling setSoundType');
 		$this->report->setSoundType($tracktype);
 	}
 	
@@ -74,7 +83,7 @@ class ReportBuilder {
 		// setSoundSubtype eliminates need to sanitize
 		$this->report->setSoundSubtype($_POST["performancetype"]);
 		
-		if ($_POST["canidsong"]) {
+		if (array_key_exists("canidsong", $_POST) && array_key_exists ("songtitle", $_POST)) {
 			$title = trim(strip_tags($_POST["songtitle"]));
 			if (strlen($title) > 0) {
 				// strlen returns 0 for null object.
@@ -88,10 +97,14 @@ class ReportBuilder {
 					$song = $songs[0];
 				if (is_null($song)) {
 					$song = new Song ();
+					$GLOBALS["logger"]->debug("Creating new Song with title " . $title);
 					$song->title = $title;
 					$song->insert();
 				}
 				$this->report->song = $song;
+				$GLOBALS["logger"]->debug("A song was just added by doPerformance");
+				if (is_null($song))
+					$GLOBALS["logger"]->debug ("But it's null");
 			}
 		}
 		$this->calcPerformerType();
@@ -174,10 +187,12 @@ class ReportBuilder {
 			if ($performerNames != NULL) {
 				$performers = array();
 				foreach ($performerNames as $performerName)  {
+					$GLOBALS["logger"]->debug ("performer name: " . $performerName);
 					$performerName = trim(strip_tags($performerName));
 					$actor = Actor::findByName ($performerName);
 					if (!is_null($actor)) {
 						// name belongs to an Actor
+						$GLOBALS["logger"]->debug ("Got an Actor matching performer " . $performerName);
 						$performers[] = $actor;
 					}
 					else {
@@ -186,6 +201,7 @@ class ReportBuilder {
 						$actor->name = $performerName;
 						// TODO for now, assume all performers are individuals (I'm not!)
 						$actor->typeId = Actor::TYPE_INDIVIDUAL;
+						$GLOBALS["logger"]->debug ("Inserting actor with name " . $performerName);
 						$actor->insert();
 						$performers[] = $actor;
 					}

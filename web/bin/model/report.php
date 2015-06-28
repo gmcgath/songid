@@ -141,12 +141,13 @@ class Report {
 		$GLOBALS["logger"]->debug("report:insert");
 		
 		$newRec = ORM::for_table (self::REPORT_TABLE)->create();
-		$GLOBALS["logger"]->debug('Created newRec');
 		$newRec->clip_id = $this->clip->id;
 		$newRec->master_id = $this->masterId;
 		$sngid = NULL;
-		if (!is_null($this->song)) 
+		if (!is_null($this->song)) {
+			$GLOBALS["logger"]->debug('There is a song with ID ' . $this->song->id);
 			$sngid = $this->song->id;
+		}
 		$newRec->song_id = $sngid;
 		$newRec->singalong = $this->singalong;
 		$newRec->seq_num = $this->seqNum;
@@ -158,10 +159,13 @@ class Report {
 		$GLOBALS["logger"]->debug("Saving newRec");
 		$newRec->save();
 		$GLOBALS["logger"]->debug("insert: saved new record into reports table");
-		return $newRec->id();
+		$this->id = $newRec->id();
 //		$insstmt = "INSERT INTO REPORTS (CLIP_ID, MASTER_ID, SEQ_NUM, USER_ID, SOUND_TYPE, " .
 //			" SOUND_SUBTYPE, SONG_ID, PERFORMER_TYPE, SINGALONG, FLAGGED) " .
 //			" VALUES ($clpid, $mstrid, $seqn, $usrid, $sndtyp, $sndsbtyp, $sngid, $prftyp, $sngalng, $flgd)";
+		$this->writePerformers();
+		$this->writeInstruments();
+		return $newRec->id();
 	}
 	
 	/* Deletes the current Report from the database. */
@@ -259,6 +263,7 @@ class Report {
 				$newRec = ORM::for_table(self::REPTS_PERFS_TABLE)->create();
 				$newRec->report_id = $this->id;
 				$newRec->actor_id = $performer->id;
+				$newRec->save();
 //				$insstmt = "INSERT INTO REPORTS_PERFORMERS (REPORT_ID, ACTOR_ID) " .
 //					"VALUES ($rptid, $actid)";
 			}

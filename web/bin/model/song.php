@@ -66,8 +66,10 @@ class Song {
 		$recToInsert = ORM::for_table(self::SONG_TABLE)->create();
 		$recToInsert->title = $this->title;
 		$recToInsert->note = $this->note;
+		$GLOBALS["logger"]->debug ("Inserting song with title " . $this->title);
 //		$insstmt = "INSERT INTO SONGS (TITLE, NOTE) VALUES ($ttl, $nte)";
 		$recToInsert->save();
+		$this->id = $recToInsert->id();
 		return $recToInsert->id();
 	}
 	

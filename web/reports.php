@@ -84,9 +84,12 @@ $prevm = 0;
 	$hidenext = false;
 	
 	// param clip says to just show for one clip, default all clips
-	$clipid = $_GET["clip"];
-	if ( !ctype_digit($clipid) ) {
-		$clipid = NULL;
+	#clipid = NULL;
+	if (array_key_exists( "clip", $_GET)) {
+		$clipid = $_GET["clip"];
+		if ( !ctype_digit($clipid) ) {
+			$clipid = NULL;
+		}
 	}
 	
 	// Get parameters for report date range. Format is yyyymmdd

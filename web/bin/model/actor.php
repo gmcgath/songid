@@ -38,7 +38,8 @@ class Actor {
 			$actor = new Actor ();
 			$actor->id = $actorId;
 			$actor->name = $result->name;
-			$actor->typeId = $result->typeId;
+			$GLOBALS["logger"]->debug ("Found actor with name " . $actor->name);
+			$actor->typeId = $result->type_id;
 			
 			return $actor;
 		}
@@ -46,28 +47,29 @@ class Actor {
 	}
 	
 	/** Returns an Actor matching the name, or NULL.
-	    We use the table ACTOR_NAMES to check all aliases.
-	    By convention, the primary name in ACTORS is also in ACTOR_NAMES.
-	    Names in ACTOR_NAMES are unique, so there will be no more than one. */
+	    Do we really need ACTOR_NAMES at all? The idea of really identifying actors
+	    by multiple names seems like a waste of effort. */
 	public static function findByName ($name) {
 //		$selstmt = "SELECT ACTOR_ID FROM ACTOR_NAMES WHERE NAME = $nam";
-		$resultSet = ORM::for_table('ACTOR_NAMES')->
-			select('actor_id')->
+		$result = ORM::for_table('ACTORS')->
+			select('id')->
 			where_equal('name', $name)->
 			find_one();
 		
-		$actor = Actor::findById($result->actor_id);
-		if (is_null ($actor)) {
-			$GLOBALS["logger"]->info ("Database inconsistency: No actor with ID $actid");
+		if ($result) {
+			$actor = new Actor();
+			$actor->id = $result->id;
+			$actor->name = $name;
+			$actor->typeId = $result->type_id;
+		}
+		else {
+			$actor = null;
 		}
 		return $actor;
 	}
 	
 	/* Inserts an Actor into the database. Throws an Exception on failure.
-	   Also puts the name into ACTOR_NAMES.
-	   We're using MyISAM, so we can't use a transaction. LOCK TABLES isn't
-	   the same thing, as it doesn't cause a rollback if the second insert fails.
-	   TODO The best way to do it seems to be a stored procedure:
+	   TODO Make this a transaction.
 	   http://stackoverflow.com/questions/15725630/mysql-inserting-into-2-tables-at-once-that-have-primary-key-and-foreign-key
 	   
 	   Returns the ID if successful.
@@ -81,9 +83,9 @@ class Actor {
 		$this->id = $actorObj->id();
 		
 		// Now add the name to ACTOR_NAMES
-		$actorNameObj = ORM::for_table('ACTOR_NAMES')->create();
-		$actorNameObj->actor_id = $this->id;
-		$actorNameObj->name = $this->name;
+//		$actorNameObj = ORM::for_table('ACTOR_NAMES')->create();
+//		$actorNameObj->actor_id = $this->id;
+//		$actorNameObj->name = $this->name;
 		return $this->id;
 //		$insstmt = "INSERT INTO ACTORS (NAME, TYPE_ID) VALUES ($nam, $tpid)";
 	}
