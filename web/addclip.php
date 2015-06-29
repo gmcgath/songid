@@ -71,6 +71,10 @@ if (!($user->hasRole(User::ROLE_EDITOR))) {
 		$errmsg = "Upload error";
 		break;
 		
+		case 8:
+		$errmsg = "Year may contain only digits.";
+		break;
+		
 		default:
 		break;
 	}
@@ -84,25 +88,42 @@ if (!($user->hasRole(User::ROLE_EDITOR))) {
 <tr>
 <td class="formlabel;">Description:</td>
 <td>
-	<input type="text" maxlength="256" style="width:550px;" name="clipdesc" required autofocus
+	<input type="text" maxlength="256" class="newclipfield"  name="clipdesc" required autofocus
 	title="Any descriptive text, maximum 256 characters">
+</td>
+</tr>
+<tr>
+<td class="formlabel;">Performer (optional):</td>
+<td>
+	<input type="text" maxlength="150" class="newclipfield" name="performer" 
+	title="Performer(s) if known">
+</td>
+</tr>
+<tr>
+<td class="formlabel;">Event (optional):</td>
+<td>
+	<input type="text" maxlength="150" class="newclipfield" name="event"
+	title="Name of convention, gathering, recording session, etc.">
+</td>
+</tr>
+<tr>
+<td class="formlabel;">Year (optional):</td>
+<td>
+	<input type="number" maxlength="4" class="newclipfield" name="year"
+	title="Year of recording">
 </td>
 </tr>
 
 <tr>
 <td class="formlabel;">URL:</td>
 <td>
-	<input type="url" style="width:550px;" name="clipurl" 
+	<input type="url" class="newclipfield" name="clipurl" 
 	title="The URL of the audio resource">
 </td>
 <td>
 </tr>
 <tr><td>
-<b>OR</b>
-</td>
-</tr>
-<tr>
-<td>
+<b>OR </b>
 <input type="file" name="clipupload" id="clipupload">
 </td>
 </tr>

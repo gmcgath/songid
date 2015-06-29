@@ -20,6 +20,9 @@ class Clip {
 	
 	var $id;
 	var $description;
+	var $performer;		// free-form text field
+	var $event;			// free-form text field
+	var $year;			// of the performance or recording
 	var $url;
 	var $date; 
 
@@ -38,14 +41,15 @@ class Clip {
 		$rpttab = self::REPORTS_TABLE;
 		$selstmt = NULL;
 		if ($onlyUnrep) {
-			$selstmt = "SELECT DISTINCT c.id, c.description, c.url, c.date " .
+			$selstmt = "SELECT DISTINCT c.id, c.description, " .
+				"c.performer, c.event, c.year, c.url, c.date " .
 				"FROM $clptab c LEFT JOIN $rpttab r " .
 				"ON c.id = r.clip_id " .
 				"WHERE r.id IS NULL " .
 				"LIMIT :idx , :n";
 		}
 		else {
-			$selstmt = "SELECT id, description, url, date FROM $clptab LIMIT :idx , :n";
+			$selstmt = "SELECT id, description, performer, event, year, url, date FROM $clptab LIMIT :idx , :n";
 		}
 		$paramArray = array ('idx' => $idx , 'n' => $n);
 		$GLOBALS["logger"]->debug("Querying for rows");
@@ -53,13 +57,9 @@ class Clip {
 			raw_query($selstmt, $paramArray)->
 			find_many();
 		$rows = array();
-		$GLOBALS["logger"]->debug("Building rows in getRows");
 		foreach ($resultSet as $result) {
 			$clip = new Clip();
-			$clip->id = $result->id;
-			$clip->description = $result->description;
-			$clip->url = $result->url;
-			$clip->date = $result->date;
+			$clip->getFromOrm($result);
 			$rows[] = $clip;
 		}
 		return $rows;	
@@ -70,6 +70,9 @@ class Clip {
 		$result = ORM::for_table(self::CLIPS_TABLE)->
 			select('id')->
 			select('description')->
+			select('performer')->
+			select('event')->
+			select('year')->
 			select('url')->
 			select('date')->
 			where_equal('id', $id)->
@@ -79,12 +82,8 @@ class Clip {
 			return NULL;
 		}
 		$clip = new Clip();
-		$clip->id = $result->id;
-		$clip->description = $result->description;
-		$clip->url = $result->url;
-		$clip->date = $result->date;
+		$clip->getFromOrm($result);
 		return $clip;
-//		$selstmt = "SELECT ID, DESCRIPTION, URL, DATE FROM CLIPS WHERE ID = $id";
 	}
 	
 	/* Write the updated values of the clip out. */
@@ -106,12 +105,25 @@ class Clip {
 	public function insert () {
 		$newRecord = ORM::for_table(self::CLIPS_TABLE)->create();
 		$newRecord->description = $this->description;
+		$newRecord->performer = $this->performer;
+		$newRecord->event = $this->event;
+		$newRecord->year = $this->year;
 		$newRecord->url = $this->url;
-		$GLOBALS["logger"]->debug("Saving clip with URL " . $newRecord->url);
 //		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
 		$newRecord->save();
 		$this->id = $newRecord->id();
 		return $newRecord->id();
+	}
+	
+	/* Load the values from an ORM result. */
+	private function getFromOrm ($result) {
+		$this->id = $result->id;
+		$this->description = $result->description;
+		$this->performer = $result->performer;
+		$this->event = $result->event;
+		$this->year = $result->year;
+		$this->url = $result->url;
+		$this->date = $result->date;
 	}
 }
 

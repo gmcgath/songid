@@ -103,7 +103,28 @@ function doInstruments () {
 <p id="audioerror" class="hidden errormsg">The clip could not be loaded.</p>
 <p class="audiocaption">
 <?php
-	echo $clip->description;
+	echo "Description: " . $clip->description;
+?>
+</p>
+<p class="audiocaption">
+<?php
+	if ($clip->performer) {
+		echo "Performer: " . $clip->performer;
+	}
+?>
+</p>
+<p class="audiocaption">
+<?php
+	if ($clip->event) {
+		echo "Event: " . $clip->event;
+	}
+?>
+</p>
+<p class="audiocaption">
+<?php
+	if ($clip->year) {
+		echo "Year: " . $clip->year;
+	}
 ?>
 </p>
 <?php

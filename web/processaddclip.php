@@ -39,23 +39,39 @@ if (!isset($AUDIO_DIR)) {
 
 $URL_BASE = "audio/";
 
+$err = -1;
+
 $clip = new Clip;
 $clip->description = array_key_exists('clipdesc', $_POST) ? strip_tags($_POST["clipdesc"]) : NULL;
+$clip->performer = array_key_exists('performer', $_POST) ? strip_tags($_POST["performer"]) : NULL;
+if (is_string ($clip->performer) && strlen($clip->performer) == 0) {
+	$clip->performer = NULL;
+}
+$clip->event = array_key_exists('event', $_POST) ? strip_tags($_POST["event"]) : NULL;
+if (is_string ($clip->event) && strlen($clip->event) == 0) {
+	$clip->event = NULL;
+}
+$year = array_key_exists('year', $_POST) ? strip_tags($_POST["year"]) : NULL;
+$clip->year = NULL;
+if ($year) {
+	if (!ctype_digit($year)) {
+		$err = 8;
+	}
+	else {
+		$clip->year = intval($year);
+	}
+}
+$GLOBALS["logger"]->debug ("year = " . $clip->year);
 $clip->url = array_key_exists('clipurl', $_POST) ? strip_tags($_POST["clipurl"]) : NULL;
 $file = array_key_exists('clipupload', $_FILES) ? $_FILES['clipupload'] : NULL;
 if (strlen($clip->url) == 0)		// empty(str) has a stupid and unreliable definition
 	$clip->url = NULL;
 	
-$err = -1;
-
 $GLOBALS["logger"]->debug ("clipurl = " . $clip->url);
 if (is_null($file)) {
 	$GLOBALS["logger"]->debug("file is null");
 }
 else {
-	$GLOBALS["logger"]->debug ("Dumping file");
-	dumpVar($file);
-	
 	if (!$file["name"])
 		$file = null;		// File object may be passed even if there's no file
 }
@@ -65,8 +81,10 @@ function getUserSubdirectory () {
 	global $AUDIO_DIR;
 	$usr = $_SESSION['user'];
 	$path = $AUDIO_DIR . $usr->id . '/';
-	mkdir ($path);
-	chmod ($path, 0777);		// For some reason putting the mode in mkdir doesn't work
+	if (!file_exists($path) && !is_dir($path)) {
+		mkdir ($path);
+		chmod ($path, 0777);		// For some reason putting the mode in mkdir doesn't work
+	}
 	return $path;
 }
 

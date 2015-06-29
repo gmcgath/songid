@@ -46,7 +46,11 @@ table.cliptable {padding-left: 30px; border-collapse: collapse;}
 
 table.cliptable tr, table.cliptable td {border: 1px solid blue;}
 
-table.editcliptable {padding-left: 30px;}
+table.editcliptable {padding-left: 30px; border-collapse: collapse;}
+
+table.editcliptable td { padding-bottom:10px; }
+
+input.newclipfield { width:550px; }
 
 table.editusertable {border-collapse: collapse;}
 
