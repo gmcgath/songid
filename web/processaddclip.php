@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 }
 
 /* Maximum upload size. The limit in php.ini should be at least as big. */
-$MAX_FILE_SIZE = 8 * 1024 * 1024;
+$MAX_FILE_SIZE = 40 * 1024 * 1024;
 
 $ALLOWED_TYPES = array("mp3");
 
