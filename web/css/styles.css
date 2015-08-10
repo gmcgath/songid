@@ -52,9 +52,11 @@ table.editcliptable td { padding-bottom:10px; }
 
 input.newclipfield { width:550px; }
 
-table.editusertable {border-collapse: collapse;}
+table.editusertable {border-collapse: collapse; width:680px;}
 
 .editusertable, .editusertable tr, .editusertable td {border: 1px solid blue;}
+
+.editusertable th {font-size:90%;border: 1px solid blue;}
 
 td.reportnav { width: 100px; }
 

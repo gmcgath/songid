@@ -52,7 +52,7 @@ $prevm = 0;
 	
 	$GLOBALS["logger"]->debug('reports.php');
 	
-	if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_EDITOR))) {
+	if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_ADMIN))) {
 		header ("Location: norole.php", true, 302);
 		return;
 	}
@@ -258,7 +258,7 @@ if ( !$hidenext ) {
 		}
 		echo ("</ul>\n");
 		$user = $_SESSION['user'];
-		if ($user->hasRole(User::ROLE_EDITOR)) {
+		if ($user->hasRole(User::ROLE_ADMIN)) {
 			echo ("<button type='button' onclick='location.href=\"processdelreport.php?id={$report->id}\"'>");
 			echo ("Delete report</button>");
 			echo ("</td>");

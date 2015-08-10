@@ -18,6 +18,11 @@ require_once ('bin/sessioncheck.php');
 
 if (!sessioncheck())
 	return;
+$user = $_SESSION['user'];
+if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_ADMIN))) {
+	header ("Location: norole.php", true, 302);
+	return;
+}
 
 ?>
 
@@ -31,17 +36,13 @@ if (!sessioncheck())
 <noscript><strong>Sorry, JavaScript is required.</strong>
 </noscript>
 <?php
-	include_once ('bin/supportfuncs.php');
-	include_once ('bin/model/clip.php');
+
+include_once ('bin/supportfuncs.php');
+include_once ('bin/model/clip.php');
 	
-	$user = $_SESSION['user'];
-	
-	$user = $_SESSION['user'];
-	if (!($user->hasRole(User::ROLE_CONTRIBUTOR)) && !($user->hasRole(User::ROLE_EDITOR))) {
-		header ("Location: norole.php", true, 302);
-		return;
-	}
-	include ('menubar.php');
+
+include ('menubar.php');
+
 ?>
 
 <h1>Available sound clips</h1>	
@@ -51,7 +52,7 @@ if (!sessioncheck())
 	if (isset($_GET["unrep"]))
 		$onlyUnreported = true;
 	
-	if ($user->hasRole(User::ROLE_EDITOR)) {
+	if ($user->hasRole(User::ROLE_ADMIN)) {
 		echo ("<button type='button' onclick='location.href=\"addclip.php\"'>Add new clip</button>\n");
 		echo ("<p>&nbsp;</p>\n");
 	}
@@ -86,7 +87,7 @@ if (!sessioncheck())
 			echo ("<td><a href='reports.php?clip={$clip->id}'>");
 			echo ("View reports</a>&nbsp;</td>\n");
 			
-			if ($user->hasRole(User::ROLE_EDITOR)) {
+			if ($user->hasRole(User::ROLE_ADMIN)) {
 				echo ("<td><a href='editclip.php?id=");
 				echo ($clip->id);
 				echo ("'>");

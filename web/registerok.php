@@ -24,7 +24,8 @@ include_once('bin/model/user.php');
 
 
 
-<p>You have successfully registered. You may now <a href="login.php">log in</a>.</p>
+<p>You have successfully registered, but you will not be able to use the system
+until a superuser approves you. You may now <a href="login.php">log in</a>.</p>
 <?php
 
 if (array_key_exists ("login", $_GET)) {

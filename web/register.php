@@ -39,9 +39,6 @@ if (array_key_exists("error", $_GET)) {
 		case 5:
 			$errmsg = "The password may contain only letters, digits, and underscores.";
 			break;
-		case 6:
-			$errmsg = "Invalid authorization code.";
-			break;
 		default:
 			$errmsg = "Internal error. Please report the problem.";
 	}
@@ -69,10 +66,10 @@ if (array_key_exists("error", $_GET)) {
 <td><input type="password" id="pw2" name="pw2" class="loginbox" required>
 </tr>
 <tr>
-<td class="formlabel">Authorization code:</td>
-<td><input type="password" name="authcode" class="loginbox" required>
-</tr>
 <tr>
+<td class="formlabel">Please tell us in a few words about yourself and your connection to filk:</td>
+<td><textarea name="selfinfo" maxlength="256" rows="3" cols="60" required></textarea>
+</tr>
 <td><input type="submit" class="submitbutton" value="Register"></td>
 <td>&nbsp;</td>
 </tr>

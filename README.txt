@@ -2,7 +2,7 @@ The songid project is intended to let librarians, archivists, researchers,
 and anyone else with a lot of sound tracks to "nichesource" their
 identification. 
 
-Copyright 2014 Gary McGath, except as noted for specific files.
+Copyright 2014-2015 Gary McGath and Jonathan Lennox, except as noted for specific files.
 Permission to use granted under the MIT License.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

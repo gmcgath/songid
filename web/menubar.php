@@ -18,7 +18,7 @@ else {
 	<li><a href="cliplist.php">Clips</a></li>
 	<li><a href="reports.php">Reports</a></li> 
 <?php
-	if ($usr->hasRole(User::ROLE_ADMINISTRATOR)) {
+	if ($usr->hasRole(User::ROLE_SUPERUSER)) {
 ?>
 	<li><a href="admin.php">User administration</a></li>
 <?php

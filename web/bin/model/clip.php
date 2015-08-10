@@ -5,7 +5,7 @@
    Gary McGath
    July 11, 2014
 
-   Copyright 2014 by Gary McGath.
+   Copyright 2014-2015 by Gary McGath.
    This code is made available under the MIT license.
    See README.txt in the source distribution.
 */
@@ -24,8 +24,16 @@ class Clip {
 	var $event;			// free-form text field
 	var $year;			// of the performance or recording
 	var $url;
-	var $date; 
+	var $date;
+	var $recording_id;
 
+	public function __construct() {
+		$this->performer = null;
+		$this->event = null;
+		$this->year = null;
+		$this->recording_id = null;
+	}
+	
 	/* Return n rows starting with idx.
 	   If $onlyUnrep is true, show only clips with zero reports
 	   Returns an array of clip objects. If idx is out of bounds,
@@ -42,14 +50,16 @@ class Clip {
 		$selstmt = NULL;
 		if ($onlyUnrep) {
 			$selstmt = "SELECT DISTINCT c.id, c.description, " .
-				"c.performer, c.event, c.year, c.url, c.date " .
+				"c.performer, c.event, c.year, c.url, c.date, " .
+				"c.recording_id " .
 				"FROM $clptab c LEFT JOIN $rpttab r " .
 				"ON c.id = r.clip_id " .
 				"WHERE r.id IS NULL " .
 				"LIMIT :idx , :n";
 		}
 		else {
-			$selstmt = "SELECT id, description, performer, event, year, url, date FROM $clptab LIMIT :idx , :n";
+			$selstmt = "SELECT id, description, performer, event, year, url, date, recording_id FROM " .
+			"$clptab LIMIT :idx , :n";
 		}
 		$paramArray = array ('idx' => $idx , 'n' => $n);
 		$GLOBALS["logger"]->debug("Querying for rows");
@@ -75,6 +85,7 @@ class Clip {
 			select('year')->
 			select('url')->
 			select('date')->
+			select('recording_id')->
 			where_equal('id', $id)->
 			find_one();
 		if (!$result) {
@@ -89,13 +100,11 @@ class Clip {
 	/* Write the updated values of the clip out. */
 	public function update() {
 		$recToUpdate = ORM::for_table(self::CLIPS_TABLE)->find_one($this->id);
-		$recToUpdate->description = $this->description;
-		$recToUpdate->url = $this->url;
-		$recToUpdate->save();
-//		$updstmt = "UPDATE CLIPS SET " .
-//			"DESCRIPTION = $desc, ".
-//			"URL = $ur " .
-//			"WHERE ID = $id";
+		if ($recToUpdate) {
+			$recToUpdate->description = $this->description;
+			$recToUpdate->url = $this->url;
+			$recToUpdate->save();
+		}
 	}
 
 	/* Inserts a Clip into the database. Throws an Exception on failure.
@@ -109,7 +118,7 @@ class Clip {
 		$newRecord->event = $this->event;
 		$newRecord->year = $this->year;
 		$newRecord->url = $this->url;
-//		$insstmt = "INSERT INTO CLIPS (DESCRIPTION, URL) VALUES ($dsc, $url)";
+		$newRecord->recording_id = $this->recording_id;
 		$newRecord->save();
 		$this->id = $newRecord->id();
 		return $newRecord->id();
@@ -124,6 +133,7 @@ class Clip {
 		$this->year = $result->year;
 		$this->url = $result->url;
 		$this->date = $result->date;
+		$this->recording_id = $result->recording_id;
 	}
 }
 

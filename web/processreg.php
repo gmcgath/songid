@@ -20,10 +20,9 @@ try {
 	$loginId = $_POST["user"];
 	$pw = $_POST["pw"];
 	$realName = trim(strip_tags($_POST["realname"]));
-	$authcode = trim(strip_tags($_POST["authcode"]));
 	
 	// Check for valid fields
-	if ($loginId == NULL || $pw == NULL || $realName == NULL || $authcode == NULL) {
+	if ($loginId == NULL || $pw == NULL || $realName == NULL) {
 		// Empty string is == to null, so we catch empty as well as missing values
 		header ("Location: register.php?error=3", true, 302);
 		return;
@@ -42,26 +41,20 @@ try {
 		return;
 	}
 	
-	// Check authorization code
-	if (!Authcode::verifyAuth($authcode)) {
-		header ("Location: register.php?error=6", true, 302);
-		return;
-	}
-	
 	// Check if login name is already in use
 	if (User::findByLoginId($loginId)) {
 		header ("Location: register.php?error=2", true, 302);
 		return;
 	}
 	
-	// Create the user
+	// Create the user. No roles are assigned initially.
 	$user = new User;
 	$user->loginId = $loginId;
 	$user->name = $realName;
 	$user->passwordHash = password_hash($pw, PASSWORD_DEFAULT);
 	$user->insert();
 	$GLOBALS["logger"]->debug("user id after creation is " . $user->id);
-	$user->assignRole(User::ROLE_CONTRIBUTOR);
+//	$user->assignRole(User::ROLE_CONTRIBUTOR);
 	
 	$newurl = "registerok.php?login=" .
 		$user->loginId .

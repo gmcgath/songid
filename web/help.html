@@ -29,19 +29,23 @@ under hit-or-miss circumstances. Go away.
 <p>
 To use this system, you must be a registered user. Go to the 
 <a href="register.php" target="_blank">registration page</a> and enter your user name,
-real name, password, and the authorization code we gave you. If you
-forgot your password, you can create another account.
+real name, and password, as well as a box to enter something about yourself that lets
+us be sure who you are. If you
+forgot your password, you can create another account. You'll initially be given
+an inactive account that you can log into but not do anything with. Contact a superuser
+to let them know you've registered and need to be activated.
 <p>
-There are three user roles: contributors, editors, and administrators.
-A user can have more than one role; typically they'll be cumulative, so
-users who have higher roles also have lower ones. 
-When you register, you have the contributor role. An administrator can
-change your roles.
+There are four user roles: contributors, administrators, stakeholders, and superusers.
+A user can have more than one role. An administrator can change your roles.
 <p>
-With the Contributor role, you can listen to clips, enter information about them to
+With the Contributor role, which all or almost all users will have,
+you can listen to clips, enter information about them to
 create a report, and view reports. You can't modify any existing information.
-Users with the Editor role can add clips, edit information about them, and delete reports.
-Users with the Administrator role can delete users and modify their roles.
+Users with the Administrator role can add clips, edit information about them, and delete reports.
+Users with the Superuser role can delete users and modify their roles.
+The Stakeholder role isn't actually implemented yet, but users with that role
+will be able to hear clips and view reports in which they're named as performers,
+composers, etc.
 </p>
 <h2>Entering information about clips</h2>
 <p>
@@ -53,7 +57,7 @@ already produced a report on, click the "Show clips without reports" button. Thi
 change to "Show all clips" to let you switch back.
 <p>
 Each clip has two clickable links for contributors: "Create report" and "View reports." 
-If you have the Editor role, you'll see a third link, "Edit." 
+If you have the Administrator role, you'll see a third link, "Edit." 
 <p>
 Click on "Create report" for a clip, and you'll come to a page with a sound player
 and a form. The form will change as you make selections. 
@@ -75,13 +79,13 @@ the clip of interest. To view all clips, or all clips within a date range, Click
 </p>
 <h2>Editing reports</h2>
 <p>
-You must have the Editor role to edit clips. If you do, an "Edit" link will appear next
+You must have the Administrator role to edit clips. If you do, an "Edit" link will appear next
 to each clip title. This will take you to the editing form, where you can change the
 title and URL of a ciip. There's currently no way to delete a clip.
 </p>
 <h2>Adding clips</h2>
 <p>
-If you have the Editor role, the clip list page will have an "Add new clip" button.
+If you have the Administrator role, the clip list page will have an "Add new clip" button.
 This will take you to a form where you can specify the URL and description of the
 clip. Mentioning the place and time of recording is good if you know it. The
 description can be up to 256 characters long.

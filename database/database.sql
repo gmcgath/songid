@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 02, 2015 at 02:28 PM
+-- Generation Time: Aug 10, 2015 at 12:35 PM
 -- Server version: 5.5.43-0+deb7u1
 -- PHP Version: 5.6.9-1~dotdeb+7.1
 
@@ -28,11 +28,17 @@ USE `songid`;
 -- Table structure for table `ACTORS`
 --
 
+DROP TABLE IF EXISTS `ACTORS`;
 CREATE TABLE IF NOT EXISTS `ACTORS` (
 `id` int(11) NOT NULL,
   `name` varchar(128) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Primary name',
   `type_id` int(11) NOT NULL DEFAULT '1' COMMENT 'FK TO ACTOR_TYPES'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `ACTORS`
+--
+
 
 -- --------------------------------------------------------
 
@@ -40,6 +46,7 @@ CREATE TABLE IF NOT EXISTS `ACTORS` (
 -- Table structure for table `ACTOR_NAMES`
 --
 
+DROP TABLE IF EXISTS `ACTOR_NAMES`;
 CREATE TABLE IF NOT EXISTS `ACTOR_NAMES` (
 `id` int(10) NOT NULL,
   `actor_id` int(11) NOT NULL COMMENT 'FK to ACTORS',
@@ -52,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `ACTOR_NAMES` (
 -- Table structure for table `ACTOR_TYPES`
 --
 
+DROP TABLE IF EXISTS `ACTOR_TYPES`;
 CREATE TABLE IF NOT EXISTS `ACTOR_TYPES` (
   `ID` int(11) NOT NULL,
   `DESCRIPTION` varchar(64) COLLATE utf8_unicode_ci NOT NULL
@@ -70,6 +78,7 @@ INSERT INTO `ACTOR_TYPES` (`ID`, `DESCRIPTION`) VALUES(2, 'GROUP');
 -- Table structure for table `AUTHCODES`
 --
 
+DROP TABLE IF EXISTS `AUTHCODES`;
 CREATE TABLE IF NOT EXISTS `AUTHCODES` (
 `id` int(11) NOT NULL,
   `code_hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL
@@ -87,12 +96,17 @@ INSERT INTO `AUTHCODES` (`id`, `code_hash`) VALUES(1, '$2y$10$vs2p.ooXsprDxdn7PO
 -- Table structure for table `CLIPS`
 --
 
+DROP TABLE IF EXISTS `CLIPS`;
 CREATE TABLE IF NOT EXISTS `CLIPS` (
 `id` int(11) NOT NULL,
   `description` varchar(256) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL,
+  `performer` varchar(150) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `event` varchar(150) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `year` int(4) DEFAULT NULL,
   `url` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `recording_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 -- --------------------------------------------------------
@@ -101,6 +115,7 @@ CREATE TABLE IF NOT EXISTS `CLIPS` (
 -- Table structure for table `INSTRUMENTS`
 --
 
+DROP TABLE IF EXISTS `INSTRUMENTS`;
 CREATE TABLE IF NOT EXISTS `INSTRUMENTS` (
 `id` int(11) NOT NULL,
   `name` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
@@ -190,6 +205,7 @@ INSERT INTO `INSTRUMENTS` (`id`, `name`, `category_id`) VALUES(53, 'Xylophone', 
 -- Table structure for table `INSTRUMENT_CATEGORIES`
 --
 
+DROP TABLE IF EXISTS `INSTRUMENT_CATEGORIES`;
 CREATE TABLE IF NOT EXISTS `INSTRUMENT_CATEGORIES` (
 `id` int(11) NOT NULL,
   `name` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
@@ -209,9 +225,24 @@ INSERT INTO `INSTRUMENT_CATEGORIES` (`id`, `name`, `display_sequence`) VALUES(5,
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `RECORDINGS`
+--
+
+DROP TABLE IF EXISTS `RECORDINGS`;
+CREATE TABLE IF NOT EXISTS `RECORDINGS` (
+`id` int(11) NOT NULL,
+  `path` varchar(192) COLLATE utf8_unicode_ci NOT NULL,
+  `event` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `year` int(4) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `REPORTS`
 --
 
+DROP TABLE IF EXISTS `REPORTS`;
 CREATE TABLE IF NOT EXISTS `REPORTS` (
 `id` int(11) NOT NULL,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -225,7 +256,9 @@ CREATE TABLE IF NOT EXISTS `REPORTS` (
   `song_id` int(11) DEFAULT NULL COMMENT 'FK to SONGS',
   `singalong` tinyint(1) NOT NULL DEFAULT '0',
   `flagged` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
 
 -- --------------------------------------------------------
 
@@ -233,6 +266,7 @@ CREATE TABLE IF NOT EXISTS `REPORTS` (
 -- Table structure for table `REPORTS_COMPOSERS`
 --
 
+DROP TABLE IF EXISTS `REPORTS_COMPOSERS`;
 CREATE TABLE IF NOT EXISTS `REPORTS_COMPOSERS` (
 `id` int(11) NOT NULL,
   `report_id` int(11) NOT NULL COMMENT 'FK to REPORTS',
@@ -245,10 +279,14 @@ CREATE TABLE IF NOT EXISTS `REPORTS_COMPOSERS` (
 -- Table structure for table `REPORTS_INSTRUMENTS`
 --
 
+DROP TABLE IF EXISTS `REPORTS_INSTRUMENTS`;
 CREATE TABLE IF NOT EXISTS `REPORTS_INSTRUMENTS` (
+`id` int(11) NOT NULL,
   `REPORT_ID` int(11) NOT NULL COMMENT 'FK to REPORTS',
   `INSTRUMENT_ID` int(11) NOT NULL COMMENT 'FK to INSTRUMENTS'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
 
 -- --------------------------------------------------------
 
@@ -256,10 +294,14 @@ CREATE TABLE IF NOT EXISTS `REPORTS_INSTRUMENTS` (
 -- Table structure for table `REPORTS_PERFORMERS`
 --
 
+DROP TABLE IF EXISTS `REPORTS_PERFORMERS`;
 CREATE TABLE IF NOT EXISTS `REPORTS_PERFORMERS` (
+`id` int(11) NOT NULL,
   `REPORT_ID` int(11) NOT NULL COMMENT 'FK to REPORTS',
   `ACTOR_ID` int(11) NOT NULL COMMENT 'FK to ACTORS'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
 
 -- --------------------------------------------------------
 
@@ -267,11 +309,12 @@ CREATE TABLE IF NOT EXISTS `REPORTS_PERFORMERS` (
 -- Table structure for table `SONGS`
 --
 
+DROP TABLE IF EXISTS `SONGS`;
 CREATE TABLE IF NOT EXISTS `SONGS` (
 `id` int(11) NOT NULL,
   `title` varchar(128) CHARACTER SET utf8 COLLATE utf8_roman_ci NOT NULL,
   `note` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'For disambiguation'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 
@@ -281,6 +324,7 @@ CREATE TABLE IF NOT EXISTS `SONGS` (
 -- Table structure for table `SONGS_TUNES`
 --
 
+DROP TABLE IF EXISTS `SONGS_TUNES`;
 CREATE TABLE IF NOT EXISTS `SONGS_TUNES` (
 `id` int(11) NOT NULL,
   `song_id` int(11) NOT NULL COMMENT 'FK to SONGS',
@@ -293,13 +337,17 @@ CREATE TABLE IF NOT EXISTS `SONGS_TUNES` (
 -- Table structure for table `USERS`
 --
 
+DROP TABLE IF EXISTS `USERS`;
 CREATE TABLE IF NOT EXISTS `USERS` (
 `id` int(11) NOT NULL,
   `login_id` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
   `password_hash` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
   `name` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `date_registered` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `date_registered` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `activated` tinyint(1) NOT NULL DEFAULT '0',
+  `self_info` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 
 
 -- --------------------------------------------------------
@@ -308,11 +356,12 @@ CREATE TABLE IF NOT EXISTS `USERS` (
 -- Table structure for table `USERS_ROLES`
 --
 
+DROP TABLE IF EXISTS `USERS_ROLES`;
 CREATE TABLE IF NOT EXISTS `USERS_ROLES` (
 `id` int(10) NOT NULL,
   `user_id` int(11) NOT NULL COMMENT 'FK to USERS',
   `role` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 
@@ -348,7 +397,7 @@ ALTER TABLE `AUTHCODES`
 -- Indexes for table `CLIPS`
 --
 ALTER TABLE `CLIPS`
- ADD PRIMARY KEY (`id`);
+ ADD PRIMARY KEY (`id`), ADD KEY `recording_id` (`recording_id`);
 
 --
 -- Indexes for table `INSTRUMENTS`
@@ -361,6 +410,12 @@ ALTER TABLE `INSTRUMENTS`
 --
 ALTER TABLE `INSTRUMENT_CATEGORIES`
  ADD PRIMARY KEY (`id`), ADD KEY `DISPLAY_SEQUENCE` (`display_sequence`);
+
+--
+-- Indexes for table `RECORDINGS`
+--
+ALTER TABLE `RECORDINGS`
+ ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `REPORTS`
@@ -378,13 +433,13 @@ ALTER TABLE `REPORTS_COMPOSERS`
 -- Indexes for table `REPORTS_INSTRUMENTS`
 --
 ALTER TABLE `REPORTS_INSTRUMENTS`
- ADD KEY `REPORT_ID` (`REPORT_ID`);
+ ADD PRIMARY KEY (`id`), ADD KEY `REPORT_ID` (`REPORT_ID`);
 
 --
 -- Indexes for table `REPORTS_PERFORMERS`
 --
 ALTER TABLE `REPORTS_PERFORMERS`
- ADD KEY `REPORT_ID` (`REPORT_ID`,`ACTOR_ID`);
+ ADD PRIMARY KEY (`id`), ADD KEY `REPORT_ID` (`REPORT_ID`,`ACTOR_ID`);
 
 --
 -- Indexes for table `SONGS`
@@ -418,7 +473,7 @@ ALTER TABLE `USERS_ROLES`
 -- AUTO_INCREMENT for table `ACTORS`
 --
 ALTER TABLE `ACTORS`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=17;
 --
 -- AUTO_INCREMENT for table `ACTOR_NAMES`
 --
@@ -445,14 +500,29 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `INSTRUMENT_CATEGORIES`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `RECORDINGS`
+--
+ALTER TABLE `RECORDINGS`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
 -- AUTO_INCREMENT for table `REPORTS`
 --
 ALTER TABLE `REPORTS`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `REPORTS_COMPOSERS`
 --
 ALTER TABLE `REPORTS_COMPOSERS`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `REPORTS_INSTRUMENTS`
+--
+ALTER TABLE `REPORTS_INSTRUMENTS`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
+--
+-- AUTO_INCREMENT for table `REPORTS_PERFORMERS`
+--
+ALTER TABLE `REPORTS_PERFORMERS`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `SONGS`
@@ -473,7 +543,17 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 -- AUTO_INCREMENT for table `USERS_ROLES`
 --
 ALTER TABLE `USERS_ROLES`
-MODIFY `id` int(10) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=6;
+MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `CLIPS`
+--
+ALTER TABLE `CLIPS`
+ADD CONSTRAINT `cliptorecording` FOREIGN KEY (`recording_id`) REFERENCES `RECORDINGS` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
