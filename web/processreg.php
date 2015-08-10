@@ -19,7 +19,8 @@ require_once ('bin/loggersetup.php');
 try {
 	$loginId = $_POST["user"];
 	$pw = $_POST["pw"];
-	$realName = trim(strip_tags($_POST["realname"]));
+	$realName = trim(strip_tags($_POST['realname']));
+	$selfInfo = trim(strip_tags($_POST['selfinfo']));
 	
 	// Check for valid fields
 	if ($loginId == NULL || $pw == NULL || $realName == NULL) {
@@ -47,14 +48,20 @@ try {
 		return;
 	}
 	
-	// Create the user. No roles are assigned initially.
+	// Create the user. Assign the contributor role initially. It won't let
+	// the user do anything till activated.
 	$user = new User;
 	$user->loginId = $loginId;
 	$user->name = $realName;
+	$user->activated = 0;
+	$user->selfInfo = $selfInfo;
 	$user->passwordHash = password_hash($pw, PASSWORD_DEFAULT);
 	$user->insert();
 	$GLOBALS["logger"]->debug("user id after creation is " . $user->id);
-//	$user->assignRole(User::ROLE_CONTRIBUTOR);
+	$user->assignRole(User::ROLE_CONTRIBUTOR);
+	
+	// Notify the superusers.
+	// TODO send email ***
 	
 	$newurl = "registerok.php?login=" .
 		$user->loginId .

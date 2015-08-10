@@ -18,4 +18,5 @@
 	date_default_timezone_set("America/New_York");		// PHP style
 	$sqlTimeZone = "US/Eastern";							// sensible SQL style
 	$logdir = '/var/phplogs';
+	$mailbot_from = 'mailbot@example.com';
 ?>

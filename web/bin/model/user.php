@@ -45,21 +45,12 @@ class User {
 	   NULL otherwise. */
 	public static function verifyLogin($username, $pw) {
 		$result = ORM::for_table(self::USER_TABLE)->
-			select('id')->
-			select('password_hash')->
-			select('name')->
-			select('activated')->
-			select('self_info')->
 			where_equal ('login_id', $username)->
 			find_one();
 
 		if ($result && password_verify ($pw, $result->password_hash)) {
 			$user = new User();
-			$user->id = $result->id;
-			$user->loginId = $username;
-			$user->name = $result->name;
-			$user->activated = $result->activated;
-			$user->selfInfo = $result->self_info;
+			$user->populateFromResult( $result );
 			$user->roles = $user->getRoles();
 			return $user;
 		}
@@ -69,21 +60,11 @@ class User {
 	/* Retrieve a row with a given login name, not checking the password */
 	public static function findByLoginId ($username) {
 		$result = ORM::for_table(self::USER_TABLE)->
-			select('id')->
-			select('password_hash')->
-			select('name')->
-			select('activated')->
-			select('self_info')->
 			where_equal('login_id', $username)->
 			find_one();
 		if ($result) {
 			$user = new User();
-			$user->id = $result->id;
-			$user->loginId = $username;
-			$user->passwordHash = $result->password_hash;
-			$user->name = $result->name;
-			$user->activated = $result->activated;
-			$user->selfInfo = $result->self_info;
+			$user->populateFromResult( $result );
 			$user->roles = $user->getRoles();
 			return $user;
 		}
@@ -105,22 +86,12 @@ class User {
 	/* Retrieve a row with a given ID */
 	public static function findById ($id) {
 		$result = ORM::for_table(self::USER_TABLE)->
-			select('login_id')->
-			select('password_hash')->
-			select('name')->
-			select('activated')->
-			select('self_info')->
 			where_equal('id', $id)->
 			find_one();
 		if ($result) {
 			$GLOBALS["logger"]->debug("User:findById found a user");
 			$user = new User();
-			$user->id = $id;
-			$user->loginId = $result->login_id;
-			$user->passwordHash = $result->password_hash;
-			$user->name = $result->name;
-			$user->activated = $result->activated;
-			$user->selfInfo = $result->self_info;
+			$user->populateFromResult( $result );
 			$user->roles = $user->getRoles();
 			return $user;		
 		}
@@ -131,25 +102,32 @@ class User {
 	/* Return an array of all the users. */
 	public static function getAllUsers() {
 		$resultSet = ORM::for_table(self::USER_TABLE)->
-			select('id')->
-			select('login_id')->
-			select('name')->
-			select('activated')->
-			select('self_info')->
 			find_many();
 			
 		$rows = array();
 		foreach ($resultSet as $result) {
 			$user = new User();
-			$user->id = $result->id;
-			$user->loginId = $result->login_id;
-			$user->name = $result->name;
-			$user->activated = $result->activated;
-			$user->selfInfo = $result->self_info;
+			$user->populateFromResult( $result );
 			$user->roles = $user->getRoles();	
 			$rows[] = $user;
 		}
 		return $rows;	
+	}
+	
+	/* Return all the users with a specified role. */
+	public static function getUsersWithRole( $role ) {
+		$userRoleResultSet = ORM::for_table(self::USERS_ROLES_TABLE)->
+			select('user_id')->
+			where('role', $role);
+		// Build a string of the admin user IDs 
+		$inArray = array();
+		foreach ($userRoleResultSet as $result) {
+			$inArray[] = $result->user_id;
+		}
+		
+		$resultSet = ORM::for_table(self::USER_TABLE)->
+			where_in('id', $inarray)->
+			find_many();
 	}
 	
 	/* Set the user's activated status */
@@ -162,11 +140,6 @@ class User {
 	/* Return an array of all users that have no roles. */
 	public static function getInactiveUsers() {
 		$resultSet = ORM::for_table(self::USER_TABLE)->
-			select('id')->
-			select('login_id')->
-			select('name')->
-			select('activated')->
-			select('self_info')->
 			where_not_equal( 'activated', 0 )->
 			find_many();
 		$retval = array();
@@ -266,6 +239,28 @@ class User {
 		$this->id = $newUser->id();
 		$GLOBALS["logger"]->debug("New user id is " . $this->id);
 		return $newUser->id();
+	}
+	
+	/* Populates a user from a query result. Doesn't get roles. */
+	public function populateFromResult($result) {
+		if ( isset( $result->id )) {
+			$this->id = $result->id;
+		}
+		if ( isset( $result->login_id )) {
+			$this->loginId = $result->login_id;
+		}
+		if ( isset( $result->password_hash )) {
+			$this->passwordHash = $result->password_hash;
+		}
+		if ( isset( $result->name )) {
+			$this->name = $result->name;
+		}
+		if ( isset( $result->activated )) {
+			$this->activated = $result->activated;
+		}
+		if ( isset( $result->self_info )) {
+			$this->selfInfo = $result->self_info;
+		}
 	}
 }
 
